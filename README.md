@@ -39,9 +39,9 @@ beamformer used by stages 1–2. Stage 3 needs only numpy/scipy/h5py/matplotlib/
 ```
 python run.py convert  <measurement folder>
 python run.py beamform <measurement folder> [--no-gifs] [--overwrite]
-python run.py viz      <measurement folder> --config configs/active.yaml  [--meas N]
+python run.py viz      <measurement folder> --config configs/active.yaml  [--meas N] [--phantom]
 python run.py viz      <measurement folder> --config configs/passive.yaml
-python run.py all      <measurement folder> --config configs/active.yaml
+python run.py all      <measurement folder> --config configs/active.yaml [--phantom]
 ```
 
 `<measurement folder>` contains the Verasonics `CombinedData.mat` (+ any `RF_data_*.bin`).
@@ -51,6 +51,35 @@ HDF5 into `<folder>/output/swp_active` (or `swp_passive`).
 Stages 1 and 2 share one RF read, so `beamform` also produces the converted files — run `convert`
 separately only if you want the zea database copies without beamforming. Because each stage skips
 inputs that already exist, you can **start from stage 3** whenever the IQ files are present.
+
+If the folder has only the runtime `AcquisitionParametersAndECG.mat` (the dynamic parameters saved
+during acquisition) and no `CombinedData.mat`, stages 1–2 build `CombinedData.mat` first by merging
+that file with the constant base config (`swp.acquisition.ensure_combined_data`). This currently
+runs the ported MATLAB merge (`src/swp/acquisition/matlab/make_combined_data.m`) via `matlab
+-batch`, so MATLAB must be available (found on `PATH`, or set `SWP_MATLAB`); the base config
+directory defaults to `D:\Luuk van Knippenberg\SWI\Base config files` (override with
+`SWP_BASE_CONFIG_DIR`). A pure-Python v7.3 writer will replace the MATLAB step later.
+
+## Phantom measurements
+
+`--phantom` (on `viz` / `all`) adapts the **active** recipe for a phantom: there is no anatomical
+M-line and no natural (buffer-4) shear wave, and the ARF push produces a wave that is **symmetric
+about the focal point**, so the M-line is simply a **horizontal line through the push focal depth**
+(`mline.type: horizontal_push`, depth from the stored `push_z`) — no interactive drawing and no
+buffer-5 B-mode. The processing recipe (bands, filters, stored-focus `r0`, outward-directional) is
+unchanged, so `r0` sits at the centre of the line and the wave travels outward both ways. Phantom
+acquisitions also have fewer frames (no cardiac dependency), which the pipeline handles transparently.
+
+```
+python run.py beamform <phantom folder> --no-gifs
+python run.py viz      <phantom folder> --config configs/active.yaml --phantom
+```
+
+`scripts/phantom_voltage_montage.py --root "<Phantom parent folder>"` assembles a side-by-side
+montage of the per-folder space-time maps across a push-voltage sweep, labelled with the **delivered**
+push voltage read from the data. Run `scripts/check_push_voltage.py --root "<Phantom parent folder>"`
+first to confirm the sweep actually varied — the push TPC profile can silently clamp the voltage at
+its `highVoltageLimit`. Full workflow + the clamp lesson: [docs/phantom_voltage_sweep.md](docs/phantom_voltage_sweep.md).
 
 ## M-line selection
 
@@ -77,8 +106,13 @@ data, and origin handling left as a TODO.
 ```
 run.py                 stage driver (convert / beamform / viz / all)
 configs/               active.yaml, passive.yaml
+scripts/               phantom_voltage_montage.py (cross-folder voltage-sweep montage),
+                       check_push_voltage.py (delivered push-voltage sweep check)
+docs/                  HANDOFF.md, phantom_voltage_sweep.md (phantom sweep runbook)
 src/swp/
-  acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams)
+  acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);
+                       combined.py + matlab/make_combined_data.m build CombinedData.mat from the runtime .mat;
+                       pushvoltage.py reads the delivered ARF push voltage (TPC profile) from a folder
   mline/               interactive M-line selection, ported from SWI/Zea/swi_mline.py
   viz/                 stage 3 core, ported from iq2sws (io/core/estimators/filters/speed/viz/metrics/pipeline/runconfig)
 ```

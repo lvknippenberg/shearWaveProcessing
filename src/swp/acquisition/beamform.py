@@ -598,11 +598,20 @@ def convert_folder(folder, output_dir=None, converted_dir=None, buffers_matlab=N
 
 
 def find_mat(folder: Path) -> Path:
-    """Locate the Verasonics workspace ``.mat`` inside a measurement folder."""
+    """Locate the Verasonics workspace ``.mat`` inside a measurement folder.
+
+    Prefers ``CombinedData.mat`` (the merged constant+dynamic workspace the
+    beamformer reads). If only the runtime ``AcquisitionParametersAndECG.mat`` is
+    present, ``CombinedData.mat`` is built from it first (base config + dynamic
+    params merge; see :mod:`swp.acquisition.combined`).
+    """
     folder = Path(folder)
-    for name in ("CombinedData.mat", "AcquisitionParametersAndECG.mat"):
-        if (folder / name).is_file():
-            return folder / name
+    combined = folder / "CombinedData.mat"
+    if combined.is_file():
+        return combined
+    if (folder / "AcquisitionParametersAndECG.mat").is_file():
+        from .combined import ensure_combined_data
+        return ensure_combined_data(folder)
     mats = sorted(folder.glob("*.mat"))
     if not mats:
         raise FileNotFoundError(f"No .mat workspace found in {folder}")

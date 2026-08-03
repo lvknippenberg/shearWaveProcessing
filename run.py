@@ -130,10 +130,13 @@ def _process_measurement(cfg, base_cfg, m, bands, outdir, bmode_path, bmode_fram
     if not os.path.exists(iq_path):
         print(f"  meas{m}: IQ not found ({os.path.basename(iq_path)}) - skipping")
         return
-    npz_path = rc.mline_npz_path(cfg, m)
-    _ensure_mline(npz_path, bmode_path, bmode_frame,
-                  title=f"M-line for meas{m} ({os.path.basename(iq_path)})",
-                  n_samples=cfg["mline"].get("n_samples", 250))
+    # Only a manual (anatomical) M-line is drawn/loaded interactively; the horizontal
+    # phantom line is generated from the axes + push focal depth, so no B-mode/drawing.
+    if cfg["mline"]["type"] == "manual":
+        npz_path = rc.mline_npz_path(cfg, m)
+        _ensure_mline(npz_path, bmode_path, bmode_frame,
+                      title=f"M-line for meas{m} ({os.path.basename(iq_path)})",
+                      n_samples=cfg["mline"].get("n_samples", 250))
 
     acq = rc.load_acq(cfg, m)
     # rebuild base with this acquisition so a 'stored' focus can anchor r0 on the saved push x
@@ -170,10 +173,26 @@ def _process_measurement(cfg, base_cfg, m, bands, outdir, bmode_path, bmode_fram
           f"(r0={r0*1e3:.1f} mm, push_x={acq.push_x})")
 
 
-def stage_viz(folder, config, meas=None):
+def _apply_phantom(cfg):
+    """Adapt an active config for a phantom measurement (in place).
+
+    Phantoms have no anatomical M-line and no natural (buffer-4) shear wave: the ARF
+    push produces a symmetric wave about the focal point, so the M-line is simply a
+    horizontal line through the push focal depth (``horizontal_push``), needing no
+    interactive drawing and no buffer-5 B-mode. The processing recipe (bands, filters,
+    stored-focus r0, outward-directional) is left exactly as the active config.
+    """
+    cfg["mline"] = {**cfg["mline"], "type": "horizontal_push"}
+    cfg["data"] = {**cfg["data"], "bmode": None}      # no buffer-5 frame needed
+    return cfg
+
+
+def stage_viz(folder, config, meas=None, phantom=False):
     from swp.viz import runconfig as rc
 
     cfg = rc.load_config(config)
+    if phantom:
+        _apply_phantom(cfg)
     output_dir = os.path.join(folder, "output")
     cfg["data"]["root"] = output_dir
 
@@ -233,6 +252,9 @@ def main():
     pv.add_argument("folder")
     pv.add_argument("--config", required=True, help="configs/active.yaml or configs/passive.yaml")
     pv.add_argument("--meas", type=int, default=None, help="only this measurement (default: all)")
+    pv.add_argument("--phantom", action="store_true",
+                    help="phantom measurement: horizontal M-line through the push focal point "
+                         "(no anatomical M-line / buffer-5 B-mode / buffer-4 shear wave)")
 
     pp = sub.add_parser("passive", help="Passive burst-window workflow: general M-line -> burst "
                                         "detection -> per-window M-line -> 100 ms space-time montage")
@@ -250,6 +272,8 @@ def main():
     pa.add_argument("--no-gifs", action="store_true")
     pa.add_argument("--overwrite", action="store_true")
     pa.add_argument("--meas", type=int, default=None)
+    pa.add_argument("--phantom", action="store_true",
+                    help="phantom measurement (see 'viz --phantom')")
 
     a = p.parse_args()
     if a.stage == "convert":
@@ -258,14 +282,14 @@ def main():
         stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite,
                        save_converted=not a.no_converted)
     elif a.stage == "viz":
-        stage_viz(a.folder, a.config, meas=a.meas)
+        stage_viz(a.folder, a.config, meas=a.meas, phantom=a.phantom)
     elif a.stage == "passive":
         from swp.passive import process_passive
         process_passive(a.folder, a.config, window_ms=a.window_ms, max_events=a.max_events,
                         pad_ms=a.pad_ms, overview_stride=a.overview_stride, redraw=a.redraw)
     elif a.stage == "all":
         stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite)
-        stage_viz(a.folder, a.config, meas=a.meas)
+        stage_viz(a.folder, a.config, meas=a.meas, phantom=a.phantom)
 
 
 if __name__ == "__main__":

@@ -70,6 +70,12 @@ def build_mline(cfg: dict, acq: Acquisition, m: int) -> MLine:
         return mline_from_points(points, mc.get("n_samples", ns_file))
     if mc["type"] == "horizontal":
         return horizontal_mline(acq.x, mc["depth_mm"] * 1e-3, mc.get("n_samples", 250))
+    if mc["type"] == "horizontal_push":
+        # Phantom default: a horizontal line through the ARF push focal point. There is
+        # no anatomical M-line in a phantom, and the response is symmetric about the push,
+        # so a horizontal line at the focal depth captures the outward-travelling wave.
+        depth = acq.push_z if acq.push_z is not None else mc.get("depth_mm", 40.0) * 1e-3
+        return horizontal_mline(acq.x, depth, mc.get("n_samples", 250))
     raise ValueError(f"unknown mline type {mc['type']!r}")
 
 
