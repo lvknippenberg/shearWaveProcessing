@@ -17,7 +17,7 @@ from .core.geometry import detect_push_focus, PushFocus
 from .estimators import ESTIMATORS
 from .filters import IQ_FILTERS, FIELD_FILTERS
 from .filters.context import FilterCtx
-from .filters.directional import outward_spacetime
+from .filters.directional import outward_spacetime, directional_spacetime
 from .mline.mline import MLine
 from .speed import build_spacetime, SpaceTime, SPEED_METHODS, SpeedResult
 
@@ -36,7 +36,10 @@ class PipelineConfig:
     quantity: str = "displacement"           # "displacement" or "velocity"
     iq_filters: List[Step] = field(default_factory=list)
     field_filters: List[Step] = field(default_factory=list)
-    directional: bool = False                # outward directional filter on the space-time
+    directional: bool = False                # directional space-time filter on the space-time
+    directional_mode: str = "outward"        # "outward" (active, symmetric about r0) |
+                                             # "leftward"/"neg" | "rightward"/"pos" (passive:
+                                             # single-direction over the full M-line, origin at one end)
     speed: str = "radon"
     drop_first: int = 1                      # drop corrupt first frame(s)
     mline_offsets: int = 5
@@ -136,9 +139,21 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
     else:
         r0 = _r0_along_mline(mline, focus)
 
-    # --- optional directional (outward) filtering on the space-time ---
+    # --- optional directional filtering on the space-time ---
+    # active SWE: symmetric ARF push -> keep waves travelling OUTWARD from r0 on both sides.
+    # passive SWE: the shear wave originates at the valve (one end of the M-line), so keep a
+    # SINGLE direction across the whole M-line (removes reflections; no symmetry). r0 is then
+    # the origin end, for the plot / speed fit.
     if cfg.directional:
-        st = SpaceTime(outward_spacetime(st.data, st.r, r0), st.r, st.t, st.quantity)
+        mode = cfg.directional_mode
+        if mode in ("leftward", "neg"):
+            r0 = float(st.r[-1])                       # origin at the right (high-r) end
+            st = SpaceTime(directional_spacetime(st.data, "neg"), st.r, st.t, st.quantity)
+        elif mode in ("rightward", "pos"):
+            r0 = float(st.r[0])                        # origin at the left (low-r) end
+            st = SpaceTime(directional_spacetime(st.data, "pos"), st.r, st.t, st.quantity)
+        else:
+            st = SpaceTime(outward_spacetime(st.data, st.r, r0), st.r, st.t, st.quantity)
 
     # --- speed estimation ---
     speed = SPEED_METHODS[cfg.speed](st, r0)

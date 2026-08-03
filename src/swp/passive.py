@@ -27,9 +27,11 @@ from .viz import runconfig as rc
 from .viz.core.acquisition import Acquisition
 from .viz.io import load_acquisition, load_mline
 from .viz.mline import mline_from_points
-from .viz.pipeline import run_pipeline
+from .viz.pipeline import run_pipeline, Step
 from .viz.metrics import origin_coherence
-from .viz.viz import spacetime_montage
+from .viz.viz import spacetime_montage, plot_spacetime
+from .viz.filters.directional import directional_spacetime
+from .viz.speed.spacetime import SpaceTime
 from .mline.select import (
     load_bmode_frame, select_mline, save_mline, draw_mline_on_bmode,
     detect_line_bursts, plot_bursts,
@@ -118,9 +120,14 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
                               n_samples=cfg["mline"].get("n_samples", 250), redraw=redraw)
 
     # --- 2) along-line displacement over the whole recording -> burst detection ---
+    # Burst detection runs on a FIXED band (detect.band), independent of the processing band, so
+    # tuning pipeline.field_filters does not move the detected windows (keeps index M-lines valid).
+    detect_band = cfg.get("detect", {}).get("band", [5.0, 150.0])
+    smoothing = [s for s in base.field_filters if s.name != "temporal_bandpass"]
+    ov_filters = [Step("temporal_bandpass", dict(f_lo=detect_band[0], f_hi=detect_band[1]))] + smoothing
     print("  computing displacement overview for burst detection "
-          f"(spatial stride {overview_stride}) ...")
-    ov_cfg = replace(base, directional=False)
+          f"({detect_band[0]}-{detect_band[1]} Hz, spatial stride {overview_stride}) ...")
+    ov_cfg = replace(base, directional=False, field_filters=ov_filters)
     ov = run_pipeline(_stride_acq(acq, overview_stride), gen_mline, ov_cfg, focus=None)
     D_st = np.asarray(ov.st.data).T                    # (n_s, n_t) as the burst detector expects
     t_s = np.asarray(ov.st.t)
@@ -130,6 +137,23 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
                 title=f"passive along-M-line energy -- {len(windows)} burst window(s) "
                       f"({int(window_ms)} ms), candidate valve closures")
     print(f"  detected {len(windows)} burst window(s) -> {os.path.basename(bursts_png)}")
+
+    # --- full-window space-time plot (the whole recording along the general M-line) ---
+    # Directional-filtered per the passive convention (single direction from the valve end),
+    # so reflections are removed; the burst windows above are placed on this record.
+    mode = base.directional_mode
+    keep = "neg" if mode in ("leftward", "neg") else ("pos" if mode in ("rightward", "pos") else None)
+    full = np.asarray(ov.st.data)
+    r0_full = float(ov.st.r[-1] if keep == "neg" else ov.st.r[0])
+    if keep is not None:
+        full = directional_spacetime(full, keep)
+    full_st = SpaceTime(full, ov.st.r, ov.st.t, ov.st.quantity)
+    full_png = os.path.join(outdir, "passive_full_spacetime.png")
+    plot_spacetime(full_st, full_png, r0_mm=r0_full * 1e3,
+                   title=f"passive full-window space-time -- general M-line, "
+                         f"{detect_band[0]}-{detect_band[1]} Hz"
+                         f"{'' if keep is None else f', directional {mode}'}")
+    print(f"  full-window space-time -> {os.path.basename(full_png)}")
     for i, w in enumerate(windows):
         print(f"    #{i}: peak {w.t_peak*1e3:.0f} ms, window [{w.t0*1e3:.0f}, {w.t1*1e3:.0f}] ms")
     if not windows:

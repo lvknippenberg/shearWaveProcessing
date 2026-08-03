@@ -52,8 +52,19 @@ pipeline:
     - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
     - {name: temporal_moving_mean, params: {window: 3}}
 
-  directional: true                         # outward directional (k-omega) filter anchored at r0
+  directional: true                         # directional (k-omega) filter on the space-time
+  directional_mode: leftward                # passive: the shear wave originates at the valve
+                                            # (right/high-r end of the M-line in this data) and
+                                            # travels right->left. Keep that single direction over
+                                            # the WHOLE M-line -- no symmetric response; this only
+                                            # removes reflections. (Flip to 'rightward' if the
+                                            # valve is drawn at the left end instead.)
   speed: ttp_ransac
+
+# Burst detection uses a FIXED band, independent of pipeline.field_filters, so tuning the
+# processing band does not move the detected windows (index-based M-lines stay valid).
+detect:
+  band: [5, 150]                            # Hz, for the along-line energy used to place windows
 
 run:
   measurement: 0
