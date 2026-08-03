@@ -140,7 +140,10 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
     results, titles = [], []
     for i, w in enumerate(windows):
         frame = _frame_at_time(acq.t, w.t_peak)
-        npz = os.path.join(mlines_dir, f"passive_win{i}_{w.t0*1e3:.0f}-{w.t1*1e3:.0f}ms_mline.npz")
+        # Keyed by window INDEX (not time span) so reuse survives recipe/band tweaks that
+        # jitter the detected window edges. If the number/order of detected windows changes,
+        # re-draw with --redraw so a saved line is not reused for a different event.
+        npz = os.path.join(mlines_dir, f"passive_win{i}_mline.npz")
         ml = _ensure_mline(npz, bmode_path, frame,
                            f"passive M-line -- window {i} @ {w.t_peak*1e3:.0f} ms "
                            f"[{w.t0*1e3:.0f}-{w.t1*1e3:.0f} ms]",

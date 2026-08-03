@@ -31,8 +31,9 @@ mline:
 
 focus:
   mode: auto                                # no ARF push; r0 = M-line point nearest the auto-detected
-                                            # activity centre. TODO: replace with a passive-appropriate
-                                            # origin (e.g. valve-plane anchor or burst-based windows).
+                                            # activity centre (the strongest early displacement), which
+                                            # anchors the directional (outward) filter. TODO: a more
+                                            # physical passive origin (valve-plane anchor per window).
 
 # --- processing pipeline (STARTING POINT -- to be tuned) ---
 pipeline:
@@ -43,19 +44,18 @@ pipeline:
   drop_first: 1
   iq_filters: []
 
-  # Starting recipe: band-pass around natural cardiac shear-wave frequencies (lower than the
-  # ARF-driven active band), Gaussian spatial smoothing, light temporal smoothing, directional.
-  # These values are a sensible default only -- TUNE against real passive data.
+  # Band-pass around natural cardiac shear-wave frequencies (much lower than the ARF-driven
+  # active band), Gaussian spatial smoothing, light temporal smoothing, outward-directional.
+  # Sampling rate of the buffer-4 IQ is ~925 Hz (4 transmits: 2 angles x pulse inversion).
   field_filters:
-    - {name: temporal_bandpass, params: {f_lo: 40, f_hi: 300}}
+    - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
     - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
     - {name: temporal_moving_mean, params: {window: 3}}
 
-  directional: false                        # off by default (no well-defined single origin yet)
+  directional: true                         # outward directional (k-omega) filter anchored at r0
   speed: ttp_ransac
 
 run:
   measurement: 0
   outdir: "swp_passive"                     # relative to data.root -> <folder>/output/swp_passive
-  # Passive natural waves span a lower band than ARF; a single confirmation band to start.
-  bands: [[40, 300]]
+  bands: [[5, 150]]
