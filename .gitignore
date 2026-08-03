@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.idea/
+.vscode/
+
+# generated outputs / data
+output/
+output_old/
+results/
+*.hdf5
+*.gif
+*.mp4
+*.bin
+*.mat
+# keep small M-line records in version control if you want; ignored by default
+mlines/

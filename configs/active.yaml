@@ -1,0 +1,59 @@
+# shearWaveProcessing -- ACTIVE SWE (ARF push, buffer 2; M-line drawn on buffer-5 B-mode).
+# The visualization recipe is the iq2sws in-vivo consensus (settled over 24 measurements,
+# ranked by origin_coherence). Units: lengths in mm (_mm) / um (_um); frequencies in Hz.
+#
+# `data.root` is set by run.py to <measurement folder>/output, so the paths below are relative
+# to the Stage-2 output directory. Run:
+#   python run.py viz --config configs/active.yaml <measurement folder>
+#   python run.py viz --config configs/active.yaml <measurement folder> --meas 14
+
+data:
+  root: ""                                  # set by run.py to <folder>/output
+  grid_dir: ""
+  file: "CombinedData_buffer2_meas{m}_iq.hdf5"
+  bmode: "CombinedData_buffer5_iq.hdf5"     # co-registered B-mode cine (one frame per push) for M-line drawing
+  ecg: null                                 # optional ECG.mat for cardiac phase (not required)
+
+mline:
+  type: manual                              # per-measurement septal M-line (drawn once, then reused)
+  npz: "mlines/active_meas{m}_mline.npz"    # relative to data.root; auto-drawn if missing (buffer-5 frame m)
+  n_samples: 250
+  offsets: 7                                # parallel copies averaged perpendicular to the M-line
+  offset_step_mm: 0.8                       # 7 x 0.8 = +/-2.4 mm, within the ~8-10 mm septal wall
+
+focus:
+  mode: stored                              # read the ARF push location from the HDF5 (custom/push_focus_x/z),
+                                            # written by the acquisition stage. Falls back to x_mm/z_mm for
+                                            # older files. The wave origin r0 = M-line crossing of the push x.
+                                            # Other modes: vertical (x=x_mm) | fixed (2-D point) | auto (detect).
+  x_mm: 0.0                                 # fallback push lateral position (vertical line at x=0)
+  z_mm: 49.3                                # fallback nominal focal depth
+
+# --- processing pipeline (iq2sws in-vivo consensus recipe) ---
+pipeline:
+  estimator: loupas                         # loupas | kasai | xcorr (estimator barely matters; phase-based is right)
+  estimator_params: {}
+  mode: relative_to_reference               # active SWE has a pre-push reference (custom/reference_iq)
+  quantity: displacement                    # displacement | velocity
+  drop_first: 1                             # drop the wrap-prone first tracking frame
+  iq_filters: []
+
+  # Consensus top-3 over all 24 in-vivo (mean origin_coherence; motion -> spatial -> temporal):
+  #   1. band-pass 120-700 / gauss / mean3   0.753   <- this recipe (highest; also the phantom winner)
+  #   2. band-pass 120-700 / gauss / none    0.735   (temporal smoothing optional)
+  #   3. poly3           / gauss / mean3      0.728   (most robust worst-case; swap the first step for
+  #                                                    {name: polynomial_drift, params: {order: 3}})
+  field_filters:
+    - {name: temporal_bandpass, params: {f_lo: 120, f_hi: 700}}
+    - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+    - {name: temporal_moving_mean, params: {window: 3}}
+
+  directional: true                         # outward directional (k-omega) filter anchored at r0
+  speed: ttp_ransac                         # automatic in-vivo speed is unreliable; read the montage manually
+
+run:
+  measurement: 0                            # single-measurement default if not batching
+  outdir: "swp_active"                      # relative to data.root -> <folder>/output/swp_active
+  # Multi-band confirmation view: the spatial+temporal recipe is applied at each band; a line that
+  # appears in ALL three bands is real signal (not band-specific noise/reverberation).
+  bands: [[80, 500], [120, 700], [200, 900]]

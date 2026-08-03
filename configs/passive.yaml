@@ -1,0 +1,61 @@
+# shearWaveProcessing -- PASSIVE SWE (natural shear waves, buffer 4).
+#
+# EXPERIMENTAL FRAMEWORK. Unlike active SWE, passive elastography has no ARF push and no
+# pre-push reference: the buffer-4 ultrafast diverging-wave stream is a continuous cine of
+# natural (valve-closure) shear waves. This config provides a *starting* recipe on the same
+# iq2sws core; the exact filters/parameters/origin handling still need to be TUNED against
+# representative passive data (mirroring how the active recipe was optimized in iq2sws).
+#
+# Key differences from active.yaml:
+#   * pipeline.mode = frame_to_frame  (no reference frame; cumulative displacement)
+#   * data.file has no {m} (buffer 4 is a single continuous file, one "measurement")
+#   * the M-line is drawn on the buffer-4 B-mode itself (no separate image buffer)
+#   * focus/r0 is not a physical ARF push -> mode: auto (origin handling is a tuning TODO)
+#
+# Run:
+#   python run.py viz --config configs/passive.yaml <measurement folder>
+
+data:
+  root: ""                                  # set by run.py to <folder>/output
+  grid_dir: ""
+  file: "CombinedData_buffer4_iq.hdf5"      # single continuous passive stream (no {m})
+  bmode: "CombinedData_buffer4_iq.hdf5"     # draw the M-line on the passive stream itself
+  ecg: null
+
+mline:
+  type: manual
+  npz: "mlines/passive_mline.npz"           # relative to data.root; auto-drawn if missing (mid-frame)
+  n_samples: 250
+  offsets: 7
+  offset_step_mm: 0.8
+
+focus:
+  mode: auto                                # no ARF push; r0 = M-line point nearest the auto-detected
+                                            # activity centre. TODO: replace with a passive-appropriate
+                                            # origin (e.g. valve-plane anchor or burst-based windows).
+
+# --- processing pipeline (STARTING POINT -- to be tuned) ---
+pipeline:
+  estimator: loupas
+  estimator_params: {}
+  mode: frame_to_frame                      # passive: no reference; differential displacement
+  quantity: displacement
+  drop_first: 1
+  iq_filters: []
+
+  # Starting recipe: band-pass around natural cardiac shear-wave frequencies (lower than the
+  # ARF-driven active band), Gaussian spatial smoothing, light temporal smoothing, directional.
+  # These values are a sensible default only -- TUNE against real passive data.
+  field_filters:
+    - {name: temporal_bandpass, params: {f_lo: 40, f_hi: 300}}
+    - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+    - {name: temporal_moving_mean, params: {window: 3}}
+
+  directional: false                        # off by default (no well-defined single origin yet)
+  speed: ttp_ransac
+
+run:
+  measurement: 0
+  outdir: "swp_passive"                     # relative to data.root -> <folder>/output/swp_passive
+  # Passive natural waves span a lower band than ARF; a single confirmation band to start.
+  bands: [[40, 300]]
