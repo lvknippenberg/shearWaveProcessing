@@ -229,10 +229,20 @@ def main():
     pb.add_argument("--no-converted", action="store_true")
     pb.add_argument("--overwrite", action="store_true")
 
-    pv = sub.add_parser("viz", help="Stage 3: IQ -> shear-wave space-time plots")
+    pv = sub.add_parser("viz", help="Stage 3: IQ -> shear-wave space-time plots (active or passive)")
     pv.add_argument("folder")
     pv.add_argument("--config", required=True, help="configs/active.yaml or configs/passive.yaml")
     pv.add_argument("--meas", type=int, default=None, help="only this measurement (default: all)")
+
+    pp = sub.add_parser("passive", help="Passive burst-window workflow: general M-line -> burst "
+                                        "detection -> per-window M-line -> 100 ms space-time montage")
+    pp.add_argument("folder")
+    pp.add_argument("--config", default="configs/passive.yaml")
+    pp.add_argument("--window-ms", type=float, default=100.0)
+    pp.add_argument("--max-events", type=int, default=4)
+    pp.add_argument("--pad-ms", type=float, default=20.0)
+    pp.add_argument("--overview-stride", type=int, default=2)
+    pp.add_argument("--redraw", action="store_true", help="re-draw every M-line even if saved")
 
     pa = sub.add_parser("all", help="Stages 1->2->3")
     pa.add_argument("folder")
@@ -249,6 +259,10 @@ def main():
                        save_converted=not a.no_converted)
     elif a.stage == "viz":
         stage_viz(a.folder, a.config, meas=a.meas)
+    elif a.stage == "passive":
+        from swp.passive import process_passive
+        process_passive(a.folder, a.config, window_ms=a.window_ms, max_events=a.max_events,
+                        pad_ms=a.pad_ms, overview_stride=a.overview_stride, redraw=a.redraw)
     elif a.stage == "all":
         stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite)
         stage_viz(a.folder, a.config, meas=a.meas)

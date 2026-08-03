@@ -69,9 +69,10 @@ class Acquisition:
         )
 
     def summary(self) -> str:
+        ref = "none" if self.ref_iq is None else str(self.ref_iq.shape)
         return (
             f"Acquisition[{self.source}/{self.grid}] "
-            f"iq{self.iq.shape} ref{self.ref_iq.shape} "
+            f"iq{self.iq.shape} ref{ref} "
             f"x[{self.x[0]*1e3:.1f},{self.x[-1]*1e3:.1f}]mm "
             f"z[{self.z[0]*1e3:.1f},{self.z[-1]*1e3:.1f}]mm "
             f"prf={self.prf:.0f}Hz f_demod={self.f_demod/1e6:.3f}MHz "
