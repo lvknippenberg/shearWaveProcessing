@@ -28,7 +28,7 @@ from .viz.core.acquisition import Acquisition
 from .viz.io import load_acquisition, load_mline
 from .viz.mline import mline_from_points
 from .viz.pipeline import run_pipeline, Step
-from .viz.metrics import origin_coherence
+from .viz.metrics import passive_coherence
 from .viz.viz import spacetime_montage, plot_spacetime
 from .viz.filters.directional import directional_spacetime
 from .viz.speed.spacetime import SpaceTime
@@ -176,10 +176,11 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
         i1 = _frame_at_time(acq.t, w.t1 + pad_s) + 1
         acq_w = dataclasses.replace(acq, iq=acq.iq[i0:i1], t=acq.t[i0:i1])
         res = run_pipeline(acq_w, ml, base, focus=None)
-        oc = origin_coherence(res.st, res.r0)
+        pc, cbest = passive_coherence(res.st, res.r0, return_speed=True)
         results.append(res)
-        titles.append(f"win{i}  {w.t_peak*1e3:.0f} ms\n[{w.t0*1e3:.0f}-{w.t1*1e3:.0f} ms]  oc={oc:.2f}")
-        print(f"    window #{i}: space-time {res.st.data.shape} oc={oc:.3f}")
+        titles.append(f"win{i}  {w.t_peak*1e3:.0f} ms  [{w.t0*1e3:.0f}-{w.t1*1e3:.0f} ms]\n"
+                      f"pc={pc:.2f}  c={cbest:.1f} m/s")
+        print(f"    window #{i}: space-time {res.st.data.shape} passive_coherence={pc:.3f} c={cbest:.2f}")
 
     # --- 4) montage ---
     montage = os.path.join(outdir, "passive_windows_montage.png")

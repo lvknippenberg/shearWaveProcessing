@@ -34,6 +34,13 @@ must be importable for stages 1–2.
   So directional filtering is applied to the **whole M-line in one direction** (`directional_mode:
   leftward`, i.e. keep −r-travelling) — **not** symmetric; its only purpose is to remove reflections.
   Flip to `rightward` if a future M-line is drawn with the valve at the left end.
+  - **TODO (generalise the direction).** `leftward`/`rightward` are named for horizontal M-lines, but
+    we will also analyse **vertical M-lines** (septum drawn top→bottom), where the shear wave
+    propagates **up or down**. The filter already works along **M-line arc length** (`r`), so the
+    mechanism is correct; only the *naming/semantics* need generalising to "origin at the −r end vs
+    the +r end" (e.g. `directional_mode: from_start | from_end`, origin = the M-line end nearest the
+    valve), so "up/down" vertical propagation is expressed the same way as "left/right". Rename before
+    the geometry gets confusing.
 
 ## 3. What is done
 

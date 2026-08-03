@@ -81,6 +81,70 @@ def origin_coherence(st: SpaceTime, r0: float, cmin: float = 1.0, cmax: float = 
     return oc
 
 
+def passive_coherence(st: SpaceTime, r0: float, cmin: float = 0.5, cmax: float = 10.0,
+                      n_speeds: int = 80, d_min: float = 2e-3, d_max: float | None = None,
+                      t0_max: float | None = None, demean: bool = True,
+                      return_speed: bool = False):
+    """One-sided origin coherence for **passive** SWE, in [0, 1] — the recommended passive metric.
+
+    Passive shear waves differ from ARF waves in ways this metric is built around:
+
+    * **One-sided.**  The wave originates at a valve closure at **one end** of the M-line (``r0``)
+      and travels across it in a **single direction** — there is no symmetric second lobe, so
+      (unlike :func:`origin_coherence`) only the side that carries the wave is scored, and there is
+      no geometric-mean symmetry penalty.
+    * **Wide / long-range.**  Passive waves are higher-SNR and propagate across a **larger distance**,
+      so the whole propagation extent is used (``d_max`` defaults to the full M-line length) and a
+      coherent wave is rewarded for staying coherent far from the origin.
+    * **Onset not at t≈0.**  The valve-closure onset falls somewhere inside the analysis window (not
+      pinned to t=0 as the ARF push is), so the origin time ``t0`` is free by default
+      (``t0_max=None``); pass ``t0_max`` to restrict it.
+
+    Method: for columns with ``|r - r0| ∈ [d_min, d_max]`` slant-stack the temporal Hilbert envelope
+    along the moveout ``t = t0 + |r - r0| / c`` and take the best single speed ``c`` (and origin time
+    ``t0``).  Crucially the score is the **improvement of the best finite-speed stack over the
+    no-moveout stack**, ``(best_stack − flat_stack) / colpeak``: a genuinely *propagating* wave stacks
+    far better when aligned to its slope than when not (→ high), while a **non-propagating flat band**
+    (or a blob, or noise) gains little from alignment (→ ~0).  This is what makes the metric reward
+    *propagation*, not just a bright horizontal band.  ``return_speed`` also returns the best speed.
+    """
+    data = st.data - st.data.mean(axis=0, keepdims=True) if demean else st.data
+    env = np.abs(hilbert(data, axis=0))
+    nt = env.shape[0]
+    dt = float(st.t[1] - st.t[0])
+    d = np.abs(st.r - r0)
+    if d_max is None:
+        d_max = float(d.max())
+    cols = np.where((d >= d_min) & (d <= d_max))[0]
+    if cols.size < 4:
+        return (0.0, float("nan")) if return_speed else 0.0
+    colpeak = env[:, cols].max(axis=0).mean() + 1e-12
+    base_i = np.arange(nt)
+    i_hi = nt if t0_max is None else max(1, int(round(t0_max / dt)))
+    # flat baseline: average the columns with NO moveout (best t0), i.e. the c -> inf / static case.
+    flat = float(env[:, cols].mean(axis=1)[:i_hi].max())
+    speeds = np.linspace(cmin, cmax, n_speeds)
+    best, best_c = 0.0, float("nan")
+    for c in speeds:
+        shift = d[cols] / c / dt
+        valid = shift <= (nt - 1)
+        if int(valid.sum()) < 4:
+            continue
+        stacked = np.zeros(nt)
+        for j, s in zip(cols[valid], shift[valid]):
+            stacked += np.interp(base_i + s, base_i, env[:, j])   # align outward moveout to t0
+        stacked /= float(valid.sum())
+        peak = float(stacked[:i_hi].max())
+        if peak > best:
+            best, best_c = peak, float(c)
+    # Reward propagation: how much of the alignable "headroom" (colpeak - flat) the best finite-speed
+    # moveout recovers. Clean wave -> best ~ colpeak -> ~1; flat band -> colpeak ~ flat -> ~0
+    # (headroom ~0); noise/blob -> small recovery -> low. Independent of the wave's speed.
+    headroom = colpeak - flat
+    coh = float(np.clip((best - flat) / headroom, 0.0, 1.0)) if headroom > 1e-6 * colpeak else 0.0
+    return (coh, best_c) if return_speed else coh
+
+
 def wavefront_coherence(st: SpaceTime, cmin: float = 1.0, cmax: float = 10.0,
                         rel_width: float = 0.25, ft_min: float = 80.0, ft_max: float = 800.0,
                         fr_min: float = 30.0, fr_max: float = 400.0,
