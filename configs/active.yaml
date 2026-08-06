@@ -54,6 +54,38 @@ pipeline:
 run:
   measurement: 0                            # single-measurement default if not batching
   outdir: "swp_active"                      # relative to data.root -> <folder>/output/swp_active
-  # Multi-band confirmation view: the spatial+temporal recipe is applied at each band; a line that
-  # appears in ALL three bands is real signal (not band-specific noise/reverberation).
+  # Legacy multi-band confirmation grid (used only if `views` below is removed): the spatial+temporal
+  # recipe is applied at each band; a line present in all bands is real signal.
   bands: [[80, 500], [120, 700], [200, 900]]
+
+  # THREE processing VIEWS -> one space-time plot per view per measurement (same behaviour as the
+  # passive path). These are the iq2sws in-vivo consensus top-3 (ranked by origin_coherence), chosen
+  # to be independent: different motion removal (band-pass vs polynomial) and temporal on/off, so a
+  # wavefront present in all three is real. All keep the outward directional filter (symmetric ARF
+  # push). View B uses NO temporal filtering.
+  views:
+    # A -- top recipe (oc 0.753): band-pass 120-700, Gaussian, temporal mean3.
+    - name: "disp bp120-700 gauss mean3"
+      quantity: displacement
+      directional: true
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 120, f_hi: 700}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+        - {name: temporal_moving_mean, params: {window: 3}}
+
+    # B -- NO temporal filter, lower band (oc ~0.735 family): band-pass 80-500, Gaussian only.
+    - name: "disp bp80-500 gauss NO-temporal"
+      quantity: displacement
+      directional: true
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 80, f_hi: 500}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+
+    # C -- different motion removal (oc 0.728): polynomial-drift detrend instead of a band-pass.
+    - name: "disp poly3 gauss mean3"
+      quantity: displacement
+      directional: true
+      field_filters:
+        - {name: polynomial_drift, params: {order: 3}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+        - {name: temporal_moving_mean, params: {window: 3}}

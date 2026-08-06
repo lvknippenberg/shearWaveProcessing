@@ -1,137 +1,160 @@
 # shearWaveProcessing — handoff
 
-Session-to-session context for continuing this repo. Read this first.
+Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
+for the full passive-SWE investigation record. Last updated 2026-08-04.
 
 ## 1. What this repo is
 
-Unified cardiac shear-wave elastography (SWE) pipeline combining the acquisition half (ported
-from `SWI/Zea`) and the visualization half (ported from `iq2sws`). Three modular stages driven by
-`run.py`:
+Unified cardiac shear-wave elastography (SWE) pipeline combining the acquisition half (ported from
+`SWI/Zea`) and the visualization half (ported from `iq2sws`). Three modular stages driven by `run.py`:
 
 1. `convert`  — Verasonics `.mat` → zea `.hdf5` (converted RF).
 2. `beamform` — RF → IQ + B-mode GIFs + per-measurement shear-wave IQ, saved **with the ARF push
    location** (`custom/push_focus_x/z`) and all scan parameters.
-3. `viz` / `passive` — IQ → shear-wave space-time plots (+ speed).
+3. `viz` (active) / `passive` — IQ → shear-wave space-time plots (+ speed).
 
-Environment: `D:\Luuk van Knippenberg\envs\zea_latest\python.exe`, `KERAS_BACKEND=torch`. `zea`
-must be importable for stages 1–2.
+Environment: `D:\Luuk van Knippenberg\envs\zea_latest\python.exe`, `KERAS_BACKEND=torch`. `zea` must be
+importable for stages 1–2 (numpy/scipy/matplotlib/h5py suffice for stage 3).
 
 ## 2. Data & assumptions
 
-- Test dataset: `D:\Luuk van Knippenberg\Claude\invivo_sw` (in-vivo PLAX septum; `CombinedData.mat`
-  + `RF_data_*.bin`; `output_old/` holds earlier reference results).
+- Test dataset: `D:\Luuk van Knippenberg\Claude\invivo_sw` (in-vivo PLAX septum; `CombinedData.mat` +
+  `RF_data_*.bin`; `output_old/` holds earlier reference results; `output/mlines/` holds the saved
+  **anatomical septal M-lines** `passive_win{i}_mline.npz` + `passive_general_mline.npz`).
 - 6-buffer S5-1 SWI Widebeam sequence. **Buffer 2** = active ARF (reference + push + tracking);
-  **Buffer 4** = ultrafast diverging-wave stream = **passive** source; **Buffer 5** = one co-registered
-  B-mode frame per push (for active M-line drawing).
-- **Active SWE**: has a pre-push reference → `relative_to_reference` displacement; ARF push is a
-  **vertical line at x=0** (confirmed from the stored push location, x=0.00 mm, z=49.28 mm), so the
-  response is **symmetric** and the directional filter keeps waves travelling **outward** from r0
-  (`directional_mode: outward`).
-- **Passive SWE**: **no reference** → `frame_to_frame` displacement. Sampling rate of buffer 4 is
-  **~925.9 Hz** (4 transmits = 2 angles × pulse inversion; = tracking PRF 3704 Hz ÷ 4; confirmed vs
-  `meta` ActualFPS and the stored timestamps). The shear wave originates at the **valve closure**,
-  which in this data sits at the **right (high-r) end of the M-line**, and travels **right → left**.
-  So directional filtering is applied to the **whole M-line in one direction** (`directional_mode:
-  leftward`, i.e. keep −r-travelling) — **not** symmetric; its only purpose is to remove reflections.
-  Flip to `rightward` if a future M-line is drawn with the valve at the left end.
-  - **TODO (generalise the direction).** `leftward`/`rightward` are named for horizontal M-lines, but
-    we will also analyse **vertical M-lines** (septum drawn top→bottom), where the shear wave
-    propagates **up or down**. The filter already works along **M-line arc length** (`r`), so the
-    mechanism is correct; only the *naming/semantics* need generalising to "origin at the −r end vs
-    the +r end" (e.g. `directional_mode: from_start | from_end`, origin = the M-line end nearest the
-    valve), so "up/down" vertical propagation is expressed the same way as "left/right". Rename before
-    the geometry gets confusing.
+  **Buffer 4** = ultrafast diverging-wave stream = **passive** source (~**925.9 Hz**, 4 transmits =
+  2 angles × pulse inversion = tracking PRF 3704 ÷ 4); **Buffer 5** = one co-registered B-mode frame
+  per push (active M-line drawing).
+- **Active SWE**: pre-push reference → `relative_to_reference` displacement; ARF push is a vertical line
+  at **x=0** (stored, z=49.28 mm) → **symmetric** response → outward directional filter (`outward`).
+- **Passive SWE**: **no reference** → `frame_to_frame` displacement. Natural (valve-closure) shear
+  waves; in PLAX they travel **right → left (basal → apical)**. **The k-ω directional filter is now OFF
+  for passive** (see §4) — it biased the apparent speed and added reverberation banding.
 
-## 3. What is done
+## 3. Window labelling (invivo_sw) — settled
 
-- **Stages 1–2** (`src/swp/acquisition/`): faithful port of `beamform_swi.py` / `swi_sequence.py` /
-  `make_gifs.py` / `swi_txsettings.py`. Added: `push_focus_x/z` custom elements in the active saver;
-  `scanparams.append_scan_params_to_iq` retrofits demod/tx/probe freq, sound_speed, wavelength, prf,
-  dz, dx onto the active (buffer 2) and passive (buffer 4) IQ. `convert_folder` for stage 1 alone.
-- **zea env workarounds** (also break the *original* `beamform_swi.py` in this env, not our port):
-  `_ensure_cpu_t_peak` (zea's `Parameters.t_peak` does `np.asarray` on a CUDA tensor); dropped the
-  `warn_missing_optional_fields`+`ignore_warnings` combo that `File.create` now rejects.
-- **M-line** (`src/swp/mline/select.py`): ported interactive selector; `.npz` (points + n_samples)
-  reused automatically. Active M-lines keyed by measurement; passive by **window index**.
-- **Active viz** (`run.py viz --config configs/active.yaml`): the settled iq2sws in-vivo recipe
-  (Loupas, rel-to-reference displacement, drop frame 0, band-pass 120–700, Gaussian smooth
-  0.6/1.2 mm, temporal mean 3, outward-directional), r0 anchored on the **stored** push location
-  (`focus.mode: stored`), multi-band montage. Validated: meas14 origin_coherence 0.94.
-- **Passive viz** (`run.py passive <folder>`, `src/swp/passive.py`): general M-line → along-line
-  displacement over the whole recording → **burst detection** on a **fixed band** (`detect.band`,
-  independent of the processing band, so windows are stable) → ~100 ms window per valve closure →
-  **fresh M-line per window** (`output/mlines/passive_win{i}_mline.npz`, reused on re-run; `--redraw`
-  to force) → **montage** + a **full-window space-time plot** (`passive_full_spacetime.png`). Config:
-  `frame_to_frame`, band-pass 5–150 Hz, `directional_mode: leftward`. On invivo_sw it finds 4 windows
-  (~52, 377, 549, 920 ms).
+Burst detection finds 4 windows. Cardiac cycle = 920 − 52 = **868 ms → 69 bpm** (matches ECG). By
+timing + same-recipe comparison (`scripts/passive_compare_windows.py`):
 
-## 4. Known issues / NOT done (the important part)
+| window | peak | event | notes |
+|---|---|---|---|
+| win0 | 52 ms | **MVC** (early systole) | near-identical to win3 |
+| win1 | 377 ms | **AVC** (+325 ms, end systole) | the clean AVC wave, ~2–2.7 m/s (disp) |
+| win2 | 550 ms | **diastolic (E-wave) / noise** | +498 ms ≈ mid-diastole, NOT a valve closure — the messy outlier |
+| win3 | 920 ms | **MVC** (next cycle) | twin of win0 (one full cycle later) |
 
-- **The passive metric and auto-speed are wrong for passive.** `metrics.origin_coherence` and the
-  `ttp_ransac` speed are designed for the **symmetric active** case (energy on both sides of r0). With
-  the passive unidirectional filter and r0 at the M-line end, one side is empty → `origin_coherence`
-  reads ~0 and the speed fit fails (blank/q=0). The space-time *images* are correct; only the reported
-  scores are meaningless. **A passive-specific metric + one-sided speed fit is the first task below.**
-- **The passive recipe is untuned.** Band 5–150 Hz, Gaussian 0.6/1.2, temporal mean 3, leftward — all
-  first guesses. No systematic search has been run (that is the next big step).
-- **Passive origin (r0) is a heuristic** (M-line end). A per-window, physically anchored valve-plane
-  origin would be better.
-- Buffer 4 in `output/` was **reused from `output_old/` and retrofitted** with scan params this
-  session, not freshly beamformed; `run.py beamform` regenerates it (~25 min; heavy).
-- Active passive share the iq2sws speed methods, which the memory notes are unreliable in vivo —
-  read montages manually.
-- Cosmetic: git reports CRLF conversions on commit (Windows).
+Earlier confusion (tuning to win2) came from win2 not being a valve-closure wave. **Do not tune to win2.**
 
-## 5. Next step — exhaustive method/filter/parameter search for passive SWE (plan)
+## 4. Key passive findings (what the searches taught us)
 
-Mirror what was done for active in `iq2sws/archive/` (`search.py` ≈ 6 k combos/measurement, cached
-Loupas + precomputed bilinear M-line sampler + vectorised metric, ranked by `origin_coherence`; then
-`analyze_search.py` re-ranks and montages, `summarize_search.py` aggregates). Adapt for passive:
+Two exhaustive searches (`scripts/search_passive.py` v1, `scripts/search_passive2.py` v2) + a MATLAB
+cross-check (`processIQ.m`, `ProcessDW=true`). Full detail in `docs/passive_search.md`.
 
-**5.1 Define a passive metric (do this first).** Add `metrics.passive_coherence(st, r0, side)` — a
-**one-sided** origin coherence: slant-stack the Hilbert envelope along the outward-from-the-valve
-moveout `t = t0 + |r − r0| / c` on the single valid side (leftward), best `c ∈ [0.5, 10] m/s` over a
-near-origin window `|r − r0| ∈ [2, 16] mm`, requiring an aligned origin time `t0` near the event
-start (rejects late reverberation and rightward/standing energy). This is `origin_coherence` reduced
-to one side. Validate on a synthetic leftward wave (add to `tests/`). Also add a one-sided speed fit
-(TOF/TTP restricted to r < r0).
+1. **Directional filter OFF.** The k-ω filter injected horizontal reverberation banding and biased the
+   slope toward vertical / too-high speed. Confirmed empirically (`passive_directional_test.py`): AVC
+   velocity gives **c ≈ 4 m/s with no filter** (matches Vos: pig 4.2, human 3.5) vs **6 m/s with the
+   leftward filter**. MATLAB's passive pipeline uses no directional filter either.
+2. **Remove bulk wall motion with a band-pass whose low corner is ≥ ~10 Hz** (5 Hz lets the bulk band
+   through). SVD-clutter and polynomial detrend do NOT substitute. A **250 Hz IQ low-pass hurts** (it
+   washes the wavefront out, esp. acceleration).
+3. **Quantity:** displacement = **cleanest wavefront for visualisation**; velocity noisier; acceleration
+   sharpest front but noisiest (a clarity metric based on semblance over-rewards it). For a least-biased
+   *speed* number, acceleration is preferred (Petrescu 2022); disp < vel < acc systematically (mild
+   Lamb-wave dispersion).
+4. **Spatial:** light Gaussian ~0.6 mm (median ≈, slightly worse). **Temporal:** light mean/median or
+   none (second-order). **M-lines:** few lines; N=1 best for the sharp acceleration front, more lines
+   help smoother quantities; mean ≈ median.
+5. **Metric caveat (important):** the envelope `metrics.passive_coherence` AND naive semblance are
+   maximised by the flat bulk band → unreliable speed. Use **`metrics.slant_stack_speed`** — a *signed*
+   tau-p slant-stack fitting the **wave CENTRE** (not the onset; matches Vos/Petrescu Radon practice).
+   For *reporting* call it with `remove_flat=False` (the band-pass already removed the bulk band; the
+   `remove_flat=True` default over-corrects and pins at `cmin`). The built-in `ttp_ransac` speed is also
+   unreliable in vivo — read montages by eye.
+6. **Speeds** are physiological (AVC disp ~2–2.7, MVC disp ~3–5 m/s) but **absolute values remain
+   sensitive to M-line obliquity** relative to the true propagation path (MVC vs AVC ordering not yet
+   consistent with literature). The *visual* conclusions are robust; the absolute numbers are not.
 
-**5.2 Search axes** (per valve-closure window; the window set comes from the fixed-band burst
-detection so it is stable across the sweep):
-- quantity: displacement / velocity / acceleration
-- detrend / motion: none / polynomial_drift(order) / temporal_bandpass(f_lo, f_hi)
-- band grid: f_lo ∈ {2,5,10,20}, f_hi ∈ {80,120,150,200,300} Hz (respect the ~925 Hz Nyquist ≈ 463 Hz)
-- spatial smooth: none / gaussian(σ_z, σ_x) / median
-- temporal smooth: none / moving_mean(window) / moving_median(window)
-- directional: leftward / off (confirm leftward really helps)
-- M-line offsets: n ∈ {1,5,7}, spacing ∈ {0.5,0.8,1.2} mm
-Estimate ~few thousand combos/window — keep it tractable with the caching below.
+## 5. Current config + "always 3 space-time plots"
 
-**5.3 Efficiency** (reuse the iq2sws pattern): cache the `frame_to_frame` Loupas displacement per
-window once (it is the same for all field-filter combos on that window); precompute the bilinear
-M-line sampler for the fixed per-window M-line; vectorise `passive_coherence`. Full-res per 100 ms
-window is cheap (~130 frames); the whole sweep should be minutes per window.
+Both paths now **always emit 3 space-time plots per measurement**, via shared
+**`runconfig.build_views(cfg, acq)`** → `run.views` (three full, independent recipes). `run.py`
+`_process_measurement` (active) and `swp.passive` both use it; falls back to the legacy `run.bands`
+grid if `run.views` is absent. Montage orientation via a non-breaking `spacetime_montage(...,
+transpose=)` flag: **active** keeps native (r-x, t-y; symmetric V from r0); **passive** uses the
+**M-mode orientation** (x=time, y=along-line) so propagation reads as a diagonal.
 
-**5.4 Deliverables / scripts** (put under `scripts/`, outputs under `results/passive/`, git-ignored):
-- `scripts/search_passive.py --folder <f> [--window i]` → per-window leaderboard (ranked by
-  `passive_coherence`) + a top-k montage.
-- `scripts/analyze_passive.py` → consensus recipe across windows (and across subjects once more data
-  exists), + summary figure of score vs window/cardiac-phase.
-- Write the consensus back into `configs/passive.yaml` (as the active recipe was).
+- **`configs/passive.yaml`** main recipe = displacement · **no directional** · bp10-150 · gauss0.6/1.2 ·
+  mean3 · 5 M-lines · no IQ pre-filter. `run.views`:
+  - A `disp / bp10-150 / gauss0.6 / mean3 / 5-line`
+  - B `disp / bp5-150 / median1.0 / **no temporal** / 9-line`
+  - C `velocity / bp15-90 / gauss1.0 / mean5 / 9-line`
+- **`configs/active.yaml`** `run.views` = iq2sws consensus top-3 (all displacement, outward directional):
+  - A `disp / bp120-700 / gauss / mean3` (oc 0.753)
+  - B `disp / bp80-500 / gauss / **no temporal**` (oc ~0.735)
+  - C `disp / poly3 / gauss / mean3` (oc 0.728)
 
-**5.5 Acceptance:** a single fixed passive recipe that reaches most of the per-window best
-`passive_coherence` across windows, with visually clean leftward wavefronts in the montage, and a
-one-sided speed that is stable where the wave is clear.
+Verified: passive on invivo_sw (wave clear in all 3 views for win0/win1/win3); active on a phantom
+measurement (3 clean symmetric-V panels, oc 0.89–0.98, SWS ~2.3–2.4 m/s).
 
-## 6. Quick commands
+## 6. Known issues / caveats
+
+- **Absolute passive speed is M-line-alignment-limited** (§4.6) — the biggest open accuracy issue.
+- **`ttp_ransac` + `origin_coherence` are active-oriented** (symmetric, both sides of r0); meaningless
+  for the one-sided passive wave. Use `slant_stack_speed` for passive. The passive montage still overlays
+  the `ttp_ransac` line (imperfect); title speed is the signed-Radon value.
+- **Burst-window peak times shift slightly** when the processing/smoothing config changes (detection
+  runs the config's smoothing on the overview). M-lines are index-keyed so still load; but the cropped
+  100 ms window edges move a little. `detect.band` is fixed to keep this small.
+- **Median spatial full-field filtering is the search runtime bottleneck** (~12 s per op) — decimate the
+  field or drop median options for fast sweeps.
+- Buffer 4 in `output/` was retrofitted with scan params, not freshly beamformed (`run.py beamform`
+  regenerates, ~25 min). Cosmetic: git reports CRLF conversions on commit (Windows).
+
+## 7. Next steps
+
+1. **ECG-anchored window labelling.** Overlay `AcquisitionParametersAndECG.mat` R-peaks to confirm
+   MVC/AVC/diastole directly (not by timing arithmetic) and auto-label/gate windows; drop the diastolic
+   win2 or mark it. (`data.ecg` hook already exists.)
+2. **Proper passive speed estimator.** Promote a normalized-Radon / signed slant-stack (wave **centre**,
+   physiological range, both quantities) into `SPEED_METHODS` and overlay *its* line on the montage
+   (replace the `ttp_ransac` overlay for passive). Report disp/vel/acc speeds per window (Petrescu).
+3. **M-line alignment / geometry.** Ensure the same septal geometry per window (and add **vertical
+   M-line** support — see the generalise-direction note below); the absolute-speed discrepancy is
+   alignment-driven. A curvature/obliquity check would help.
+4. **Metric hardening.** Fold the per-time spatial-mean removal into the ranking metric (or use the
+   signed-Radon clarity score) so the exhaustive search stops rewarding the flat band; re-run if the
+   ranking shifts.
+5. **k-ω / dispersion analysis** (Lamb mode for the thin septum) — the physically correct model; would
+   separate phase velocity vs a single group speed. Vos found only mild dispersion, so a group speed is
+   defensible meanwhile.
+6. **Validate on cleaner / more data.** AVC is the stronger wave; a higher-SNR or ECG-gated acquisition
+   would let the speed estimators be validated, and enable a cross-subject consensus (as active had).
+7. **(Lower priority) generalise directional naming.** `leftward`/`rightward` are horizontal-M-line
+   names; for vertical M-lines rename to origin-relative (`from_start`/`from_end`). Only matters if the
+   directional filter is re-enabled for some case — it is OFF for passive now.
+
+## 8. Tooling index
+
+- `scripts/search_passive.py` — v1 exhaustive search (6 720/window, `passive_coherence`).
+- `scripts/search_passive2.py` — v2 (11 520/window, **all 7 axes**: directional on/off, N-line mean/median,
+  IQ pre-filter, band/SVD/poly, gauss/median spatial, mean/median temporal, disp/vel/acc), signed-Radon
+  clarity score → top-16 + **per-axis marginal montages** (`--window i --label AVC/MVC`).
+- `scripts/passive_best_montage.py`, `passive_filter_variety.py`, `passive_slantstack.py`,
+  `passive_directional_test.py`, `passive_compare_windows.py` — targeted montages (see `passive_search.md`).
+- Metrics (`src/swp/viz/metrics.py`): `slant_stack_speed` (signed tau-p, **use for passive speed**),
+  `passive_coherence` (envelope; do NOT trust its speed), `origin_coherence`/`wavefront_coherence` (active).
+- Shared: `runconfig.build_views`; `spacetime_montage(transpose=)`.
+- Outputs (git-ignored): `<folder>/output/swp_passive/`, `.../swp_passive/search/`, `.../search2/`,
+  `.../swp_active/`; M-lines in `<folder>/output/mlines/`.
+
+## 9. Quick commands
 
 ```
-python run.py beamform "<folder>"                              # stage 1+2 (writes output/, push location)
-python run.py viz      "<folder>" --config configs/active.yaml [--meas N]
-python run.py passive  "<folder>"                              # general + per-window M-lines -> montage
-python run.py passive  "<folder>" --redraw                     # re-draw all passive M-lines
+python run.py beamform "<folder>"                               # stage 1+2 (writes output/, push location)
+python run.py viz      "<folder>" --config configs/active.yaml [--meas N]   # active -> 3 views/meas
+python run.py viz      "<folder>" --config configs/active.yaml --phantom    # phantom (horizontal M-line)
+python run.py passive  "<folder>"                               # passive -> 3 views x windows montage
+python run.py passive  "<folder>" --redraw                      # re-draw all passive M-lines
+# re-run a passive exhaustive search:
+python scripts/search_passive2.py --window 1 --label AVC
 ```
-
-Outputs: `<folder>/output/swp_active/` and `<folder>/output/swp_passive/`
-(`passive_bursts.png`, `passive_full_spacetime.png`, `passive_windows_montage.png`); M-lines in
-`<folder>/output/mlines/`.

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import os
 import re
+from dataclasses import replace
 from typing import List, Optional
 
 import numpy as np
@@ -188,6 +189,30 @@ def bands(cfg: dict) -> Optional[List[tuple]]:
     """Multi-band confirmation view: ``run.bands`` as a list of (f_lo, f_hi) Hz, or None."""
     b = cfg.get("run", {}).get("bands")
     return [(float(lo), float(hi)) for lo, hi in b] if b else None
+
+
+def build_views(cfg: dict, acq: Optional[Acquisition] = None):
+    """Processing *views* from ``run.views`` -> list of ``(name, PipelineConfig)``, or ``None``.
+
+    Each view is a full, independent recipe (its own quantity / field_filters / directional / M-line
+    sampling) so a single run renders one space-time plot per view per measurement. Both the active
+    (``run.py``) and passive (``swp.passive``) paths use this, so they behave identically. Returns
+    ``None`` when no ``run.views`` are defined (callers fall back to their default single/band view).
+    """
+    views_cfg = cfg.get("run", {}).get("views")
+    if not views_cfg:
+        return None
+    out = []
+    for v in views_cfg:
+        ov = {k: v[k] for k in ("quantity", "field_filters", "directional", "directional_mode",
+                                "estimator", "mode", "drop_first") if k in v}
+        vc = build_pipeline_config(cfg, overrides=ov, acq=acq)
+        if "offsets" in v or "offset_step_mm" in v:
+            vc = replace(vc, mline_offsets=int(v.get("offsets", vc.mline_offsets)),
+                         mline_offset_step_m=(float(v["offset_step_mm"]) * 1e-3
+                                              if "offset_step_mm" in v else vc.mline_offset_step_m))
+        out.append((str(v.get("name", "view")), vc))
+    return out
 
 
 def outdir(cfg: dict, root: str) -> str:

@@ -26,8 +26,8 @@ mline:
   type: manual
   npz: "mlines/passive_mline.npz"           # relative to data.root; auto-drawn if missing (mid-frame)
   n_samples: 250
-  offsets: 7
-  offset_step_mm: 0.8
+  offsets: 5                                 # SEARCH: tight offset averaging (5 lines x 0.5 mm) best;
+  offset_step_mm: 0.5                        # more/wider offsets slightly worse (blurs the wavefront).
 
 focus:
   mode: auto                                # no ARF push; r0 = M-line point nearest the auto-detected
@@ -35,31 +35,38 @@ focus:
                                             # anchors the directional (outward) filter. TODO: a more
                                             # physical passive origin (valve-plane anchor per window).
 
-# --- processing pipeline (STARTING POINT -- to be tuned) ---
+# --- processing pipeline (TUNED by scripts/search_passive2.py on invivo_sw; see docs/passive_search.md) ---
+# Optimal passive recipe from the v2 exhaustive search + the MATLAB comparison. The two decisive
+# changes vs the earlier config: (1) quantity = DISPLACEMENT (cleanest wavefront for visualisation;
+# velocity/acceleration are noisier and their auto-speed degrades), and (2) directional filter OFF
+# (the k-omega filter injected reverberation banding and biased the slope toward vertical / too-high
+# speed; MATLAB's passive pipeline uses none). On the clean AVC window (win1) this gives a strong
+# coherent wavefront at ~2.7 m/s.
 pipeline:
   estimator: loupas
   estimator_params: {}
   mode: frame_to_frame                      # passive: no reference; differential displacement
-  quantity: displacement
+  quantity: displacement                    # SEARCH v2: displacement = clearest wavefront for viz.
+                                            # (Use acceleration only for a least-biased SPEED number.)
   drop_first: 1
-  iq_filters: []
+  iq_filters: []                            # SEARCH v2: NO IQ pre-filter (a 250 Hz slow-time low-pass
+                                            # washes the wavefront out, especially for acceleration).
 
-  # Band-pass around natural cardiac shear-wave frequencies (much lower than the ARF-driven
-  # active band), Gaussian spatial smoothing, light temporal smoothing, outward-directional.
-  # Sampling rate of the buffer-4 IQ is ~925 Hz (4 transmits: 2 angles x pulse inversion).
+  # Band-pass to remove the bulk myocardial wall motion (< a few Hz) while keeping the shear-wave band;
+  # light Gaussian spatial smoothing; light slow-time smoothing. NO directional filter (see below).
+  # Sampling rate ~925 Hz (buffer 4). bp5-150 and bp10-150 both work; median 1 mm ~= gauss 0.6 mm.
   field_filters:
-    - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
-    - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+    - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
+    - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}   # light Gaussian (~= median 1 mm)
     - {name: temporal_moving_mean, params: {window: 3}}
 
-  directional: true                         # directional (k-omega) filter on the space-time
-  directional_mode: leftward                # passive: the shear wave originates at the valve
-                                            # (right/high-r end of the M-line in this data) and
-                                            # travels right->left. Keep that single direction over
-                                            # the WHOLE M-line -- no symmetric response; this only
-                                            # removes reflections. (Flip to 'rightward' if the
-                                            # valve is drawn at the left end instead.)
-  speed: ttp_ransac
+  directional: false                        # SEARCH v2 + MATLAB comparison: the k-omega directional
+  directional_mode: leftward                # filter is OFF for passive (it adds reverberation banding and
+                                            # biases the apparent speed high). Kept here only as a label;
+                                            # ignored while `directional: false`.
+  speed: ttp_ransac                         # NB: for a robust passive speed use a normalized-Radon /
+                                            # slant-stack fit on the signed M-mode (metrics.slant_stack_speed),
+                                            # fitting the wave CENTRE, not the onset (see docs).
 
 # Burst detection uses a FIXED band, independent of pipeline.field_filters, so tuning the
 # processing band does not move the detected windows (index-based M-lines stay valid).
@@ -70,3 +77,41 @@ run:
   measurement: 0
   outdir: "swp_passive"                     # relative to data.root -> <folder>/output/swp_passive
   bands: [[5, 150]]
+
+  # THREE processing VIEWS -> one space-time plot per view per window (columns of the montage).
+  # All three are high-performing recipes from the v2 search but deliberately DIFFERENT (quantity,
+  # band, spatial-filter type, temporal filter, M-line count) so a genuine shear wave shows the same
+  # slope in all three while noise does not. None use a directional filter (SEARCH v2). View B uses
+  # NO temporal filtering. Reported speed is the signed-Radon (slant-stack) fit to the wave centre.
+  views:
+    # A -- default: displacement, mid band-pass, light Gaussian, light temporal mean.
+    - name: "disp bp10-150 gauss mean3"
+      quantity: displacement
+      directional: false
+      offsets: 5
+      offset_step_mm: 0.5
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
+        - {name: temporal_moving_mean, params: {window: 3}}
+
+    # B -- NO temporal filtering; median spatial; wider band; more M-lines (very different smoothing).
+    - name: "disp bp5-150 median NO-temporal"
+      quantity: displacement
+      directional: false
+      offsets: 9
+      offset_step_mm: 0.5
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
+        - {name: spatial_median, params: {size_z_mm: 1.0, size_x_mm: 2.0}}
+
+    # C -- different QUANTITY (velocity), narrower shear band, stronger Gaussian + longer temporal mean.
+    - name: "velocity bp15-90 gauss1.0 mean5"
+      quantity: velocity
+      directional: false
+      offsets: 9
+      offset_step_mm: 0.8
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 90}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 1.0, sigma_x_mm: 2.0}}
+        - {name: temporal_moving_mean, params: {window: 5}}

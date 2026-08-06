@@ -143,30 +143,44 @@ def _process_measurement(cfg, base_cfg, m, bands, outdir, bmode_path, bmode_fram
     base = rc.build_pipeline_config(cfg, acq=acq)
     mline = rc.build_mline(cfg, acq, m)
     focus = rc.build_focus(cfg, acq)
-    smooth = _smoothing_steps(base)
-    cols = bands if bands is not None else [None]
-
+    # Prefer `run.views` (3 full, independent recipes -> 3 space-time plots, same as the passive
+    # path). Fall back to the legacy `run.bands` grid (2 quantities x N bands) when no views defined.
+    views = rc.build_views(cfg, acq)
     results, titles, store = [], [], {}
-    for quantity in ("displacement", "velocity"):
-        for band in cols:
-            ff = _band_recipe(smooth, band)
-            raw = run_pipeline(acq, mline, replace(base, quantity=quantity, field_filters=ff,
-                                                   directional=False), focus=focus)
+    if views is not None:
+        for vname, vcfg in views:
+            raw = run_pipeline(acq, mline, replace(vcfg, directional=False), focus=focus)
             oc = origin_coherence(raw.st, raw.r0)
-            res = run_pipeline(acq, mline, replace(base, quantity=quantity, field_filters=ff,
-                                                   directional=base.directional), focus=focus)
+            res = run_pipeline(acq, mline, vcfg, focus=focus)
             results.append(res)
-            tag = f"bp{int(band[0])}-{int(band[1])}" if band is not None else "recipe"
-            titles.append(f"{quantity[:4]}  {tag}\noc={oc:.3f}")
-            store[(quantity, tag)] = (res, oc, band)
+            titles.append(f"{vname}\noc={oc:.3f}")
+            store[(vcfg.quantity, vname.replace("/", "-"))] = (res, oc, None)
+        ncols = len(views)
+        suptitle = f"meas{m} [{acq.source}]  3 views (columns = recipes); dashed r0"
+    else:
+        smooth = _smoothing_steps(base)
+        cols = bands if bands is not None else [None]
+        for quantity in ("displacement", "velocity"):
+            for band in cols:
+                ff = _band_recipe(smooth, band)
+                raw = run_pipeline(acq, mline, replace(base, quantity=quantity, field_filters=ff,
+                                                       directional=False), focus=focus)
+                oc = origin_coherence(raw.st, raw.r0)
+                res = run_pipeline(acq, mline, replace(base, quantity=quantity, field_filters=ff,
+                                                       directional=base.directional), focus=focus)
+                results.append(res)
+                tag = f"bp{int(band[0])}-{int(band[1])}" if band is not None else "recipe"
+                titles.append(f"{quantity[:4]}  {tag}\noc={oc:.3f}")
+                store[(quantity, tag)] = (res, oc, band)
+        ncols = len(cols)
+        suptitle = (f"meas{m} [{acq.source}]  top: displacement, bottom: velocity; columns = bands; "
+                    f"dashed r0")
     r0 = results[0].r0
 
     os.makedirs(outdir, exist_ok=True)
     png = os.path.join(outdir, f"swp_meas{m}.png")
-    spacetime_montage(results, png, ncols=len(cols),
-                      suptitle=f"meas{m} [{acq.source}]  top: displacement, bottom: velocity; "
-                               f"columns = bands; dashed r0 (={r0*1e3:.1f} mm)",
-                      panel_titles=titles)
+    spacetime_montage(results, png, ncols=ncols,
+                      suptitle=f"{suptitle} (={r0*1e3:.1f} mm)", panel_titles=titles)
     h5 = os.path.join(outdir, f"swp_meas{m}.hdf5")
     _write_hdf5(h5, m, r0, bands, base, store)
     print(f"  meas{m}: wrote {os.path.basename(png)} + {os.path.basename(h5)} "
@@ -208,9 +222,13 @@ def stage_viz(folder, config, meas=None, phantom=False):
 
     outdir = rc.outdir(cfg, output_dir)
     bmode_tmpl = cfg["data"].get("bmode")
+    _views = rc.build_views(cfg, None)
     print(f"swp viz [{os.path.basename(config)}]: {len(meas_list)} measurement(s) from {output_dir}")
-    print(f"  bands: {bands}  |  mode: {base.mode}  |  smoothing: "
-          f"{'+'.join(s.name for s in _smoothing_steps(base)) or 'none'}")
+    if _views is not None:
+        print(f"  views: {', '.join(n for n, _ in _views)}  |  mode: {base.mode}")
+    else:
+        print(f"  bands: {bands}  |  mode: {base.mode}  |  smoothing: "
+              f"{'+'.join(s.name for s in _smoothing_steps(base)) or 'none'}")
     for m in meas_list:
         bmode_path = os.path.join(output_dir, bmode_tmpl.format(m=m)) if bmode_tmpl else rc.hdf5_path(cfg, m)
         # active: buffer-5 has one frame per push -> frame m. passive: single cine -> middle frame.

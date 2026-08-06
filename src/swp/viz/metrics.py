@@ -81,6 +81,66 @@ def origin_coherence(st: SpaceTime, r0: float, cmin: float = 1.0, cmax: float = 
     return oc
 
 
+def slant_stack_speed(st: SpaceTime, r0: float | None = None, cmin: float = 1.0, cmax: float = 6.0,
+                      n_speeds: int = 121, remove_flat: bool = True, demean: bool = True,
+                      return_line: bool = False):
+    """**Signed tau-p slant-stack** speed of a propagating wavefront, robust to the flat bulk band.
+
+    Both :func:`passive_coherence` (envelope) and a naive signed semblance are maximised by the
+    strong **spatially-uniform** low-frequency band (bulk myocardial motion): columns are then
+    already aligned at *any* speed, so the fit runs to an implausibly high (near-flat) value.  The
+    decisive fix here is ``remove_flat``: subtract the **per-time spatial mean** so the uniform band
+    is removed and only the *propagating* (spatially non-uniform) component remains.  A tau-p (Radon)
+    slant-stack then finds the slope that maximises semblance over **both** travel directions.
+
+    For each trial slowness ``p = ±1/c`` (m/s)^-1 columns are shifted by ``p·(r − r̄)`` and the
+    semblance ``Σ_t (Σ_j a_j)^2 / (N·Σ_t Σ_j a_j^2) ∈ [0,1]`` of the coherent stack is measured over
+    the fully-in-window time rows.  Returns ``(semblance, c_signed)`` where the **sign of c** encodes
+    direction (``+`` = wave travels toward increasing r, ``−`` = toward decreasing r).  With
+    ``return_line`` also returns ``(r_line, t_line)`` — the fitted wavefront moveout, for overlay.
+    ``r0`` is unused (kept for call-compatibility); direction is inferred from the data.
+    """
+    data = st.data - st.data.mean(axis=0, keepdims=True) if demean else st.data.copy()
+    if remove_flat:
+        data = data - data.mean(axis=1, keepdims=True)     # kill spatially-uniform bulk band
+    nt, ns = data.shape
+    dt = float(st.t[1] - st.t[0])
+    r = st.r
+    r_ref = float(r.mean())
+    dr_rel = (r - r_ref) / dt                                # per-column lever arm, in frames per (m/s)^-1
+    base = np.arange(nt)[:, None]
+    ci = np.arange(ns)
+    # signed slownesses p = 1/c over [1/cmax, 1/cmin], both directions (exclude the flat p≈0)
+    p_pos = np.linspace(1.0 / cmax, 1.0 / cmin, n_speeds // 2)
+    slownesses = np.concatenate([-p_pos[::-1], p_pos])
+    best_sem, best_p, best_t0 = 0.0, float("nan"), 0
+    for p in slownesses:
+        shift = p * dr_rel                                  # (ns,) frames, may be ±
+        lo = int(np.ceil(max(0.0, -shift.min())))
+        hi = nt - int(np.ceil(max(0.0, shift.max())))
+        if hi - lo < 8:
+            continue
+        idx = base[lo:hi] + shift[None, :]                  # (rows, ns)
+        i0 = np.floor(idx).astype(np.intp)
+        frac = idx - i0
+        al = data[i0, ci] * (1 - frac) + data[np.clip(i0 + 1, 0, nt - 1), ci] * frac
+        num = al.sum(axis=1)
+        den = (al ** 2).sum(axis=1)
+        sem = float((num ** 2).sum() / (ns * den.sum() + 1e-20))
+        if sem > best_sem:
+            m = num                                         # coherent stack (sum) vs aligned time
+            best_sem, best_p = sem, float(p)
+            best_t0 = lo + int(np.argmax(np.abs(hilbert(m))))
+    if not np.isfinite(best_p) or best_p == 0.0:
+        out = (0.0, float("nan"))
+        return out + (None,) if return_line else out
+    c_signed = 1.0 / best_p                                 # sign = direction
+    if not return_line:
+        return best_sem, c_signed
+    t_line = st.t[best_t0] + best_p * (r - r_ref)           # invert the alignment (p in s/m, r in m)
+    return best_sem, c_signed, (r, t_line)
+
+
 def passive_coherence(st: SpaceTime, r0: float, cmin: float = 0.5, cmax: float = 10.0,
                       n_speeds: int = 80, d_min: float = 2e-3, d_max: float | None = None,
                       t0_max: float | None = None, demean: bool = True,

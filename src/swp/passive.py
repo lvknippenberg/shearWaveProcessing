@@ -28,7 +28,7 @@ from .viz.core.acquisition import Acquisition
 from .viz.io import load_acquisition, load_mline
 from .viz.mline import mline_from_points
 from .viz.pipeline import run_pipeline, Step
-from .viz.metrics import passive_coherence
+from .viz.metrics import passive_coherence, slant_stack_speed
 from .viz.viz import spacetime_montage, plot_spacetime
 from .viz.filters.directional import directional_spacetime
 from .viz.speed.spacetime import SpaceTime
@@ -39,6 +39,21 @@ from .mline.select import (
 
 # Motion-comp steps that the burst-overview pass keeps (it uses the full config recipe minus
 # the directional filter); see run.py MOTION_FILTERS for the active-side equivalent.
+
+
+def _build_views(cfg, acq):
+    """Build the list of ``(name, PipelineConfig)`` processing *views* from ``cfg['run']['views']``.
+
+    Each view fully overrides quantity / field_filters / directional / M-line sampling, so a single
+    run produces one space-time plot per view per window (mirroring the active side's multi-band
+    confirmation view, but with completely different recipes). Falls back to the single main
+    ``pipeline`` config when no views are defined.
+    """
+    views = rc.build_views(cfg, acq)
+    if views:
+        return views
+    return [(cfg["pipeline"].get("quantity", "displacement"),
+             rc.build_pipeline_config(cfg, acq=acq))]
 
 
 def _middle_frame(path: str) -> int:
@@ -159,7 +174,12 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
     if not windows:
         raise SystemExit("no bursts detected; try a different general M-line or lower thresholds.")
 
-    # --- 3) per-window: fresh M-line + process the 100 ms around the event ---
+    # --- 3) per-window: fresh M-line + process the 100 ms around the event, once PER VIEW ---
+    # Each window is rendered with every configured view (3 different high-performing recipes), so the
+    # shear-wave propagation can be confirmed across independent processing choices: a real wave shows
+    # the same slope in all three, noise does not. Layout: rows = windows, columns = views.
+    views = _build_views(cfg, acq)
+    print(f"  {len(views)} view(s) per window: " + " | ".join(n for n, _ in views))
     pad_s = pad_ms * 1e-3
     results, titles = [], []
     for i, w in enumerate(windows):
@@ -175,17 +195,20 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
         i0 = _frame_at_time(acq.t, w.t0 - pad_s)
         i1 = _frame_at_time(acq.t, w.t1 + pad_s) + 1
         acq_w = dataclasses.replace(acq, iq=acq.iq[i0:i1], t=acq.t[i0:i1])
-        res = run_pipeline(acq_w, ml, base, focus=None)
-        pc, cbest = passive_coherence(res.st, res.r0, return_speed=True)
-        results.append(res)
-        titles.append(f"win{i}  {w.t_peak*1e3:.0f} ms  [{w.t0*1e3:.0f}-{w.t1*1e3:.0f} ms]\n"
-                      f"pc={pc:.2f}  c={cbest:.1f} m/s")
-        print(f"    window #{i}: space-time {res.st.data.shape} passive_coherence={pc:.3f} c={cbest:.2f}")
+        for vname, vcfg in views:
+            res = run_pipeline(acq_w, ml, vcfg, focus=None)
+            # signed-Radon (slant-stack) speed on the raw band-passed M-mode = wave CENTRE, both
+            # directions (remove_flat=False: the band-pass already removed the bulk band).
+            sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=6.0, remove_flat=False)
+            results.append(res)
+            titles.append(f"win{i} {w.t_peak*1e3:.0f} ms  [{vname}]\n"
+                          f"c={abs(c):.1f} m/s (semblance {sem:.2f})")
+            print(f"    window #{i} [{vname}]: space-time {res.st.data.shape} c={c:.2f} sem={sem:.3f}")
 
-    # --- 4) montage ---
+    # --- 4) montage: rows = windows, cols = views ---
     montage = os.path.join(outdir, "passive_windows_montage.png")
-    spacetime_montage(results, montage, ncols=min(len(results), 4), panel_titles=titles,
-                      suptitle=f"Passive SWE -- {len(results)} valve-closure window(s), "
-                               f"{int(window_ms)} ms each  (fresh M-line per window)")
+    spacetime_montage(results, montage, ncols=len(views), panel_titles=titles, transpose=True,
+                      suptitle=f"Passive SWE -- {len(windows)} window(s) x {len(views)} views "
+                               f"(M-mode: x=time, y=along-line; columns = recipes)")
     print(f"done -> {montage}")
     return montage
