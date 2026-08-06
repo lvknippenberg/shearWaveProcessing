@@ -22,6 +22,13 @@ from .common import (
 )
 
 
+def _axial_smooth_complex(prod, kz, kx):
+    p = complex_uniform_filter1d(prod, kz, axis=1)
+    if kx > 1:
+        p = complex_uniform_filter1d(p, kx, axis=2)
+    return p
+
+
 def loupas_displacement(
     iq: np.ndarray,
     dz: float,
@@ -32,6 +39,8 @@ def loupas_displacement(
     kernel_z_m: float = 1.0e-3,
     kernel_x_m: float = 0.0,
     local_frequency: bool = True,
+    adaptive_kernel: bool = False,
+    kernel_z_max_m: float = 2.0e-3,
     mode: str = "frame_to_frame",
     reference: Optional[np.ndarray] = None,
 ) -> DisplacementResult:
@@ -42,15 +51,30 @@ def loupas_displacement(
     iq : (n_frames, nz, nx) complex
         Post-push tracking ensemble.
     dz, dx, c, f_demod, prf
-        Scan parameters (see :class:`~iq2sws.core.acquisition.Acquisition`).
+        Scan parameters, taken from the acquisition (Verasonics): ``c`` speed of sound,
+        ``f_demod`` demodulation/centre frequency (phase->displacement scaling), ``prf`` tracking
+        frame rate, ``dz`` axial pixel pitch (set by the RF sampling rate / beamforming grid). These
+        are **not** free tuning knobs - they must match the data.
     kernel_z_m, kernel_x_m : float
-        Axial / lateral averaging window in metres (variance vs resolution trade-off).
+        Axial / lateral averaging window in metres (variance vs resolution trade-off) - the main
+        tuning knobs.
     local_frequency : bool
         If True, Loupas local center-frequency correction; else fixed ``f_demod`` (Kasai-like).
+    adaptive_kernel : bool
+        If True, size the axial kernel per pixel by the **local RF coherence**: use ``kernel_z_m``
+        where the signal is coherent (preserve resolution) and grow toward ``kernel_z_max_m`` where it
+        is not (reduce noise). Coherence ``C = |<P>| / <|P|>`` of the slow-time correlation ``P`` is
+        computed at the base kernel; the displacement is blended ``C·d(small) + (1-C)·d(large)``.
+    kernel_z_max_m : float
+        Maximum axial kernel for the adaptive mode (used where coherence is low).
     mode : {"frame_to_frame", "relative_to_reference"}
         Differential (cumulative velocity) or absolute vs a reference frame/ensemble.
     reference : (nz, nx) or (n_ref, nz, nx) complex, optional
         Reference for ``relative_to_reference`` (ensemble is averaged in complex).
+
+    Note on **complex-correlation weighting**: taking the angle of the *spatially-averaged complex*
+    product ``<conj(ref)·iq>`` (rather than averaging per-sample phases) already weights each sample
+    by its magnitude, so higher-SNR samples dominate the estimate - the standard robust Loupas form.
 
     Returns
     -------
@@ -80,12 +104,23 @@ def loupas_displacement(
     else:
         raise ValueError(f"unknown mode {mode!r}")
 
-    prod = complex_uniform_filter1d(prod, kz, axis=1)
-    if kx > 1:
-        prod = complex_uniform_filter1d(prod, kx, axis=2)
-
-    phase = np.angle(prod)
-    disp_step = phase_to_displacement(phase, fc[None, :, :], c)
+    if adaptive_kernel:
+        from scipy.ndimage import uniform_filter1d
+        kz_max = samples_for_length(kernel_z_max_m, dz) if kernel_z_max_m > 0 else kz
+        kz_max = max(kz_max, kz)
+        p_small = _axial_smooth_complex(prod, kz, kx)
+        p_large = _axial_smooth_complex(prod, kz_max, kx)
+        # local coherence in [0,1] at the base kernel: magnitude of the averaged correlation
+        # over the average of the magnitudes (1 = fully coherent, 0 = noise).
+        num = np.abs(p_small)
+        den = uniform_filter1d(np.abs(prod), kz, axis=1, mode="nearest") + 1e-20
+        coh = np.clip(num / den, 0.0, 1.0)
+        d_small = phase_to_displacement(np.angle(p_small), fc[None, :, :], c)
+        d_large = phase_to_displacement(np.angle(p_large), fc[None, :, :], c)
+        disp_step = coh * d_small + (1.0 - coh) * d_large
+    else:
+        prod = _axial_smooth_complex(prod, kz, kx)
+        disp_step = phase_to_displacement(np.angle(prod), fc[None, :, :], c)
 
     if mode == "frame_to_frame":
         velocity = disp_step / dt                        # (n_frames-1, nz, nx) [m/s]

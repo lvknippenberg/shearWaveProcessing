@@ -81,6 +81,79 @@ def origin_coherence(st: SpaceTime, r0: float, cmin: float = 1.0, cmax: float = 
     return oc
 
 
+def wave_clarity(st: SpaceTime, r0: float, cmin: float = 1.0, cmax: float = 5.0,
+                 n_speeds: int = 40, d_min: float = 2e-3, d_max: float = 16e-3,
+                 t0_max: float = 3.0e-3, remove_flat: bool = True) -> float:
+    """Origin-aware propagation clarity in [0,1], **with the spatially-uniform bulk band removed**.
+
+    This is :func:`origin_coherence` hardened for the cardiac case: before the outward slant-stack it
+    subtracts the **per-time spatial mean** (``remove_flat``), which removes the spatially-uniform
+    bulk-wall-motion component that fools ``origin_coherence`` (it scored ~0.8 on the no-push
+    reference). What remains must be a genuinely *propagating*, spatially non-uniform, outward-from-r0,
+    early-onset wave at a physical speed (``cmax`` lowered to 5 m/s). Use this as the per-window clarity
+    ``C`` inside :func:`push_specificity`, not on its own (a clean recipe on cardiac motion can still
+    leave residual propagating structure — the no-push differential is what makes it trustworthy).
+    """
+    data = st.data - st.data.mean(axis=0, keepdims=True)          # temporal DC
+    if remove_flat:
+        data = data - data.mean(axis=1, keepdims=True)           # kill the uniform bulk band
+    env = np.abs(hilbert(data, axis=0))
+    nt = env.shape[0]
+    dt = float(st.t[1] - st.t[0])
+    d = np.abs(st.r - r0)
+    base_i = np.arange(nt)
+    i_early = max(1, int(round(t0_max / dt)))
+    speeds = np.linspace(cmin, cmax, n_speeds)
+
+    def side(mask):
+        cols = np.where(mask & (d >= d_min) & (d <= d_max))[0]
+        if cols.size < 4:
+            return 0.0
+        colpeak = env[:, cols].max(axis=0).mean() + 1e-12
+        # flat baseline = the no-moveout (c->inf) stack: uniform / standing energy peaks here, a
+        # propagating wave does not. The score is how much the best FINITE-speed outward moveout
+        # improves over it, normalised by the alignable headroom - so noise (best~flat) and bulk
+        # (flat~colpeak) both score ~0, and only a genuinely propagating wave scores high.
+        flat = float(env[:, cols].mean(axis=1)[:i_early].max())
+        best = 0.0
+        for c in speeds:
+            shift = d[cols] / c / dt
+            valid = shift <= (nt - 1)
+            if int(valid.sum()) < 4:
+                continue
+            stacked = np.zeros(nt)
+            for j, s in zip(cols[valid], shift[valid]):
+                stacked += np.interp(base_i + s, base_i, env[:, j])
+            stacked /= float(valid.sum())
+            best = max(best, float(stacked[:i_early].max()))
+        headroom = colpeak - flat
+        return float(np.clip((best - flat) / headroom, 0.0, 1.0)) if headroom > 1e-6 * colpeak else 0.0
+
+    left = side(st.r < r0)
+    right = side(st.r >= r0)
+    return float(np.sqrt(max(left, 0.0) * max(right, 0.0)))
+
+
+def push_specificity(res_push, res_nopush, r0: float | None = None) -> dict:
+    """**The recommended evaluation for ARF-SWE recipes.** How specifically a recipe images the *push*
+    response versus cardiac motion, using the pre-push reference as a built-in negative control.
+
+    Runs :func:`wave_clarity` on the post-push (tracking) space-time ``C_push`` and on the same recipe's
+    pre-push reference space-time ``C_nopush`` (no push fired there). A recipe that images the ARF wave
+    scores high `C_push` **and** low `C_nopush`; a recipe fooled by cardiac motion scores both high.
+    Returns ``S = C_push · (1 − C_nopush/C_push)₊`` (push-specific, in [0,1]) and the raw parts.
+
+    Validated on the controls: the **phantom** (real wave, no cardiac motion) → high S; the in-vivo
+    **no-push** window → S≈0. Pass ``res_nopush=None`` (e.g. phantom without meaningful reference) to
+    fall back to ``S = C_push``.
+    """
+    r0 = res_push.r0 if r0 is None else r0
+    cp = wave_clarity(res_push.st, r0)
+    cn = wave_clarity(res_nopush.st, r0) if res_nopush is not None else 0.0
+    s = cp * max(0.0, 1.0 - (cn / cp if cp > 1e-6 else 1.0))
+    return {"C_push": cp, "C_nopush": cn, "S": s, "S_diff": cp - cn}
+
+
 def slant_stack_speed(st: SpaceTime, r0: float | None = None, cmin: float = 1.0, cmax: float = 6.0,
                       n_speeds: int = 121, remove_flat: bool = True, demean: bool = True,
                       return_line: bool = False):

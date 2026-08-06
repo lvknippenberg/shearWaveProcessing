@@ -44,6 +44,7 @@ class PipelineConfig:
     drop_first: int = 1                      # drop corrupt first frame(s)
     mline_offsets: int = 5
     mline_offset_step_m: Optional[float] = None
+    mline_agg: str = "mean"                  # combine offset M-line copies: "mean" | "median"
     push_x_m: Optional[float] = None         # vertical push at this lateral x: r0 = M-line crossing there
 
     def label(self) -> str:
@@ -85,9 +86,17 @@ def _r0_lateral_crossing(mline: MLine, x0: float) -> float:
 def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
                  focus: Optional[PushFocus] = None) -> PipelineResult:
     # --- IQ-space filters ---
+    # Some IQ filters (spatial/slow-time low-pass) need acquisition constants (dz/dx/prf) that a
+    # bare IQ filter has no ctx for; inject them by signature so the registry call stays uniform.
+    import inspect
+    _acq_consts = dict(dz=acq.dz, dx=acq.dx, prf=acq.prf, c=acq.c, f_demod=acq.f_demod,
+                       reference=acq.ref_iq)
     iq = acq.iq
     for step in cfg.iq_filters:
-        iq = IQ_FILTERS[step.name](iq, **step.params)
+        fn = IQ_FILTERS[step.name]
+        accepted = set(inspect.signature(fn).parameters)
+        extra = {k: v for k, v in _acq_consts.items() if k in accepted and k not in step.params}
+        iq = fn(iq, **step.params, **extra)
 
     # --- displacement estimation ---
     est = ESTIMATORS[cfg.estimator]
@@ -113,7 +122,13 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
 
     # --- field-space filters ---
     ctx = FilterCtx(dz=acq.dz, dx=acq.dx, prf=acq.prf, t=times, x=acq.x, z=acq.z,
-                    focus_ix=focus.ix, focus_x=focus.x)
+                    focus_ix=focus.ix, focus_x=focus.x, f_demod=acq.f_demod, c=acq.c)
+    # per-pixel quality maps for optional quality masking: reference B-mode (dB) + slow-time coherence.
+    _env = np.abs(acq.ref_iq.mean(axis=0)) if acq.ref_iq is not None else np.abs(acq.iq[0])
+    ctx.bmode_db = 20.0 * np.log10(_env / (_env.max() + 1e-12) + 1e-6)
+    if acq.iq.shape[0] > 1:
+        _p = np.conj(acq.iq[:-1]) * acq.iq[1:]
+        ctx.coherence = np.abs(_p.mean(axis=0)) / (np.abs(_p).mean(axis=0) + 1e-20)
     # reference trajectory for reference-based filters (computed on demand)
     from .filters import REFERENCE_FILTERS
     if any(s.name in REFERENCE_FILTERS for s in cfg.field_filters):
@@ -132,7 +147,7 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
     # --- M-line sampling -> space-time ---
     step_m = cfg.mline_offset_step_m if cfg.mline_offset_step_m is not None else acq.dz * 4
     st = build_spacetime(fld, acq.z, acq.x, mline, times, quantity=cfg.quantity,
-                         n_offsets=cfg.mline_offsets, offset_step_m=step_m)
+                         n_offsets=cfg.mline_offsets, offset_step_m=step_m, agg=cfg.mline_agg)
 
     if cfg.push_x_m is not None:
         r0 = _r0_lateral_crossing(mline, cfg.push_x_m)

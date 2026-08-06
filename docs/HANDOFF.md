@@ -1,7 +1,87 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-08-04.
+for the full passive-SWE investigation record. Last updated 2026-08-06.
+
+## 0. LATEST (2026-08-06): low-SNR extraction sweep — see `docs/low_snr_extraction_sweep.md`
+
+A 700-recipe × 8-voltage (50→15 V) phantom sweep, scored by two speed-free V-detectors (ROI-contrast on
+a locked 50 V template + mirror-symmetry). **The shear-wave V is detectable at every voltage down to
+15 V** (ROI-contrast 0.52→0.19, above the 0.05 no-wave floor throughout). **Optimal levers shift with
+SNR:** high SNR → median smoothing (~1 mm) + wide band (120–800 Hz) + velocity; low SNR → large-σ
+Gaussian (~1.4 mm) + narrow low-freq band (~100–350 Hz) + displacement + SVD clutter. Robust all-SNR
+recipe = **id438** (bp 80–500 → spatial median 0.9×2.6 mm → temporal median w5 → 9 offsets → outward).
+**RF-NCC underperformed Loupas at every voltage (worse as SNR drops) — not worth expanding.** This
+supersedes NEXT-STEP 1 below.
+
+## 0b. method-exploration GUI, metric validation, and the settled recipe
+
+**The in-vivo finding that started this:** the active in-vivo space-time plots are dominated by **cardiac
+wall motion, not the ARF shear wave** (peak focal displacement ~42 µm, voltage-independent, ~10× the
+phantom push; and the pipeline produces a "clean wave" even from the *pre-push reference* where no push
+fired). See the reality-check / no-push-control diagnostics. Higher push voltage does **not** help in
+vivo (unlike the phantom, where clarity scales cleanly with voltage).
+
+**Interactive GUI** (`swp_gui/`, Streamlit): `KERAS_BACKEND=torch <zea-py> -m streamlit run swp_gui/app.py`.
+Tune every stage IQ/RF→space-time (IQ pre-filters, estimator incl. fine-grid RF-NCC, cardiac-motion
+removal, spatial/temporal, M-line averaging, directional, speed), each with a code viewer, a B-mode +
+**spline** M-line + offset-line overlay, read-only acquisition constants, add/remove method chains,
+per-step/global reset, a **no-push control** (same recipe on the reference — the key in-vivo diagnostic),
+comparison history, and an "animate all pushes" GIF. Boots in ~4 s (zea/torch imported lazily only for
+the fine grid). New reusable algorithms in `src/swp/viz/`: `filters/experimental.py`
+(iq low/high-pass, SVD-on-displacement, reference-subspace projection, phase-unwrap, bulk-motion comp,
+quality-mask, savgol, bilateral/NLM/anisotropic/coherence diffusion), `estimators/rf_ncc.py`,
+`acquisition/finegrid.py` (fine-grid RF re-beamform around the M-line). Loupas gained kernel_x +
+adaptive-kernel (RF-coherence-sized axial window). Directional filter was **fixed** (Tukey-windowed FFT +
+smooth angular mask): +R/−R now null the opposite lobe (~80%); outward keeps both.
+
+**Metric validation (human-in-the-loop, blind).** A big experiment (`scripts/metric_experiment_*.py`,
+`swp_gui/score_app.py` absolute 1-5, `swp_gui/pairwise_app.py` 2-AFC, per-dataset scoring) graded ~600
+randomized/focused recipes across phantom 15/25/30/50 V + in-vivo 30/40 V. Findings:
+- **`push_specificity` was DEBUNKED** (worse than the metric it replaced; false pos/neg). **Adopt
+  `origin_coherence` (mean over quantities) as THE metric** — it's the best-validated (Spearman ρ≈0.45
+  across datasets, up to 0.60 on clean data), generalizes to in-vivo for *ranking recipes*, and has no
+  blow-ups. Now the ★ headline metric in the GUI. Hand-crafted smoothness/symmetry additions did not
+  robustly beat it. Ceiling ~0.5 is honest (discrete/near-tie human scores).
+- **`origin_coherence` did NOT break in-vivo** for ranking (ρ≈0.5) — the cardiac-fooling is specific to
+  the *no-push reference* window, not to ranking recipes on the tracking window.
+- **All GUI options verified to affect the output** (`scripts/check_options.py`); no no-ops.
+
+**The settled recipe — and it is SNR-ADAPTIVE (validated on phantom 30 V vs 50 V pairwise):**
+- **Universal:** Loupas · `relative_to_reference` · temporal band-pass · **OUTWARD directional (decisive:
+  ΔBT +4 to +9; never left/right for active)** · moving-mean temporal. Frame-to-frame, xcorr, IQ SVD /
+  slow-time-highpass, bilateral, axial-strain, reference-subspace all HURT.
+- **Smoothing scales inversely with SNR (clean sign-flip):** high SNR (50 V) → **light** smoothing
+  (median or light Gaussian; Gaussian-σ↔score ρ=−0.18; NLM worst) + **more offsets (9)**. Low SNR (30 V)
+  → **more** smoothing (larger-σ Gaussian, NLM acceptable; Gaussian-σ↔score ρ=+0.34; median worse);
+  offsets less important. → recommend **SNR-adaptive σ** (ties into the Loupas adaptive-kernel), not a
+  single fixed value. Figure: `metric_experiment/snr_conclusion.png`.
+- **The readable quantity also shifts with SNR** (derivatives sharpen at high SNR, amplify noise at low):
+  high SNR → **acceleration/velocity** (oc↔ranking: acc 0.56, vel 0.38, disp 0.10); low SNR →
+  **displacement/velocity** (disp 0.56, vel 0.59, acc 0.40). **Velocity is the single most SNR-robust
+  quantity.** Implication: the metric's quantity-aggregation should be SNR-aware (or default to mean/
+  velocity); a fixed "best column" is wrong.
+
+**NEXT STEPS (priority order):**
+1. **Extract the shear wave in low-SNR data (phantom 15 V).** This is the honest hard case: at 15 V the
+   wave is barely above noise. Use the SNR-adaptive recipe (heavy smoothing, read displacement/velocity),
+   and explore the fine-grid RF-NCC estimator and stronger clutter/denoise. Success criterion: a
+   confident sloped wavefront + a stable speed. Data: `2026_08_04 voltage sweep/Phantom/...13-30-35`.
+2. **Cardiac-motion removal for in-vivo (currently NOT working).** The band-pass-after-displacement
+   approach fails (large motion wraps the phase; cardiac energy leaks into the band). Try, at/before the
+   estimator: bulk-motion compensation (global + affine/optical-flow), reference-subspace projection
+   *trained on the 40 pre-push frames*, and SVD clutter — validated with the **no-push control** (a good
+   filter makes the reference window go quiet while the tracking window keeps the wave). **User caveat
+   (important): cardiac motion and shear-wave propagation are hard to distinguish in a lone space-time
+   image without further context** — so removal (physics-based, using the reference) is the real lever,
+   not a better image metric, and validation needs the no-push contrast (and ideally ECG phase / a
+   simulated ground truth).
+3. Optional: finer recipe sweeps; real speed/stiffness extraction with the settled recipe; generalize to
+   more subjects/voltages.
+
+Experiment artifacts live in `2026_08_04 voltage sweep/metric_experiment/<dataset>/` (manifest.json,
+scores.csv, pairs.csv, plots/, per-round figures). Scripts: `metric_experiment_{generate,handpicked,
+analyze,patterns,crossdataset}.py`, `metric_build.py`, `pairwise_analyze.py`, `check_options.py`.
 
 ## 1. What this repo is
 

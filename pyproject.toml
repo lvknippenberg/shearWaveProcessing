@@ -22,6 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 gpu = ["torch"]
 dev = ["pytest"]
+gui = ["streamlit>=1.30"]     # interactive method-exploration GUI (swp_gui/)
 
 [tool.setuptools.packages.find]
 where = ["src"]

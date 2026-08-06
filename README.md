@@ -81,6 +81,40 @@ push voltage read from the data. Run `scripts/check_push_voltage.py --root "<Pha
 first to confirm the sweep actually varied — the push TPC profile can silently clamp the voltage at
 its `highVoltageLimit`. Full workflow + the clamp lesson: [docs/phantom_voltage_sweep.md](docs/phantom_voltage_sweep.md).
 
+## Interactive method-exploration GUI (`swp_gui/`)
+
+A Streamlit app to **experiment visually with every step from IQ/RF to the space-time plot** — pick a
+folder + push, then tune each stage and see the space-time plot, B-mode + M-line, metrics, and a
+built-in **no-push control** (the same recipe run on the pre-push reference, which reveals whether a
+recipe images the ARF wave or cardiac motion). Every step's source code is viewable inline.
+
+```
+pip install -e ".[gui]"          # adds streamlit
+KERAS_BACKEND=torch  D:\Luuk van Knippenberg\envs\zea_latest\python.exe -m streamlit run swp_gui/app.py
+```
+
+The four filter stages are **ordered, add/remove chains of methods** (e.g. polynomial detrend → band-pass;
+or a spatial + slow-time IQ pre-filter), with per-step and global **reset**. The M-line is shown as the
+**resampled constant-arc-length spline** (the exact curve used for processing) with its **offset lines**
+and anchors, and the acquisition constants (f0/PRF/c/dz) are shown read-only.
+
+Stages (all tunable, code viewable): **1** IQ pre-filter (spatial/slow-time low-pass, SVD clutter,
+**bulk-motion compensation**) · **2** displacement (Loupas / Kasai / complex-IQ xcorr / **RF cross-
+correlation on a fine local re-beamform**; frame-to-frame or vs-reference; displacement/velocity/
+acceleration; **adaptive axial kernel from RF coherence**; lateral kernel) · **3** cardiac-motion removal
+(**quality mask**, band-pass, high-pass, polynomial, SVD-on-displacement, **reference poly-extrapolation /
+adaptive high-pass / reference-subspace projection**, phase-unwrap, axial-strain) · **4** spatial
+(Gaussian, median, **bilateral, non-local means, Perona–Malik anisotropic diffusion, coherence-enhancing
+tensor diffusion**) · **5** temporal (moving mean/median, **Savitzky–Golay**) · **6** M-line offset
+averaging (mean/median) · **7** directional (outward/left/right) · **8** speed (TOF-RANSAC / Radon /
+TOF-xcorr) + quality metrics. Recipes download as YAML.
+
+The **RF cross-correlation** estimator (and the "use fine grid" toggle) re-beamform buffer 2 locally on
+a fine axial grid around the M-line (`src/swp/acquisition/finegrid.py`); the data is NS200BW real RF, so
+this is genuine fine-grid RF tracking. New processing methods live in `src/swp/viz/` (reusable outside
+the GUI): `filters/experimental.py`, `estimators/rf_ncc.py`. Background + references:
+[docs/literature_review.md](docs/literature_review.md).
+
 ## M-line selection
 
 The septal M-line is drawn interactively (ported from `SWI/Zea/swi_mline.py`): click points on the

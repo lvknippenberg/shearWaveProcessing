@@ -31,14 +31,16 @@ def build_spacetime(
     quantity: str = "velocity",
     n_offsets: int = 1,
     offset_step_m: float = 0.0,
+    agg: str = "mean",
 ) -> SpaceTime:
     """Build a :class:`SpaceTime` by sampling ``field`` (n_frames, nz, nx) along ``mline``.
 
     ``t`` must have length equal to ``field.shape[0]`` (e.g. interval-centre times for
-    a velocity field, or frame times for a displacement field).
+    a velocity field, or frame times for a displacement field). ``agg`` (mean/median) combines
+    the offset M-line copies.
     """
     data = sample_along_mline(field, z_axis, x_axis, mline,
-                              n_offsets=n_offsets, offset_step_m=offset_step_m)
+                              n_offsets=n_offsets, offset_step_m=offset_step_m, agg=agg)
     t = np.asarray(t, dtype=np.float64)
     if t.size != data.shape[0]:
         raise ValueError(f"t length {t.size} != field frames {data.shape[0]}")
