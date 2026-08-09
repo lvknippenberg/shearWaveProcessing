@@ -37,10 +37,150 @@ def fig_spacetime(res, title="", show_speed=True, clim=None):
     return fig, float(clim)
 
 
-def fig_bmode_mline(img_u8, extent_mm, mline, push_xz=None, n_offsets=1, offset_step_m=0.0):
+# ---- multi-quantity (displacement / velocity / acceleration) displays ----------------------------
+QORDER = ["displacement", "velocity", "acceleration"]
+QUNITS = {"displacement": (1e6, "µm"), "velocity": (1e3, "mm/s"), "acceleration": (1.0, "m/s²")}
+
+
+def cell_of(res):
+    """Pack a pipeline result into a display cell (arrays copied so it survives in session state)."""
+    s = res.st
+    return dict(data=s.data.copy(), r=s.r.copy(), t=s.t.copy(), quantity=s.quantity, r0=float(res.r0))
+
+
+def _draw_cell(ax, c, clim):
+    unit = QUNITS[c["quantity"]][0]
+    r = c["r"] * 1e3; t = c["t"] * 1e3
+    im = ax.imshow(c["data"] * unit, extent=(r[0], r[-1], t[-1], t[0]), cmap="RdBu_r",
+                   vmin=-clim, vmax=clim, aspect="auto", origin="upper")
+    ax.axvline(c["r0"] * 1e3, color="0.15", ls="--", lw=1.0, alpha=0.7)
+    ax.tick_params(labelsize=7)
+    return im
+
+
+def _col_clim(cells):
+    """Shared colour limit for one quantity column (over the rows that have it)."""
+    cl = []
+    for c in cells:
+        if c is None:
+            continue
+        unit = QUNITS[c["quantity"]][0]
+        rc = (c["r"] > 0.1 * c["r"][-1]) & (c["r"] < 0.9 * c["r"][-1])
+        cl.append((robust_clim(c["data"], rc, pct=97) * unit) or
+                  float(np.nanpercentile(np.abs(c["data"] * unit), 97)))
+    return float(np.percentile(cl, 75)) if cl else 1.0
+
+
+def fig_quantity_grid(rows, row_labels, title="", col_titles=None, scale=1.0, speed_line=None,
+                      per_cell=False):
+    """Grid of space-times: one ROW per entry in ``rows`` (each a dict quantity->cell), one COLUMN per
+    quantity (displacement / velocity / acceleration). ``scale`` sizes the figure; every panel gets a
+    colour bar. Colour scaling: by default shared per quantity column (rows directly comparable);
+    ``per_cell=True`` gives every panel its own scale (so a big previous row can't squash the current).
+    ``speed_line`` = ((r0_mm,t0_ms),(r1_mm,t1_ms)) overlays the manual speed line on the post-push rows."""
+    nrow = len(rows)
+    fig, axs = plt.subplots(nrow, 3, figsize=(2.9 * 3 * scale, 2.05 * nrow * scale), squeeze=False)
+    for cj, q in enumerate(QORDER):
+        shared = None if per_cell else _col_clim([row.get(q) for row in rows])
+        for ri, row in enumerate(rows):
+            ax = axs[ri][cj]
+            c = row.get(q)
+            if c is not None:
+                clim = _col_clim([c]) if per_cell else shared
+                im = _draw_cell(ax, c, clim)
+                cb = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.02)
+                cb.ax.tick_params(labelsize=6)
+                if speed_line is not None:
+                    (x0, y0), (x1, y1) = speed_line
+                    tmin, tmax = c["t"].min() * 1e3, c["t"].max() * 1e3   # panel time range [ms]
+                    if not (max(y0, y1) < tmin or min(y0, y1) > tmax):    # skip pre-push (line is post-push t)
+                        ax.plot([x0, x1], [y0, y1], "k-", lw=1.6, alpha=0.9)
+            else:
+                ax.axis("off")
+            if ri == 0:
+                ax.set_title((col_titles[cj] if col_titles else f"{q}  [{QUNITS[q][1]}]"), fontsize=10)
+            if ri == nrow - 1:
+                ax.set_xlabel("r along M-line [mm]", fontsize=8)
+            if cj == 0:
+                ax.set_ylabel(f"{row_labels[ri]}\nt [ms]", fontsize=9)
+    if title:
+        fig.suptitle(title, fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.95) if title else (0, 0, 1, 1))
+    return fig
+
+
+def fig_quantity_row(res_by_q, title="", scale=1.0):
+    """Single row: displacement / velocity / acceleration space-times for the current run."""
+    row = {q: cell_of(res_by_q[q]) for q in QORDER if q in res_by_q}
+    return fig_quantity_grid([row], [""], title=title, scale=scale)
+
+
+def fig_svd_spectrum(S, n_remove, n_high_remove, domain="IQ", scale=1.0):
+    """Singular-value spectrum (log) for tuning the SVD clutter cutoffs. The removed low ranks (clutter)
+    and high ranks (noise) are shaded; the kept middle band is the 'signal'. The steep initial drop is
+    clutter→signal; the flat tail is signal→noise — set the cutoffs at those two knees."""
+    S = np.asarray(S, float)
+    N = len(S)
+    idx = np.arange(1, N + 1)
+    sn = S / (S[0] + 1e-30)
+    lo, hi = n_remove + 1, N - n_high_remove          # 1-indexed kept range
+    fig, ax = plt.subplots(figsize=(4.6 * scale, 2.7 * scale))
+    ax.semilogy(idx, sn, "-o", ms=3, color="0.25", zorder=3)
+    nlo, nhi = min(n_remove, N), min(n_high_remove, N)          # clamp to the axis on over-removal
+    if nlo > 0:
+        ax.axvspan(0.5, nlo + 0.5, color="tab:red", alpha=0.18)
+        ax.text(nlo / 2 + 0.5, 0.9, "clutter", color="tab:red", fontsize=7, ha="center", va="top")
+    if nhi > 0:
+        ax.axvspan(N - nhi + 0.5, N + 0.5, color="0.5", alpha=0.22)
+        ax.text(N - nhi / 2 + 0.5, 0.9, "noise", color="0.35", fontsize=7, ha="center", va="top")
+    if hi >= lo:                                                # kept 'signal' band (empty if over-removed)
+        ax.axvspan(nlo + 0.5, N - nhi + 0.5, color="tab:green", alpha=0.10)
+        ax.text((lo + hi) / 2, sn[hi - 1], "signal", color="tab:green", fontsize=7, ha="center", va="bottom")
+    ax.set_xlabel("singular-value index (rank)", fontsize=8)
+    ax.set_ylabel("σ / σ₁  (log)", fontsize=8)
+    kept = f"keep {lo}–{hi}" if hi >= lo else "keep NONE"
+    ax.set_title(f"SVD spectrum · {domain} · N={N} · {kept}", fontsize=9)
+    ax.tick_params(labelsize=7)
+    ax.grid(True, which="both", alpha=0.3)
+    fig.tight_layout()
+    return fig
+
+
+def fig_speed_plotly(cell, clim, line=None, scale=1.0):
+    """Interactive Plotly space-time for 2-click manual speed picking (data in mm / ms). A faint
+    selectable point grid overlays the heatmap so a click anywhere returns a nearby (r,t); ``line`` =
+    ((r0_mm,t0_ms),(r1_mm,t1_ms)) draws the current measurement."""
+    import numpy as np
+    import plotly.graph_objects as go
+    unit = QUNITS[cell["quantity"]][0]
+    z = cell["data"] * unit
+    r = cell["r"] * 1e3
+    t = cell["t"] * 1e3
+    fig = go.Figure(go.Heatmap(z=z, x=r, y=t, colorscale="RdBu", reversescale=True, zmid=0,
+                               zmin=-clim, zmax=clim, showscale=False, hoverinfo="x+y"))
+    rr = r[:: max(1, len(r) // 70)]
+    tt = t[:: max(1, len(t) // 50)]
+    gx, gy = np.meshgrid(rr, tt)
+    fig.add_trace(go.Scatter(x=gx.ravel(), y=gy.ravel(), mode="markers",
+                             marker=dict(size=7, color="rgba(60,60,60,0.05)"),
+                             hoverinfo="x+y", showlegend=False, name="click"))
+    if line is not None:
+        (x0, y0), (x1, y1) = line
+        fig.add_trace(go.Scatter(x=[x0, x1], y=[y0, y1], mode="lines+markers",
+                                 line=dict(color="black", width=3), marker=dict(size=9, color="black"),
+                                 hoverinfo="skip", showlegend=False))
+    fig.add_vline(x=cell["r0"] * 1e3, line=dict(color="gray", dash="dash", width=1))
+    fig.update_xaxes(title_text="r along M-line [mm]")
+    fig.update_yaxes(title_text="t [ms]", autorange="reversed")
+    fig.update_layout(height=int(400 * scale + 40), margin=dict(l=48, r=10, t=8, b=42),
+                      dragmode=False, clickmode="event+select")
+    return fig
+
+
+def fig_bmode_mline(img_u8, extent_mm, mline, push_xz=None, n_offsets=1, offset_step_m=0.0, scale=1.0):
     """B-mode with the resampled **spline** M-line, the parallel **offset lines** actually used for
     averaging, the clicked **anchor points**, and the push focus overlaid."""
-    fig, ax = plt.subplots(figsize=(5.2, 5.6))
+    fig, ax = plt.subplots(figsize=(3.7 * scale, 4.0 * scale))
     ax.imshow(img_u8, cmap="gray", extent=extent_mm, aspect="auto")
     # offset lines used for averaging (faint), then the central spline (bright)
     lines = mline.offset_lines(n_offsets, offset_step_m)

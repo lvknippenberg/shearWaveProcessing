@@ -242,6 +242,37 @@ def to_config(recipe: Recipe, acq: Acquisition) -> PipelineConfig:
     )
 
 
+# ============================================================ SVD spectrum (GUI tuning aid)
+def svd_spectrum(acq: Acquisition, recipe: Recipe):
+    """Singular-value spectrum for the active SVD-clutter step, for the GUI cutoff-tuning plot.
+
+    Returns ``dict(S, nr, nh, domain)`` for the first ``svd_clutter`` (IQ, computed on the tracking IQ
+    ensemble) or ``svd_clutter_field`` (displacement, on the Loupas displacement field) in the recipe,
+    else ``None``. ``nr``/``nh`` are the current remove-low / remove-high cutoffs. The Casorati layout
+    matches the filter, so the rank axis and the kept range are exactly what the filter uses."""
+    def _S(vol):
+        vol = np.asarray(vol)
+        return np.linalg.svd(vol.reshape(vol.shape[0], -1), compute_uv=False)
+
+    try:
+        for name, params in recipe.iq_steps:
+            if name == "svd_clutter":
+                return dict(S=_S(acq.iq), nr=int(params.get("n_remove", 1)),
+                            nh=int(params.get("n_high_remove", 0)), domain="IQ")
+        for name, params in recipe.motion_steps:
+            if name == "svd_clutter_field":
+                from swp.viz.estimators import loupas_displacement
+                ref = acq.ref_iq if recipe.mode == "relative_to_reference" else None
+                est = loupas_displacement(acq.iq, dz=acq.dz, dx=acq.dx, c=acq.c, f_demod=acq.f_demod,
+                                          prf=acq.prf, mode=recipe.mode, reference=ref)
+                fld = est.displacement[recipe.drop_first:]
+                return dict(S=_S(fld), nr=int(params.get("n_remove", 1)),
+                            nh=int(params.get("n_high_remove", 0)), domain="displacement")
+    except Exception:  # noqa: BLE001 - a tuning aid must never break the run
+        return None
+    return None
+
+
 # ============================================================ running
 def run_recipe(acq: Acquisition, mline: MLine, cfg: PipelineConfig, nopush: bool = False):
     """Run the pipeline. ``nopush=True`` feeds the pre-push reference frames as the tracking
@@ -260,7 +291,8 @@ def run_recipe(acq: Acquisition, mline: MLine, cfg: PipelineConfig, nopush: bool
 def recipe_label(recipe: Recipe) -> str:
     """Compact one-line summary of the active methods (for labelling history/comparison panels)."""
     def steps(lst):
-        return "+".join(n for n, _ in lst) if lst else "none"
+        real = [n for n, _ in lst if n != "none"]
+        return "+".join(real) if real else "none"
     parts = []
     if recipe.iq_steps:
         parts.append("iq:" + steps(recipe.iq_steps))

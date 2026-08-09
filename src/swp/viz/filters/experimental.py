@@ -216,6 +216,56 @@ def bulk_motion_compensation(iq: np.ndarray, reference=None, dz: float = None, d
     return out
 
 
+def optical_flow_compensation(iq: np.ndarray, reference=None, dz: float = None, dx: float = None,
+                              method: str = "ilk", max_shift_m: float = 3.0e-3,
+                              radius: int = 9) -> np.ndarray:
+    """Non-rigid (dense **optical-flow**) tissue-motion compensation before displacement estimation.
+
+    The natural extension of :func:`bulk_motion_compensation` from a single global rigid shift to a
+    per-pixel motion field: a dense flow is estimated between each frame's envelope and the pre-push
+    reference (mean envelope), and the complex IQ is warped back onto the reference geometry. This
+    removes large SPATIALLY-VARYING (deforming, not just translating) cardiac wall motion, while the
+    few-micron shear-wave displacement - far below the envelope-flow (pixel) scale - is left for the
+    phase estimator to recover. (Manduca-style background-motion model; see docs/literature_review.md.)
+
+    Warps the baseband IQ real/imag bilinearly (standard speckle-tracking compensation; the residual
+    carrier-phase term of the sub-pixel warp is second-order). ``reference`` injected by the pipeline.
+    """
+    from skimage.registration import optical_flow_ilk, optical_flow_tvl1
+    from skimage.transform import warp
+
+    iq = np.asarray(iq)
+    n, nz, nx = iq.shape
+    if reference is not None:
+        ref = np.asarray(reference); ref = ref.mean(axis=0) if ref.ndim == 3 else ref
+    else:
+        ref = iq[0]
+    ref_env = np.abs(ref); ref_env = ref_env / (ref_env.max() + 1e-12)
+    rr, cc = np.meshgrid(np.arange(nz), np.arange(nx), indexing="ij")
+    of = optical_flow_ilk if method == "ilk" else optical_flow_tvl1
+    kw = {"radius": radius} if method == "ilk" else {}
+    max_z = (max_shift_m / dz) if dz else nz
+    max_x = (max_shift_m / dx) if dx else nx
+    out = np.empty_like(iq)
+    for i in range(n):
+        env = np.abs(iq[i]); env = env / (env.max() + 1e-12)
+        v, u = of(ref_env, env, **kw)                    # flow warping frame i -> reference
+        v = np.clip(v, -max_z, max_z); u = np.clip(u, -max_x, max_x)
+        coords = np.array([rr + v, cc + u])
+        out[i] = (warp(iq[i].real, coords, order=1, mode="edge")
+                  + 1j * warp(iq[i].imag, coords, order=1, mode="edge"))
+    return out
+
+
+def bulk_displacement_removal(field: np.ndarray, ctx: FilterCtx = None, mode: str = "mean") -> np.ndarray:
+    """Displacement-domain analogue of bulk motion comp: subtract each frame's global (spatial-mean or
+    -median) displacement, removing whole-field bulk translation *after* the estimator. Cheap and
+    phase-safe (no IQ warp), but it can only remove a rigid per-frame offset, not deformation."""
+    field = np.asarray(field)
+    g = (np.nanmedian if mode == "median" else np.nanmean)(field, axis=(1, 2), keepdims=True)
+    return field - g
+
+
 # ============================== advanced spatial denoisers (displacement) =========================
 def _per_frame(field, fn):
     """Apply a 2-D (nz, nx) denoiser to every frame of a (n_frames, nz, nx) field, in um then back."""

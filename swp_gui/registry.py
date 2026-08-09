@@ -17,6 +17,7 @@ from swp.viz.filters.experimental import (iq_spatial_lowpass, iq_slowtime_lowpas
                                           iq_slowtime_highpass, svd_clutter_field,
                                           reference_subspace_projection,
                                           phase_unwrap_temporal, bulk_motion_compensation,
+                                          optical_flow_compensation, bulk_displacement_removal,
                                           aniso_diffusion, coherence_diffusion, bilateral_denoise,
                                           nlm_denoise, quality_mask, savgol_temporal)
 from swp.viz.filters.clutter import svd_clutter
@@ -79,14 +80,19 @@ IQ_METHODS: List[Method] = [
     ], help="Remove low-frequency slow-time clutter/bulk motion from the IQ before displacement "
             "estimation; keep the corner below the shear-wave band."),
     Method("svd_clutter", "SVD clutter (IQ)", svd_clutter, [
-        Param("n_remove", "remove low ranks", "int", 1, 0, 20, 1),
-        Param("n_high_remove", "remove high ranks", "int", 0, 0, 20, 1),
+        Param("n_remove", "remove low ranks", "int", 1, 0, 256, 1),
+        Param("n_high_remove", "remove high ranks", "int", 0, 0, 256, 1),
     ], help="Demene spatiotemporal clutter filter on the IQ ensemble (removes bulk-tissue subspace)."),
     Method("bulk_motion_compensation", "bulk motion comp (global rigid)", bulk_motion_compensation, [
         Param("max_shift_m", "max shift (mm)", "float", 2.0, 0.2, 5.0, 0.1, 1e-3),
         Param("upsample", "sub-pixel upsample", "int", 10, 1, 50, 1),
     ], help="Estimate & undo global tissue translation per frame vs the reference (phase "
             "correlation) - removes bulk cardiac motion before the axial phase estimator sees it."),
+    Method("optical_flow_compensation", "optical-flow motion comp (non-rigid)", optical_flow_compensation, [
+        Param("max_shift_m", "max shift (mm)", "float", 3.0, 0.5, 6.0, 0.5, 1e-3),
+        Param("radius", "flow radius (px)", "int", 9, 3, 25, 1),
+    ], help="Dense per-pixel optical-flow registration to the reference (non-rigid extension of bulk "
+            "motion comp): removes deforming cardiac motion, leaves the sub-pixel shear wave."),
 ]
 
 # ----------------------------------------------------------------------------- Stage 2
@@ -137,9 +143,12 @@ MOTION_METHODS: List[Method] = [
         Param("fit_frac", "fit fraction", "float", 1.0, 0.1, 1.0, 0.05),
     ], help="Subtract a per-pixel low-order slow-time polynomial (no cutoff assumption)."),
     Method("svd_clutter_field", "SVD clutter (displacement)", svd_clutter_field, [
-        Param("n_remove", "remove low ranks", "int", 1, 0, 20, 1),
-        Param("n_high_remove", "remove high ranks", "int", 0, 0, 20, 1),
+        Param("n_remove", "remove low ranks", "int", 1, 0, 256, 1),
+        Param("n_high_remove", "remove high ranks", "int", 0, 0, 256, 1),
     ], help="Demene clutter filter on the displacement movie (coherent whole-wall motion)."),
+    Method("bulk_displacement_removal", "bulk removal (displacement)", bulk_displacement_removal, [],
+           help="Displacement-domain analogue of bulk motion comp: subtract each frame's global mean "
+                "displacement (phase-safe, rigid-only)."),
     Method("reference_motion_comp", "reference poly-extrapolation", reference_motion_compensation, [
         Param("order", "order", "int", 2, 0, 4, 1),
         Param("use_last_frac", "use last fraction", "float", 1.0, 0.1, 1.0, 0.05),

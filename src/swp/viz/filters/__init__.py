@@ -12,7 +12,8 @@ from .spatial import (spatial_smooth, spatial_median, temporal_bandpass,
                       temporal_moving_mean, temporal_moving_median)
 from .experimental import (iq_spatial_lowpass, iq_slowtime_lowpass, iq_slowtime_highpass,
                            svd_clutter_field, reference_subspace_projection, phase_unwrap_temporal,
-                           bulk_motion_compensation, aniso_diffusion, coherence_diffusion,
+                           bulk_motion_compensation, optical_flow_compensation, bulk_displacement_removal,
+                           aniso_diffusion, coherence_diffusion,
                            bilateral_denoise, nlm_denoise, quality_mask, savgol_temporal)
 
 # field filters that need the pre-push reference trajectory (ctx.ref_disp / t_ref)
@@ -26,6 +27,7 @@ IQ_FILTERS = {
     "iq_slowtime_lowpass": iq_slowtime_lowpass,
     "iq_slowtime_highpass": iq_slowtime_highpass,
     "bulk_motion_compensation": bulk_motion_compensation,
+    "optical_flow_compensation": optical_flow_compensation,
 }
 
 # displacement/velocity-space filters on (n_frames, nz, nx): (field, ctx, **params) -> field
@@ -36,6 +38,7 @@ FIELD_FILTERS = {
     "adaptive_highpass": adaptive_highpass,
     "reference_subspace_projection": reference_subspace_projection,
     "svd_clutter_field": svd_clutter_field,
+    "bulk_displacement_removal": bulk_displacement_removal,
     "phase_unwrap_temporal": phase_unwrap_temporal,
     "axial_strain": axial_strain,
     "quality_mask": quality_mask,

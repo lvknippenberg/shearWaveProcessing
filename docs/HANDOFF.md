@@ -1,9 +1,53 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-08-06.
+for the full passive-SWE investigation record. Last updated 2026-08-09.
 
-## 0. LATEST (2026-08-06): low-SNR extraction sweep — see `docs/low_snr_extraction_sweep.md`
+## 0. LATEST (2026-08-07→09): in-vivo diagnosis, Caenen validation, acquisition recommendation, GUI
+
+**The whole arc:** the 40 V in-vivo human data does **not** contain a recoverable ARF shear wave — it is
+**acquisition-limited (push-strength-limited)** — while the Caenen pig data does, and the fix is a
+**stronger push (larger aperture)**. Key results and where they live:
+
+- **In-vivo 40 V speed-scan sweep** (`scripts/sweep_invivo40.py`, per-lobe: each lobe its own best-fit
+  tilt 1–5 m/s since the oblique septum is not mirror-symmetric — user's point). All 24 pushes, 700
+  recipes. **No credible wave:** best-fit speeds pile up at the **fast/boundary end (median 4.5 m/s, 32 %
+  pinned at 5)** = near-simultaneous bulk wall motion, not propagation; high ROI comes with low symmetry.
+  Quietest (diastasis-proxy) pushes: m22,m5,m6,m23. Analyzer: `invivo40_analyze.py`.
+- **Caenen pig ARF-SWE, full 52-push sweep DONE** (`scripts/sweep_caenen.py` + `caenen_analyze.py`; ~40
+  min/push, ~24 h; supports **resume** now). **Consistent genuine wave in every push:** best-fit speed
+  **median 2.5 m/s, IQR 2–3, only 10 % boundary-pinned; 52/52 pushes ROI > 0.25**, ROI∧symmetry cluster
+  high together. The **clean opposite** of the in-vivo pile-up → the per-lobe speed-scan + speed-
+  DISTRIBUTION is a good discriminator (mid-clustered ~2 m/s = real wave; fast-pinned = bulk motion).
+  Winning family: median/gaussian smooth + narrow 120–350 Hz band + velocity/accel. Figures
+  `metric_experiment/caenen_{speed_overview,montage}.png`. Data loaded via a cropped Cartesian bridge.
+- **Acquisition comparison** `docs/caenen_vs_invivo_acquisition.md` (read from both Verasonics structs +
+  Caenen Sci Rep 2023;13:17660): in-vivo push is **F/≈4.3 @ 44.6 mm, 40 V** vs Caenen **F/1 @ 25 mm,
+  50–60 V, MI 2.2**; tracking 3.7 vs ≥5.6–8.8 kHz; free-running vs R-peak-triggered. We already use
+  Loupas (paper's suggested upgrade over Kasai). **Finer beamforming grid does NOT help** (tested) and
+  **REFoCUS is inapplicable** (needs multi-transmit; SWE tracking is single diverging-wave na=1).
+- **Phantom acquisition parameter sweep** `docs/phantom_parameter_sweep.md` (`scripts/sweep_params.py`):
+  11 configs × {20,30} V × 10 pushes. **Aperture (F#) is the dominant lever** (ROI 21→79 el 0.19→0.44 @
+  30 V); pulse modest; PRF negligible on the static phantom; combos super-additive at low voltage. MI is
+  ~linear in element count (**61 el +48 %, 79 el +90 %**; pulse length is free on MI). **RECOMMENDATION:
+  61 push elements + ~800 µs pulse.** Pipeline fixes needed: `make_combined_data.m` no longer hardcodes
+  Nframes=2 and auto-selects a per-config **v7.3** base (`PhantomSweep/BaseConfig_10frames_*`).
+- **Cardiac-motion-removal harness** (`scripts/motion_removal.py`; no-push control via split reference):
+  **reference-subspace projection AND SVD-clutter FABRICATE a false V from pure cardiac motion** (reject
+  them); **optical flow (new `optical_flow_compensation`) is the best-behaved remover** (quiets no-push
+  without fabricating); IQ-vs-displacement is technique-dependent (SVD→IQ, bulk→displacement). But on the
+  acquisition-limited in-vivo data nothing recovers a wave — revisit once the stronger push lands.
+- **GUI (`swp_gui/`)** major additions: 3-column layout (data/pipeline/results, scrollable pipeline);
+  displacement+velocity+acceleration shown together as a before/current/previous 3-row grid with
+  per-column or per-plot colour scaling + colorbars; **Caenen data set** (via `swp_gui/caenen.py`);
+  **2-click manual speed** (Plotly click-capture, pick-quantity, overlay on all rows, clear); **SVD
+  singular-value spectrum** plot when tuning svd_clutter cutoffs (limits raised 20→256); per-step
+  **enable/disable toggle + ▲▼ reorder**; 'none' steps are true no-ops (don't recompute/relabel);
+  do_run only recomputes when the recipe/data actually change (clicks were re-running the pipeline).
+  origin_coherence is the ★ metric. Needs `plotly` (added to `[gui]` extras); RESTART the server after
+  module edits.
+
+## 0a. (2026-08-06): low-SNR extraction sweep — see `docs/low_snr_extraction_sweep.md`
 
 A 700-recipe × 8-voltage (50→15 V) phantom sweep, scored by two speed-free V-detectors (ROI-contrast on
 a locked 50 V template + mirror-symmetry). **The shear-wave V is detectable at every voltage down to
@@ -76,7 +120,57 @@ randomized/focused recipes across phantom 15/25/30/50 V + in-vivo 30/40 V. Findi
    image without further context** — so removal (physics-based, using the reference) is the real lever,
    not a better image metric, and validation needs the no-push contrast (and ideally ECG phase / a
    simulated ground truth).
-3. Optional: finer recipe sweeps; real speed/stiffness extraction with the settled recipe; generalize to
+   **STATUS (2026-08-07): harness built + first evaluation done (`scripts/motion_removal.py`).** No-push
+   control = SPLIT reference (train filter on 1st half of the reference, apply to 2nd half = no push);
+   scored by the per-lobe speed-scan + symmetry; pushes ranked by pre-push wall-motion RMS (data-driven
+   diastasis proxy — ECG in the .mat is not usable, WaitForRpeak=0). **KEY FINDINGS:** (a) **reference-
+   subspace projection AND SVD-clutter FABRICATE a false shear-wave "V" from pure cardiac motion** (high
+   no-push ROI 0.13-0.16 on the quietest push m22) — the no-push control catches what push_specificity
+   missed; REJECT these for cardiac SWE. (b) **No method beats plain band-pass** (baseline track ROI 0.232
+   / no-push 0.067 / contrast 0.164); the only honest motion-remover (`iq_slowtime_highpass`: no-push
+   0.067->0.032) also suppresses the tracking signal -> the tracking "signal" IS cardiac motion, not a
+   hidden push wave. (c) Confirms acquisition-limited: processing cannot manufacture the wave (and forcing
+   it fabricates artifacts). The harness is the trustworthy tool; revisit filters (light honest remover +
+   physiological-speed gate) once the stronger-push acquisition (item 3) clears the cardiac floor. Quietest
+   pushes: m22, m5, m6, m23. Figure: `metric_experiment/motion_removal_montage.png`.
+   **IQ-domain vs DISPLACEMENT-domain filtering (2026-08-07, `motion_removal.py` + 2 new registered methods
+   `optical_flow_compensation` (IQ, non-rigid) + `bulk_displacement_removal` (disp)).** Numbers over the 4
+   quietest pushes (want LOW no-push ROI = not fabricating): it is TECHNIQUE-dependent, not a blanket rule.
+   **SVD clutter -> IQ domain** (no-push 0.097 vs disp 0.140 which FABRICATES a false V; matches Demene/lit).
+   **Bulk motion -> displacement domain** (contrast 0.148 vs IQ 0.090; the IQ Fourier-shift distorts speed to
+   1.2 m/s). **Slow-time high-pass -> IQ removes the most clutter (no-push 0.004) but takes the wave with it**
+   (track 0.053) = wave & cardiac share the band. **Optical flow (IQ, NEW) = best-behaved aggressive remover:
+   quiets the no-push (0.064) WITHOUT fabricating (unlike SVD-disp/refsub-disp) + keeps physiological 2.2 m/s
+   -> carry this forward.** Still, nothing beats plain band-pass for contrast here, and every honest remover
+   suppresses the tracking signal too -> acquisition-limited confirmed. Figure:
+   `metric_experiment/motion_removal_iqvsdisp.png`.
+3. **DONE (2026-08-07): Acquisition-optimization phantom sweep → `docs/phantom_parameter_sweep.md`.**
+   11 configs × {20,30} V × 10 pushes, OAT over pulse/aperture/PRF. **Aperture (F#) is the dominant
+   lever** (ROI 21→79 el: 0.19→0.44 @ 30 V, monotonic); pulse modest; **PRF negligible on the static
+   phantom**; combos super-additive at low voltage (79 el+1900 c ~doubles 20 V base). Focal-displacement
+   is an unreliable push proxy (strong-push decorrelation → underestimate). MI (Rayleigh coherent-sum) is
+   ~linear in element count: **61 el = +48 %, 79 el = +90 %** vs 41; **pulse length is free on MI**.
+   **RECOMMENDATION: 61 push elements + ~800 µs pulse** (most clarity-per-MI; 79 el buys +0.02 ROI for
+   nearly double the MI). Pipeline fixes: `make_combined_data.m` no longer hardcodes Nframes=2 and
+   auto-selects a per-config **v7.3** base config (PhantomSweep/BaseConfig_10frames_<cyc>c_<el>el_<pri>PRI).
+   Analysis: `scripts/sweep_params.py`.
+3b. **(superseded original next-step) Acquisition-optimization phantom measurements.** Motivated by the
+   Caenen-vs-our-in-vivo acquisition comparison (`docs/caenen_vs_invivo_acquisition.md`): the in-vivo gap
+   is acquisition-limited (weak/loose-F# push, low PRF) more than processing-limited. Re-acquire phantom
+   data varying two levers and quantify the effect the same way as the voltage sweep (peak focal
+   displacement + wavefront ROI-contrast/symmetry/speed vs the setting):
+   - **(a) Push aperture: increasing number of push transmit elements (e.g. 40 → 80).** Lowers the push
+     F-number (~4.3 → ~2.2 at the septal depth) → tighter focus, stronger ARF. Watch MI (rises with focal
+     pressure) and off-axis steering quality. Success: measurably larger focal displacement / clearer wave.
+   - **(b) Increased tracking PRF.** Currently 3704 Hz (chosen so the 15 cm B-mode range is unambiguous);
+     a dedicated shallow high-PRF *tracking* sub-sequence (≥5.6 kHz, wall-only depth) samples the wave far
+     better — the risk to check on the phantom is deep-echo range-wrap folding onto the wall.
+   - Note (settled here, do NOT re-try): **finer beamforming grid does NOT help** (phantom test: ROI flat
+     0.30→0.29 from dz 400→99 µm; displacement is slow-time phase, not axial-resolution limited), and
+     **zea REFoCUS is inapplicable** (needs multi-transmit encoding; SWE tracking is single diverging-wave,
+     na=1). Within the MI cap, **longer push duration** (impulse ∝ duration at fixed peak pressure) is a
+     cheaper strength lever than voltage.
+4. Optional: finer recipe sweeps; real speed/stiffness extraction with the settled recipe; generalize to
    more subjects/voltages.
 
 Experiment artifacts live in `2026_08_04 voltage sweep/metric_experiment/<dataset>/` (manifest.json,

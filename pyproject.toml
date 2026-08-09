@@ -22,7 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 gpu = ["torch"]
 dev = ["pytest"]
-gui = ["streamlit>=1.30"]     # interactive method-exploration GUI (swp_gui/)
+gui = ["streamlit>=1.30", "plotly>=5.0"]   # method-exploration GUI (swp_gui/); plotly = 2-click speed picking
 
 [tool.setuptools.packages.find]
 where = ["src"]

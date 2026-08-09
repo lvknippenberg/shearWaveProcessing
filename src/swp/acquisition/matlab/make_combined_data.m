@@ -30,9 +30,15 @@ if invivo_data
     copyfile(fullfile(base_config_dir, 'S5_1_SWI_PulseInversion_P15-xx_runtime.mat'), ...
              'CombinedData.mat');
 else
-    % Phantom: shorter 2-frame base config (no cardiac dependency).
-    copyfile(fullfile(base_config_dir, 'S5_1_SWI_PulseInversion_P15-xx_runtime_2frames.mat'), ...
-             'CombinedData.mat');
+    % Phantom parameter sweep: pick the base config matching this run's push settings, since the
+    % Receive/RcvBuffer frame structure differs per config (10 pushes; Ndetect varies with PRI).
+    % Naming: BaseConfig_10frames_<cycles>cycles_<elements>elements_<pri>PRI.mat (in PhantomSweep/).
+    load('AcquisitionParametersAndECG.mat', 'SW');
+    bname = sprintf('BaseConfig_10frames_%dcycles_%delements_%dPRI.mat', ...
+                    round(SW.pushCycle), round(SW.nb_push_elmts), round(SW.PRI_us));
+    bpath = fullfile(base_config_dir, 'PhantomSweep', bname);
+    assert(exist(bpath, 'file') == 2, 'PhantomSweep base config not found: %s', bpath);
+    copyfile(bpath, 'CombinedData.mat');
 end
 
 % TX (constant) from the base file; dynamic parameters overwrite the rest.
@@ -40,11 +46,14 @@ load('CombinedData.mat', 'TX')
 load('AcquisitionParametersAndECG.mat')
 
 if ~invivo_data
-    SW.Nframes = 2;
-    Resource.RcvBuffer(2).numFrames = 2;
-    Resource.RcvBuffer(2).lastFrame = 2;
-    Resource.RcvBuffer(5).numFrames = 2;
-    Resource.RcvBuffer(5).lastFrame = 2;
+    % Use the ACTUAL number of pushes from the runtime params. Older phantom acquisitions had 2, but
+    % the parameter-sweep data has 10 (and Ndetect varies with PRI - both already correct in the loaded
+    % runtime SW). Do NOT hardcode to 2 (that discarded pushes 3-10).
+    nfr = double(SW.Nframes);
+    Resource.RcvBuffer(2).numFrames = nfr;
+    Resource.RcvBuffer(2).lastFrame = nfr;
+    Resource.RcvBuffer(5).numFrames = nfr;
+    Resource.RcvBuffer(5).lastFrame = nfr;
 end
 
 % Merge the dynamic push transmits (TX_tmp) into the tail of the base TX array.
