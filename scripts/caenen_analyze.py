@@ -85,12 +85,15 @@ def main():
                  f"{b['sym_best']:>5.2f}  {b['roi1_q']:>4}  {b['sm']}/{b['f_lo']}-{b['f_hi']}Hz/o{b['offsets']}")
 
     ps = np.array(perpush_speed)
-    L.append(f"\n=== speed CONSISTENCY across the {len(pushes)} pushes (per-push best recipe) ===")
-    L.append(f"  best-fit speed: median {np.median(ps):.2f}  IQR [{np.percentile(ps,25):.2f}, "
-             f"{np.percentile(ps,75):.2f}] m/s;  boundary-pinned {100*np.mean([s in BOUNDARY for s in ps]):.0f}%")
-    L.append(f"  per-push best ROI: median {np.median(perpush_roi):.3f}, "
-             f"{sum(1 for x in perpush_roi if x>0.25)}/{len(pushes)} pushes > 0.25 (phantom-20V level)")
-    L.append(f"  reference: phantom no-wave floor ~=0.05; earlier Caenen consensus speed ~2.14 m/s (cart).")
+    L.append(f"\n=== per-push best-fit speed across the {len(pushes)} pushes ===")
+    L.append(f"  range {np.percentile(ps,25):.2f}-{np.percentile(ps,75):.2f} m/s (IQR); "
+             f"boundary-pinned {100*np.mean([s in BOUNDARY for s in ps]):.0f}%")
+    L.append("  NOTE: SWS varies with cardiac phase (the ~52 pushes span ~1.8 cardiac cycles), so the "
+             "per-push spread is largely SYSTOLIC (stiff/fast) vs DIASTOLIC (soft/slow) modulation - do "
+             "NOT pool it into a single mean SWS. A proper systolic/diastolic fit needs the ECG timing.")
+    L.append(f"  EXTRACTION QUALITY (phase-robust, so poolable): per-push best ROI median "
+             f"{np.median(perpush_roi):.3f}, {sum(1 for x in perpush_roi if x>0.25)}/{len(pushes)} > 0.25 "
+             "(a clean V is recovered at every push).")
     report = "\n".join(L)
     print(report)
     open(os.path.join(OUTDIR, "caenen_leaderboard.txt"), "w", encoding="utf-8").write(report)

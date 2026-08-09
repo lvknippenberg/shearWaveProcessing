@@ -14,13 +14,19 @@ for the full passive-SWE investigation record. Last updated 2026-08-09.
   recipes. **No credible wave:** best-fit speeds pile up at the **fast/boundary end (median 4.5 m/s, 32 %
   pinned at 5)** = near-simultaneous bulk wall motion, not propagation; high ROI comes with low symmetry.
   Quietest (diastasis-proxy) pushes: m22,m5,m6,m23. Analyzer: `invivo40_analyze.py`.
-- **Caenen pig ARF-SWE, full 52-push sweep DONE** (`scripts/sweep_caenen.py` + `caenen_analyze.py`; ~40
-  min/push, ~24 h; supports **resume** now). **Consistent genuine wave in every push:** best-fit speed
-  **median 2.5 m/s, IQR 2–3, only 10 % boundary-pinned; 52/52 pushes ROI > 0.25**, ROI∧symmetry cluster
-  high together. The **clean opposite** of the in-vivo pile-up → the per-lobe speed-scan + speed-
-  DISTRIBUTION is a good discriminator (mid-clustered ~2 m/s = real wave; fast-pinned = bulk motion).
-  Winning family: median/gaussian smooth + narrow 120–350 Hz band + velocity/accel. Figures
-  `metric_experiment/caenen_{speed_overview,montage}.png`. Data loaded via a cropped Cartesian bridge.
+- **Caenen pig ARF-SWE, full 52-push sweep DONE** (`scripts/sweep_caenen.py` + `caenen_analyze.py` +
+  `caenen_methods.py`; ~40 min/push, ~24 h; supports **resume**). **A clean symmetric V is recovered at
+  every push** (52/52 ROI > 0.25; ROI∧symmetry cluster high together) — a real wave, the clean opposite
+  of the in-vivo bulk-motion pile-up. **CAVEAT (user):** SWS varies with cardiac phase (52 pushes span
+  ~1.8 cycles), so the per-push best-fit speed spread (~1.5–5 m/s, mostly clustered 2–3) is
+  SYSTOLIC/DIASTOLIC modulation — **do NOT pool it into one mean SWS**; a systolic/diastolic fit needs
+  the ECG timing (Caenen paper's piecewise model). **Method-combination trend (poolable = extraction
+  quality) FOLLOWS the phantom/in-vivo family:** band **low-corner 120 Hz decisively wins** (ROI 0.46 vs
+  0.28 at 10–40 Hz — the dominant lever, as in passive SWE), narrow **120–350 Hz** band best, **median≈
+  gaussian smoothing** (NLM worst), and — for this clear wave — **acceleration** is the best quantity
+  (0.37 vs vel 0.30 vs disp 0.18), exactly the SNR-dependent quantity shift (high SNR → derivatives).
+  SVD-2 IQ clutter helps mildly. Figures `metric_experiment/caenen_{speed_overview,montage,methods}.png`.
+  Data via a cropped Cartesian bridge (`swp_gui/caenen.py`).
 - **Acquisition comparison** `docs/caenen_vs_invivo_acquisition.md` (read from both Verasonics structs +
   Caenen Sci Rep 2023;13:17660): in-vivo push is **F/≈4.3 @ 44.6 mm, 40 V** vs Caenen **F/1 @ 25 mm,
   50–60 V, MI 2.2**; tracking 3.7 vs ≥5.6–8.8 kHz; free-running vs R-peak-triggered. We already use
