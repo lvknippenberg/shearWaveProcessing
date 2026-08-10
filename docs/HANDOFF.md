@@ -47,7 +47,7 @@ physics/safety questions. Main outcomes:
   so these may be **natural/cardiac waves**, not the ARF push — cross-check each push against its no-push
   control before attributing; (3) absolute speed is **M-line-obliquity-limited**. The *shape* (stiffening
   through systole) is physiologically plausible; the absolute numbers and phase alignment are soft.
-- **MI / acoustic-safety literature summary (see report + web sources).** No universal voltage→MI table
+- **MI / acoustic-safety literature summary (full doc: `docs/mechanical_index_safety.md`).** No universal voltage→MI table
   exists (papers report MI & I_spta directly — the regulated quantities — because voltage→MI is probe/
   geometry-specific). Anchors: **P4-2, 2 MHz, full 64-el push → MI_0.3 = 1.60/1.11/1.00/0.90 at
   45/60/65/70 mm** (all <1.9, PWM cut to 27% shallower); Caenen P4-2 **MI 2.2 at 50–60 V**; linear-array
