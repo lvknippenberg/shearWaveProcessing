@@ -9,6 +9,50 @@ import matplotlib.pyplot as plt
 from swp.viz.core.geometry import robust_clim
 
 
+def spacetime_png_datauri(cell, clim, dpi=110):
+    """The space-time image alone (no axes/margins) as a base64 PNG data URI, using the SAME colormap
+    and colour limits as the quantity grid (``RdBu_r``, ±clim) with the fixed r0 line baked in - so the
+    manual-speed panel's backdrop matches the other plots exactly. The Plotly component overlays only the
+    draggable line on top, mapped 1:1 to the r/t axes."""
+    import base64
+    import io
+    unit = QUNITS[cell["quantity"]][0]
+    r = cell["r"] * 1e3
+    t = cell["t"] * 1e3
+    fig = plt.figure(figsize=(6.0, 3.2), dpi=dpi)
+    ax = fig.add_axes([0, 0, 1, 1]); ax.set_axis_off()
+    ax.imshow(cell["data"] * unit, extent=(r[0], r[-1], t[-1], t[0]), cmap="RdBu_r",
+              vmin=-clim, vmax=clim, aspect="auto", origin="upper")
+    ax.axvline(cell["r0"] * 1e3, color="0.15", ls="--", lw=1.3, alpha=0.75)  # fixed r0 symmetry line
+    buf = io.BytesIO(); fig.savefig(buf, format="png"); plt.close(fig)
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+
+def fig_spacetime_with_lines(cell, clim, lines, title=""):
+    """A publication-style space-time (same RdBu_r/clim as the grid) with the manual speed line(s)
+    overlaid and labelled - saved as the record of a manual measurement."""
+    unit, ulab = QUNITS[cell["quantity"]]
+    r = cell["r"] * 1e3
+    t = cell["t"] * 1e3
+    fig, ax = plt.subplots(figsize=(6.2, 4.2))
+    im = ax.imshow(cell["data"] * unit, extent=(r[0], r[-1], t[-1], t[0]), cmap="RdBu_r",
+                   vmin=-clim, vmax=clim, aspect="auto", origin="upper")
+    ax.axvline(cell["r0"] * 1e3, color="0.15", ls="--", lw=1.2, alpha=0.7, label="r0")
+    for i, ((r0m, t0m), (r1m, t1m)) in enumerate(lines, 1):
+        dr, dt = r1m - r0m, t1m - t0m
+        spd = abs(dr / dt) if abs(dt) > 1e-6 else float("inf")
+        ax.plot([r0m, r1m], [t0m, t1m], color="k", lw=2.4)
+        ax.plot([r0m, r1m], [t0m, t1m], color="w", lw=0.8, ls=":")
+        ax.annotate(f"L{i}: {spd:.2f} m/s", xy=((r0m + r1m) / 2, (t0m + t1m) / 2),
+                    xytext=(4, 4), textcoords="offset points", fontsize=8, color="k",
+                    bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="0.6", alpha=0.85))
+    ax.set_xlabel("r along M-line [mm]"); ax.set_ylabel("t [ms]")
+    ax.set_title(title or f"{cell['quantity']} — manual speed", fontsize=10)
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.02, label=ulab)
+    fig.tight_layout()
+    return fig
+
+
 def fig_spacetime(res, title="", show_speed=True, clim=None):
     """Space-time D(s,t) with the r0 origin and (optionally) the fitted wavefront overlay."""
     st = res.st

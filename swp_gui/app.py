@@ -15,9 +15,12 @@ from __future__ import annotations
 
 import dataclasses
 import inspect
+import io
+import json
 import os
 import subprocess
 import sys
+import time
 
 os.environ.setdefault("KERAS_BACKEND", "torch")
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -33,7 +36,41 @@ import core
 import caenen
 import registry as reg
 import render
+from speedline import speed_line_picker
 from swp.viz.core.geometry import robust_clim
+
+
+def _speed_records(lines, r0_mm):
+    """Per-line record: endpoints, speed, and the fit t = a·r + b (a in ms/mm; speed = 1/|a| m/s)."""
+    recs = []
+    for i, ((r0m, t0m), (r1m, t1m)) in enumerate(lines, 1):
+        dr, dt = r1m - r0m, t1m - t0m
+        speed = abs(dr / dt) if abs(dt) > 1e-6 else None
+        a = (dt / dr) if abs(dr) > 1e-9 else None          # t = a·r + b  (ms per mm)
+        b = (t0m - a * r0m) if a is not None else None
+        recs.append(dict(line=i, r0_mm=r0m, t0_ms=t0m, r1_mm=r1m, t1_ms=t1m,
+                         speed_mps=speed, slope_a_ms_per_mm=a, intercept_b_ms=b,
+                         side=("R" if (r0m + r1m) / 2 >= r0_mm else "L")))
+    return recs
+
+
+def _save_speed_measurement(folder, is_caenen, data_kind, meas, quantity, cell, clim, lines, fps=20):
+    """Save the annotated space-time PNG + a JSON record (endpoints, speed, y=a·r+b fit) into a
+    ``speed_measurements/`` folder inside the dataset folder. One file per push (re-saving overwrites)."""
+    base_dir = caenen.SWE if is_caenen else folder
+    outdir = os.path.join(base_dir, "speed_measurements")
+    os.makedirs(outdir, exist_ok=True)
+    stem = os.path.join(outdir, f"speed_meas{int(meas)}")
+    fig = render.fig_spacetime_with_lines(cell, clim, lines,
+                                          title=f"{data_kind}  meas{meas}  —  {quantity}")
+    fig.savefig(stem + ".png", dpi=140); plt.close(fig)
+    record = dict(dataset=data_kind, folder=("caenen" if is_caenen else os.path.basename(folder)),
+                  meas=int(meas), quantity=quantity, r0_mm=float(cell["r0"] * 1e3), fps=fps,
+                  timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
+                  lines=_speed_records(lines, float(cell["r0"] * 1e3)))
+    with open(stem + ".json", "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2)
+    return stem + ".png", stem + ".json"
 
 st.set_page_config(page_title="SWE method explorer", layout="wide")
 _SWEEP = r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep"
@@ -354,9 +391,10 @@ with c_res:
     else:
         acq, ml, res, met = out["acq"], out["ml"], out["res"], out["met"]
         hist = st.session_state.get("history", [])
-        if st.session_state.get("speed_ctx") != (data_kind, meas):   # reset the line when the push changes
+        if st.session_state.get("speed_ctx") != (data_kind, meas):   # reset the lines when the push changes
             st.session_state["speed_ctx"] = (data_kind, meas)
-            st.session_state.pop("speed_pts", None); st.session_state.pop("speed_line", None)
+            st.session_state.pop("speed_lines", None)
+            st.session_state["speed_reset"] = st.session_state.get("speed_reset", 0) + 1
         m = st.columns(4)
         m[0].metric("★ origin coherence", f"{met['origin_coherence']:.3f}",
                     help="THE wave-clarity metric (validated vs human scoring across voltage + "
@@ -376,9 +414,16 @@ with c_res:
         if len(hist) >= 2 and not hide_prev:
             rows.append(hist[1]["cells"])
             labels.append(f"previous config (oc={hist[1]['oc']:.2f})")
-        fig_g = render.fig_quantity_grid(rows, labels, scale=fig_scale, per_cell=per_cell_clim,
-                                         speed_line=st.session_state.get("speed_line"))
-        st.pyplot(fig_g, width='content'); plt.close(fig_g)
+        # Render the (heavy) quantity grid once per recipe/data/display change and cache the PNG, so
+        # unrelated reruns (e.g. dragging the manual-speed line) are instant instead of re-rendering it.
+        grid_sig = (st.session_state.get("run_key"), float(fig_scale), bool(per_cell_clim),
+                    bool(hide_prev), len(rows))
+        if st.session_state.get("_grid_sig") != grid_sig or "_grid_png" not in st.session_state:
+            fig_g = render.fig_quantity_grid(rows, labels, scale=fig_scale, per_cell=per_cell_clim)
+            buf = io.BytesIO(); fig_g.savefig(buf, format="png", dpi=110, bbox_inches="tight")
+            plt.close(fig_g)
+            st.session_state["_grid_png"] = buf.getvalue(); st.session_state["_grid_sig"] = grid_sig
+        st.image(st.session_state["_grid_png"])
         if len(hist) < 2:
             st.caption("↳ change any pipeline setting to fill the **previous config** row.")
 
@@ -397,55 +442,47 @@ with c_res:
                     + ("⚠️ cardiac" if ratio > 0.7 else "✅ push"))
         st.caption(cap)
 
-        # ---- manual 2-click speed measurement (Plotly click capture) ----
-        with st.expander("📏 Manual speed (2-click)", expanded=bool(st.session_state.get("speed_line"))):
+        # ---- manual speed: drag a line onto the wavefront (in-browser, commits on release) ----
+        with st.expander("📏 Manual speed (drag the line)", expanded=True):
             dq = st.radio("draw on", render.QORDER, index=1, horizontal=True, key="speed_q",
                           format_func=lambda q: q[:3])
             cell = render.cell_of(out["res_by_q"][dq])
             rc = (cell["r"] > 0.1 * cell["r"][-1]) & (cell["r"] < 0.9 * cell["r"][-1])
             u = render.QUNITS[dq][0]
             clim = (robust_clim(cell["data"], rc, 97) * u) or float(np.nanpercentile(np.abs(cell["data"] * u), 97))
-            ev = st.plotly_chart(render.fig_speed_plotly(cell, clim, st.session_state.get("speed_line"),
-                                                         scale=fig_scale),
-                                 key=f"spd_{data_kind}_{meas}_{dq}", on_select="rerun",
-                                 selection_mode="points")
-            def _sel_points(e):
-                s = (e.get("selection") if hasattr(e, "get") else getattr(e, "selection", None)) if e else None
-                if s is None:
-                    return []
-                return (s.get("points") if hasattr(s, "get") else getattr(s, "points", None)) or []
-
-            newpt = None
-            try:
-                pp = _sel_points(ev)
-                if pp:
-                    p = pp[-1]
-                    x = p["x"] if hasattr(p, "__getitem__") else p.x
-                    y = p["y"] if hasattr(p, "__getitem__") else p.y
-                    newpt = (round(float(x), 4), round(float(y), 4))
-            except Exception:  # noqa: BLE001 - never break the run on an odd selection payload
-                newpt = None
-            pts = st.session_state.get("speed_pts", [])
-            if newpt is not None and (not pts or pts[-1] != newpt):
-                pts = [newpt] if len(pts) >= 2 else pts + [newpt]
-                st.session_state["speed_pts"] = pts
-                if len(pts) == 2:                             # line complete -> redraw grid above with it
-                    st.session_state["speed_line"] = pts
-                    st.rerun()
-                else:
-                    st.session_state.pop("speed_line", None)  # 1st point: no extra rerun
-            cc = st.columns([3, 1])
-            line = st.session_state.get("speed_line")
-            if line:
-                (r0m, t0m), (r1m, t1m) = line
-                dr, dt = r1m - r0m, t1m - t0m
-                spd = abs(dr / dt) if abs(dt) > 1e-6 else float("inf")
-                side = "right of r0" if (r0m + r1m) / 2 >= res.r0 * 1e3 else "left of r0"
-                cc[0].success(f"**speed = {spd:.2f} m/s**  ·  Δr={dr:+.1f} mm, Δt={dt:+.1f} ms  ·  {side}")
+            r_mm = cell["r"] * 1e3; t_ms = cell["t"] * 1e3
+            img = render.spacetime_png_datauri(cell, clim)
+            picked = speed_line_picker(img=img, x0=float(r_mm[0]), x1=float(r_mm[-1]),
+                                       y0=float(t_ms[0]), y1=float(t_ms[-1]),
+                                       init_lines=st.session_state.get("speed_lines", []),
+                                       reset_token=st.session_state.get("speed_reset", 0),
+                                       height=int(360 * fig_scale + 30),
+                                       key=f"spd_{data_kind}_{meas}")
+            if picked is not None:
+                norm = [[[float(p0[0]), float(p0[1])], [float(p1[0]), float(p1[1])]] for p0, p1 in picked]
+                if norm != st.session_state.get("speed_lines"):
+                    st.session_state["speed_lines"] = norm
+            lines = st.session_state.get("speed_lines", [])
+            cc = st.columns([4, 1, 1])
+            if lines:                                        # list ALL lines' speeds (Streamlit flows -> never clipped)
+                md = []
+                for i, ((r0m, t0m), (r1m, t1m)) in enumerate(lines, 1):
+                    dr, dt = r1m - r0m, t1m - t0m
+                    spd = abs(dr / dt) if abs(dt) > 1e-6 else float("inf")
+                    side = "R" if (r0m + r1m) / 2 >= res.r0 * 1e3 else "L"
+                    md.append(f"**L{i}: {spd:.2f} m/s** · Δr={dr:+.1f} mm, Δt={dt:+.1f} ms · {side} of r0")
+                cc[0].success("  \n".join(md))
             else:
-                cc[0].caption(f"click the wavefront **start** then **end** — {len(pts)}/2 picked")
-            if cc[1].button("clear", key="speed_clear"):
-                st.session_state.pop("speed_pts", None); st.session_state.pop("speed_line", None)
+                cc[0].caption("draw the wavefront on the plot (click-drag); add more with **＋ add line**. "
+                              "Drag an endpoint to move one point, the body to move the whole line.")
+            if cc[1].button("💾 save", key="speed_save", disabled=not lines,
+                            help="Save this push's annotated plot + speed/line-fit JSON to the dataset's "
+                                 "speed_measurements/ folder"):
+                png, js = _save_speed_measurement(folder, is_caenen, data_kind, meas, dq, cell, clim, lines)
+                st.toast(f"saved {os.path.basename(js)} → {os.path.dirname(js)}")
+            if cc[2].button("clear all", key="speed_clear"):
+                st.session_state.pop("speed_lines", None)
+                st.session_state["speed_reset"] = st.session_state.get("speed_reset", 0) + 1
                 st.rerun()
 
         tab_b, tab_c, tab_a = st.tabs(["B-mode + M-line", "recipe / history", "acquisition"])

@@ -1,9 +1,88 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-08-09.
+for the full passive-SWE investigation record. Last updated 2026-08-10.
 
-## 0. LATEST (2026-08-07→09): in-vivo diagnosis, Caenen validation, acquisition recommendation, GUI
+## 0. LATEST (2026-08-10): LaTeX report, manual-speed tool, cardiac-cycle speeds, MI/safety, GUI fixes
+
+Session focused on a written summary of the whole project, a usable manual-speed workflow, and two
+physics/safety questions. Main outcomes:
+
+- **LaTeX project summary written: `report/`** (`main.tex` + `report/figures/`, standalone, inline
+  bibliography — no LaTeX toolchain on this machine, compile on Overleaf / local TeX). Covers data
+  sources, M-line selection + variance, pipeline + methods, the GUI, the scoring/metric-validation
+  campaign, the optimal phantom recipe + voltage sweep, the acquisition recommendation (61 el + ~800 µs),
+  the Caenen success, the in-vivo failure, and next steps. **New figures generated this session** (in
+  `report/figures/`, reproducible via scratchpad scripts): `invivo40_push_nopush_montage.png` (optimal
+  bp120-700 recipe on ALL 24 in-vivo 40 V pushes, PUSH vs its own NO-PUSH control — the quiet-diastasis
+  pushes m5/m6/m19/m23 are the only ones with positive push−nopush coherence contrast, none a clean V);
+  `caenen_push_nopush_montage.png` (Caenen-tuned velocity/bp120-350 on ALL 52 pushes, push>nopush in
+  ~85% — the positive control the in-vivo lacks); and an **appendix** showing disp+velo, push+nopush for
+  all three datasets (`appendix_phantom.png`, `appendix_invivo40.png`, `appendix_caenen_a/b.png`).
+- **No-push control data-leakage note (documented in the report §11):** for reference-*trained* filters
+  the control uses a **held-out split reference** (train on the 1st half of the pre-push frames, test on
+  the disjoint 2nd half) — this is what exposed reference-subspace/SVD *fabricating* a false V.
+- **GUI default bug FIXED:** the directional-filter selectbox defaulted to **none** (`DIRECTIONAL_METHODS`
+  had `NONE` first) so the GUI default did NOT match the settled optimum. Reordered so **outward is the
+  default** (`swp_gui/registry.py`); verified push-3 oc 0.816→0.931 (matches the report montage). Restart
+  streamlit / Reset-ALL to pick it up.
+- **Manual-speed tool rewritten (`swp_gui/speedline/` custom Plotly component + `swp_gui/render.py`
+  `spacetime_png_datauri`/`fig_spacetime_with_lines`).** Was a laggy 2-click Plotly-select (3 s/click).
+  Now: a **matplotlib backdrop** (same RdBu_r/clim as the grid, fixed r0 baked into the image so it can't
+  be dragged), starts **empty**, click-drag to draw a wavefront, **＋ add line** for multiple lines, drag
+  an endpoint (one point) or the line body (both); all in-browser, commits on release — no per-click
+  rerun. Every line's speed is listed in Streamlit (never clipped). **Fixed height** (dynamic
+  `scrollHeight` sizing caused an unresponsive resize loop — reverted). Clear-all forces a full re-plot
+  (no stray active-shape rectangle). The heavy 3×3 quantity grid is now **PNG-cached** so unrelated
+  reruns are instant. **💾 save** writes `speed_meas{m}.png` (annotated) + `speed_meas{m}.json`
+  (endpoints, speed, and the fit `t = a·r + b`, a in ms/mm → speed = 1/|a|) into
+  `<dataset folder>/speed_measurements/` (Caenen → its `SWE_results/`). One file per push, overwrites.
+- **Manual-speed RESULTS + cardiac-cycle plot (`scripts/plot_speed_cardiac.py`).** User measured 9
+  in-vivo **40 V** pushes (m0,2,3,5,6,7,9,11,14; velocity mostly, one acc). Speeds **1.4–3.7 m/s**;
+  `speed_over_cardiac_cycle.png` (in the folder's `speed_measurements/`) shows a **systolic-stiffening
+  shape**: rises to a **peak ~3.7 m/s at ~150–250 ms** (elapsed), then settles ~2.3–2.7 m/s.
+  **CAVEATS (do not over-read):** (1) the acquisition is **free-running** (`WaitForRpeak=0`), so the
+  x-axis is *elapsed time from the first push*, NOT R-peak-locked cardiac phase — the systolic alignment
+  is inferred, not gated; (2) the 40 V push is **underpowered** (established: cardiac-motion-dominated),
+  so these may be **natural/cardiac waves**, not the ARF push — cross-check each push against its no-push
+  control before attributing; (3) absolute speed is **M-line-obliquity-limited**. The *shape* (stiffening
+  through systole) is physiologically plausible; the absolute numbers and phase alignment are soft.
+- **MI / acoustic-safety literature summary (see report + web sources).** No universal voltage→MI table
+  exists (papers report MI & I_spta directly — the regulated quantities — because voltage→MI is probe/
+  geometry-specific). Anchors: **P4-2, 2 MHz, full 64-el push → MI_0.3 = 1.60/1.11/1.00/0.90 at
+  45/60/65/70 mm** (all <1.9, PWM cut to 27% shallower); Caenen P4-2 **MI 2.2 at 50–60 V**; linear-array
+  ARFI p_r 1.5–2.65 MPa. **Scaling: MI ∝ V·N/√f (focused), strongly F#-dependent; unfocused ~independent
+  of N; pulse length is free on MI (raises thermal/I_spta instead).** **Estimate for our sequence
+  (S5-1, 2.25 MHz, 41 el, F/≈4.3, ~45 mm) at 30 V: MI ≈ 0.4–0.8 (central ~0.5–0.6)** — well under 1.9 and
+  *low*, consistent with the underpowered-push finding. **Headroom:** 61–79 el at 40–50 V → MI ~1.1–1.8,
+  i.e. 2–3× stronger ARF while still legal (thermal/I_spta likely binds first for the 667–800 µs push).
+  Verasonics note: set voltage is the bipolar amplitude, so 30 V = 60 V peak-to-peak. No S5-1-specific
+  published curve — a one-point **hydrophone calibration** + the scaling gives absolute MI.
+- **Physics note — symmetry is NOT a cardiac-vs-ARF discriminator.** Cardiac motion CAN look symmetric:
+  the r0-anchored **outward directional filter imposes symmetry** on non-propagating/standing/bulk energy
+  (splits k_r≈0 energy to both lobes) → a symmetric "V" with no source at r0 (e.g. no-push m8), while a
+  **one-directional** no-push (e.g. m11) is a genuine *propagating* physiological wave (valve/wall-motion
+  wave) where the filter keeps only the outward lobe. Diagnostic: turn the outward filter OFF on the
+  no-push to see the true (un-symmetrised) motion; use push-vs-no-push contrast, not symmetry.
+
+### Expected pushes to capture MVC & AVC at 20 pushes/s (prospective, R-peak-triggered)
+
+Assumes push **#0 at the R-peak**, 20 pushes/s (**50 ms** spacing); MVC ≈ R-peak/S1, AVC ≈ end-systole
+(Weissler QS2 ≈ 546 − 2.1·HR ms from Q, ≈ −40 ms to R-peak). **Only valid for R-peak-triggered
+acquisition** — the current in-vivo data is free-running, so this is guidance for a *future* gated scan.
+
+| HR (bpm) | cycle (ms) | pushes / cycle | MVC ≈ push | AVC ≈ push |
+|---|---|---|---|---|
+| 50 | 1200 | 24 | 0–1 | 8 |
+| 60 | 1000 | 20 | 0–1 | 8 |
+| 70 |  857 | 17 | 0–1 | 7 |
+| 80 |  750 | 15 | 0–1 | 7 |
+| 90 |  667 | 13 | 0–1 | 6 |
+
+So at a typical ~70 bpm: **MVC ≈ push 0–1, AVC ≈ push 7** (t ≈ 350 ms). Coarse: 50 ms spacing gives
+~±25 ms quantisation on AVC — offset the trigger or raise the push rate to bracket the valve events.
+
+## 0b. LATEST (2026-08-07→09): in-vivo diagnosis, Caenen validation, acquisition recommendation, GUI
 
 **The whole arc:** the 40 V in-vivo human data does **not** contain a recoverable ARF shear wave — it is
 **acquisition-limited (push-strength-limited)** — while the Caenen pig data does, and the fix is a
@@ -46,7 +125,13 @@ for the full passive-SWE investigation record. Last updated 2026-08-09.
 - **GUI (`swp_gui/`)** major additions: 3-column layout (data/pipeline/results, scrollable pipeline);
   displacement+velocity+acceleration shown together as a before/current/previous 3-row grid with
   per-column or per-plot colour scaling + colorbars; **Caenen data set** (via `swp_gui/caenen.py`);
-  **2-click manual speed** (Plotly click-capture, pick-quantity, overlay on all rows, clear); **SVD
+  **drag-a-line manual speed** (custom `swp_gui/speedline/` Plotly component over a matplotlib backdrop
+  = same RdBu_r colours/clim as the grid with the fixed r0 line baked into the image so it can't be
+  dragged; starts **empty** → click-drag to draw a wavefront, **＋ add line** for more (multiple lines),
+  drag an endpoint to move one point or the line body to move both; all in-browser, commits on release —
+  no per-click rerun; every line's speed listed in Streamlit below the plot (flows, never clipped) + a
+  live in-plot readout; fixed iframe height; the heavy quantity grid is now PNG-cached so unrelated
+  reruns are instant); **SVD
   singular-value spectrum** plot when tuning svd_clutter cutoffs (limits raised 20→256); per-step
   **enable/disable toggle + ▲▼ reorder**; 'none' steps are true no-ops (don't recompute/relabel);
   do_run only recomputes when the recipe/data actually change (clicks were re-running the pipeline).

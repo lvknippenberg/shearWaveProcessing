@@ -225,9 +225,11 @@ TEMPORAL_METHODS: List[Method] = [
 
 # ----------------------------------------------------------------------------- Stage 7
 DIRECTIONAL_METHODS: List[Method] = [
-    NONE,
+    # outward first so the GUI default matches the settled optimum recipe (outward is decisive for
+    # active ARF SWE); "none" stays available as the second option.
     Method("outward", "outward (symmetric about r0)", outward_spacetime, [], help="ARF: keep waves "
            "travelling away from r0 on both sides."),
+    NONE,
     Method("leftward", "leftward (-r)", directional_spacetime, [], help="Keep -r-travelling waves."),
     Method("rightward", "rightward (+r)", directional_spacetime, [], help="Keep +r-travelling waves."),
 ]

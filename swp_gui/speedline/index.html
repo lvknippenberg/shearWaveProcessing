@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  body { margin: 0; font-family: "Source Sans Pro", system-ui, sans-serif; }
+  #tools { font-size: 13px; padding: 3px 6px 4px; color: #333; display: flex; align-items: center; gap: 8px; }
+  #tools button { font-size: 12px; padding: 2px 8px; cursor: pointer; }
+  #bar b { color: #111; }
+  #err { color: #b00; font-size: 13px; padding: 6px; }
+  #gd { width: 100%; }
+</style>
+</head>
+<body>
+  <div id="tools">
+    <button id="add">＋ add line</button>
+    <span id="bar"></span>
+  </div>
+  <div id="gd"></div>
+  <div id="err"></div>
+
+<script>
+// ---- minimal Streamlit component protocol (no external lib) ----
+function _send(type, extra) {
+  window.parent.postMessage(Object.assign({ isStreamlitMessage: true, type: type }, extra || {}), "*");
+}
+function setValue(v) { _send("streamlit:setComponentValue", { value: v, dataType: "json" }); }
+function setHeight(h) { _send("streamlit:setFrameHeight", { height: h }); }
+_send("streamlit:componentReady", { apiVersion: 1 });
+
+var gd = document.getElementById("gd");
+var curLines = [], pendingDraw = false;
+var plotted = false, lastReset = null, lastKey = null, busy = false;
+var hasPlotly = typeof Plotly !== "undefined";
+if (!hasPlotly) {
+  document.getElementById("err").textContent =
+    "Could not load Plotly (needs internet for the first load). The line picker is unavailable.";
+}
+
+function speedOf(L) {
+  var dr = L[1][0] - L[0][0], dt = L[1][1] - L[0][1];
+  return Math.abs(dt) > 1e-6 ? Math.abs(dr / dt) : Infinity;   // mm/ms == m/s
+}
+function updateBar() {
+  var el = document.getElementById("bar");
+  if (pendingDraw && curLines.length === 0) { el.innerHTML = "<b>draw the wavefront</b> — click-drag across it"; return; }
+  if (curLines.length === 0) { el.innerHTML = "click <b>＋ add line</b> to draw a wavefront"; return; }
+  var parts = curLines.map(function (L, i) {
+    var c = speedOf(L); return "L" + (i + 1) + " <b>" + (isFinite(c) ? c.toFixed(2) : "∞") + "</b>";
+  });
+  el.innerHTML = parts.join(" &nbsp;·&nbsp; ") + " m/s &nbsp; (drag endpoint / body to adjust)";
+}
+function lineShape(L) {
+  return { type: "line", xref: "x", yref: "y", layer: "above",
+           x0: L[0][0], y0: L[0][1], x1: L[1][0], y1: L[1][1], line: { color: "#111", width: 3 } };
+}
+function readShapes() {
+  var s = (gd.layout && gd.layout.shapes) || [];
+  return s.filter(function (sh) { return sh.x0 != null && sh.x1 != null; })
+          .map(function (sh) { return [[sh.x0, sh.y0], [sh.x1, sh.y1]]; });
+}
+
+function draw(args, replot) {
+  var anchor = { type: "scatter", x: [args.x0, args.x1], y: [args.y0, args.y1],
+                 mode: "markers", marker: { opacity: 0 }, hoverinfo: "skip", showlegend: false };
+  var layout = {
+    margin: { l: 50, r: 8, t: 4, b: 40 }, height: args.height,
+    images: [{ source: args.img, xref: "x", yref: "y", x: args.x0, y: args.y0,
+               sizex: (args.x1 - args.x0), sizey: (args.y1 - args.y0),
+               xanchor: "left", yanchor: "top", sizing: "stretch", layer: "below" }],
+    xaxis: { title: "r along M-line [mm]", range: [args.x0, args.x1], showgrid: false, zeroline: false, constrain: "range" },
+    yaxis: { title: "t [ms]", range: [args.y1, args.y0], showgrid: false, zeroline: false, constrain: "range" },
+    shapes: curLines.map(lineShape),
+    dragmode: pendingDraw ? "drawline" : false,
+    newshape: { line: { color: "#111", width: 3 } },
+    showlegend: false, uirevision: "keep"
+  };
+  var config = { editable: false, edits: { shapePosition: true }, displayModeBar: false, responsive: true };
+  if (replot) { Plotly.newPlot(gd, [anchor], layout, config).then(attachOnce); }
+  else        { Plotly.react(gd, [anchor], layout, config); }
+  updateBar();
+}
+
+function onRelayout() {
+  if (busy) return;
+  var lines = readShapes();
+  var drewNew = pendingDraw && lines.length > curLines.length;
+  curLines = lines;
+  if (drewNew) {                                     // finished drawing -> back to edit mode
+    pendingDraw = false; busy = true;
+    Plotly.relayout(gd, { dragmode: false }).then(function () { busy = false; });
+  }
+  updateBar();
+  setValue(curLines);
+}
+function attachOnce() { gd.on("plotly_relayout", onRelayout); }  // re-attached on each full (re)plot
+
+document.getElementById("add").onclick = function () {
+  if (!hasPlotly) return;
+  pendingDraw = true; busy = true;
+  Plotly.relayout(gd, { dragmode: "drawline" }).then(function () { busy = false; });
+  updateBar();
+};
+
+function onRender(args) {
+  if (!hasPlotly) { setHeight(60); return; }
+  setHeight(args.height + 46);                        // fixed: toolbar row + plot (plot includes x-label)
+  var reset = args.reset_token;
+  var incoming = (args.init_lines || []).map(function (L) { return [[L[0][0], L[0][1]], [L[1][0], L[1][1]]]; });
+  var resetChanged = (reset !== lastReset);
+  if (resetChanged) {                                 // reset / clear-all button / new push
+    curLines = incoming; pendingDraw = (curLines.length === 0); lastReset = reset;
+  } else if (!plotted) {                              // first render with stored lines
+    curLines = incoming; pendingDraw = (curLines.length === 0);
+  }
+  var key = args.x0 + ":" + args.x1 + ":" + args.y0 + ":" + args.y1;
+  // force a full re-plot on reset so no stray active-shape (rectangle) outline is left behind
+  var replot = !plotted || key !== lastKey || resetChanged;
+  lastKey = key; plotted = true;
+  draw(args, replot);
+}
+
+window.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "streamlit:render") { onRender(e.data.args); }
+});
+</script>
+</body>
+</html>
