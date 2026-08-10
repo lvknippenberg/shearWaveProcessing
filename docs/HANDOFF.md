@@ -82,6 +82,15 @@ acquisition** — the current in-vivo data is free-running, so this is guidance 
 So at a typical ~70 bpm: **MVC ≈ push 0–1, AVC ≈ push 7** (t ≈ 350 ms). Coarse: 50 ms spacing gives
 ~±25 ms quantisation on AVC — offset the trigger or raise the push rate to bracket the valve events.
 
+### Open TODO (this session)
+
+- **Push apodization A/B test (phantom).** For the recommended 41→61 element push, compare **uniform vs
+  a light Tukey (α ≈ 0.15)** apodization (Verasonics `TX.Apod`). Default is **uniform** (maximise force —
+  we are underpowered, not MI-limited); only adopt the light taper if it visibly cleans off-axis/edge
+  artifacts or improves r0 localisation. Score with the existing sweep harness: focal displacement +
+  wavefront ROI-contrast + mirror-symmetry + r0 localisation; never a full Hann for the push. Rationale +
+  numbers: `docs/phantom_parameter_sweep.md` (Recommendation) and `docs/mechanical_index_safety.md`.
+
 ## 0b. LATEST (2026-08-07→09): in-vivo diagnosis, Caenen validation, acquisition recommendation, GUI
 
 **The whole arc:** the 40 V in-vivo human data does **not** contain a recoverable ARF shear wave — it is

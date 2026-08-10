@@ -94,9 +94,21 @@ increase somewhat *less*); relative only (no absolute MI here — watch the FDA 
 - **PRF:** leave at the base (or raise modestly) — negligible on the phantom, but keep the option for
   in-vivo where the moving wall makes tracking rate matter (use a shallow wall-only high-PRF tracking
   window to avoid range-wrap; see `docs/caenen_vs_invivo_acquisition.md`).
+- **Apodization: keep the push aperture UNIFORM (no apodization).** The point of 41→61 el is to lower
+  the F-number and *raise* focal pressure/force; apodization gives that back (a full Hann ≈ 0.5× focal
+  pressure ⇒ ~0.25× force — throwing away the extra elements). The S5-1 is **grating-lobe-free** here
+  (pitch 0.254 mm ≈ 0.37 λ at 2.25 MHz, still <λ/(1+sinθ) even for the ~6° off-axis in-vivo push), so
+  the usual reason to apodize a push does not apply. MI *falls* with apodization, but we are not
+  MI-limited (61 el @ 30–50 V ≈ MI 0.8–1.4 < 1.9; see `docs/mechanical_index_safety.md`) — don't spend
+  force on margin we already have. **Only** consider a *light* Tukey (α ≈ 0.1–0.25, ~10–25 % force cost)
+  if the wider/off-axis push shows off-axis artifacts or a smeared origin r0 that hurt the symmetric-V /
+  r0 localization. Never a full Hann for the push. (Tracking/imaging transmits are a separate,
+  standard image-quality apodization choice and don't affect the push.)
 
 Not directly tested: 61 el + long pulse *together* (the combo tested was 79 el). The OAT + combo
-results support it, but it would be worth one confirmatory acquisition.
+results support it, but it would be worth one confirmatory acquisition. **A/B apodization test is on the
+TODO list** (`docs/HANDOFF.md`): uniform vs Tukey α≈0.15 on the phantom, scored by focal displacement +
+wavefront ROI-contrast/symmetry + r0 localization (Verasonics `TX.Apod`).
 
 ## Reproduce
 
