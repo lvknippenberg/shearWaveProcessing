@@ -32,22 +32,41 @@ VORDER = ["50V", "45V", "40V", "35V", "30V", "25V", "20V", "15V"]
 QFULL = {"dis": "displacement", "vel": "velocity", "acc": "acceleration"}
 UNIT = {"displacement": 1e6, "velocity": 1e3, "acceleration": 1.0}
 
+# One fixed, all-SNR robust recipe (sweep "id438") so every voltage panel is directly comparable
+# (same quantity + same processing) - use with --fixed. bp80-500 -> spatial median -> temporal median
+# -> 9 offsets -> outward directional.
+FIXED_REC = {"iq": "none",
+             "motion": [("temporal_bandpass", {"f_lo": 80, "f_hi": 500, "order": 2})],
+             "spatial": [("spatial_median", {"size_z_m": 0.90e-3, "size_x_m": 2.64e-3})],
+             "temporal": [("temporal_moving_median", {"window": 5})],
+             "offsets": 9, "step_m": 1.09e-3, "sm": "median", "tm": "median", "f_lo": 80, "f_hi": 500}
+
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--metric", default="roi1_best")
     ap.add_argument("--csv", default=os.path.join(sw.BASE, "sweep_results.csv"))
+    ap.add_argument("--fixed", action="store_true",
+                    help="use ONE fixed recipe + quantity for every voltage (comparable panels)")
+    ap.add_argument("--quantity", default="displacement", choices=list(UNIT),
+                    help="fixed quantity (only with --fixed)")
+    ap.add_argument("--out", default=os.path.join(sw.BASE, "sweep_top_montage.png"))
     a = ap.parse_args()
-    rows = list(csv.DictReader(open(a.csv, encoding="utf-8")))
-    recipes = json.load(open(a.csv.replace(".csv", "_recipes.json"), encoding="utf-8"))
     tmpl = json.load(open(os.path.join(sw.BASE, "v_roi_template.json"), encoding="utf-8"))
+    tmpl2 = {**tmpl, "band_s": tmpl["band_s"] * 2.0}
+    if not a.fixed:
+        rows = list(csv.DictReader(open(a.csv, encoding="utf-8")))
+        recipes = json.load(open(a.csv.replace(".csv", "_recipes.json"), encoding="utf-8"))
 
     fig, axs = plt.subplots(2, 4, figsize=(17, 8))
     for ax, v in zip(axs.ravel(), VORDER):
-        rr = [r for r in rows if r["voltage"] == v]
-        best = max(rr, key=lambda r: float(r[a.metric]))
-        rid = best["recipe_id"]; quant = QFULL[best[a.metric.replace("_best", "_q")]]
-        rec = {**recipes[rid], "sm": best["sm"], "tm": best["tm"], "f_lo": 0, "f_hi": 0}
+        if a.fixed:
+            rec, quant = FIXED_REC, a.quantity
+        else:
+            rr = [r for r in rows if r["voltage"] == v]
+            best = max(rr, key=lambda r: float(r[a.metric]))
+            rid = best["recipe_id"]; quant = QFULL[best[a.metric.replace("_best", "_q")]]
+            rec = {**recipes[rid], "sm": best["sm"], "tm": best["tm"], "f_lo": 0, "f_hi": 0}
         acq, ml, r0 = sw.load_voltage(v)
         est = sw.estimator_for_iq(acq, rec["iq"])
         st = sw.spacetime_for(est, acq, ml, r0, rec, quant)
@@ -61,18 +80,25 @@ def main():
         for b in (0, tmpl["band_s"] * 1e3, -tmpl["band_s"] * 1e3):
             ax.plot(st.r * 1e3, line + b, "k", ls="-" if b == 0 else ":", lw=1.0)
         ax.axvline(r0 * 1e3, color="0.3", ls="--", lw=0.8)
-        ax.set_title(f"{v}  id{rid} ({quant[:3]}, {rec['sm']})\n"
-                     f"roi1={float(best['roi1_best']):.2f} roi2={float(best['roi2_best']):.2f} "
-                     f"sym={float(best['sym_best']):.2f}", fontsize=9)
+        if a.fixed:
+            roi = sw.roi_contrast(st, tmpl, r0=r0)
+            ax.set_title(f"{v}   roi={roi:.2f}", fontsize=10)
+        else:
+            ax.set_title(f"{v}  id{rid} ({quant[:3]}, {rec['sm']})\n"
+                         f"roi1={float(best['roi1_best']):.2f} roi2={float(best['roi2_best']):.2f} "
+                         f"sym={float(best['sym_best']):.2f}", fontsize=9)
         ax.set_xlabel("r [mm]", fontsize=8); ax.tick_params(labelsize=7)
     for ax in axs[:, 0]:
         ax.set_ylabel("t [ms]", fontsize=9)
-    fig.suptitle("Top extraction recipe per transmit voltage (SNR), with locked V-template overlaid",
-                 fontsize=13)
+    if a.fixed:
+        fig.suptitle(f"Fixed recipe (id438: bp80-500 / median / 9-offset / outward, {a.quantity}) per "
+                     "transmit voltage (SNR), with locked V-template overlaid", fontsize=13)
+    else:
+        fig.suptitle("Top extraction recipe per transmit voltage (SNR), with locked V-template overlaid",
+                     fontsize=13)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
-    out = os.path.join(sw.BASE, "sweep_top_montage.png")
-    fig.savefig(out, dpi=140); plt.close(fig)
-    print(f"wrote {out}")
+    fig.savefig(a.out, dpi=140); plt.close(fig)
+    print(f"wrote {a.out}")
 
 
 if __name__ == "__main__":

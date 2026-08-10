@@ -326,29 +326,34 @@ spatial median $\rightarrow$ temporal median $\rightarrow$ 9 offsets $\rightarro
 
 \paragraph{Low-SNR extraction --- the honest hard case, and a positive result.} Using two speed-free
 detectors (ROI-contrast on a locked 50\,V template, and left/right mirror-symmetry --- deliberately
-\emph{not} relying on a fitted speed, which is unreliable at low SNR), \good{the shear-wave ``V'' is
-detectable at every voltage down to 15\,V} (ROI-contrast $0.52\rightarrow0.19$, above the $0.05$ no-wave
-floor throughout, Fig.~\ref{fig:lowsnr}). Low SNR is thus a processing problem, not a missing-signal
-problem. The optimal levers shift exactly as the SNR study predicted: heavier, larger-$\sigma$ Gaussian
+\emph{not} relying on a fitted speed, which is unreliable at low SNR): with the recipe \emph{tuned per
+voltage}, \good{the shear-wave ``V'' is detectable at every voltage down to 15\,V} (best ROI-contrast
+$0.52\rightarrow0.19$, above the $0.05$ no-wave floor throughout). A \emph{single fixed} recipe, by
+contrast (Fig.~\ref{fig:lowsnr}a, held constant so the panels are directly comparable), degrades smoothly
+and loses the V by $\sim$20\,V (ROI $0.44\rightarrow-0.10$). That gap \emph{is} the result:
+\good{the optimal levers must shift with SNR} (Fig.~\ref{fig:lowsnr}b) --- heavier, larger-$\sigma$ Gaussian
 smoothing; a narrower low-frequency band ($f_\mathrm{hi}$ collapsing $\sim$800\,$\rightarrow$350\,Hz);
-displacement rather than velocity; and SVD IQ clutter starting to help below 25\,V. One clear negative:
-\caveat{the fine-grid RF cross-correlation estimator underperformed Loupas at every voltage}, with the gap
-\emph{widening} as SNR dropped (it needs speckle SNR the low-voltage data lacks) --- so it is not worth
-expanding for this task.
+displacement rather than velocity; and SVD IQ clutter below 25\,V. So low SNR is a \emph{processing}
+problem (there is no single recipe), not a missing-signal one. One clear negative:
+\caveat{the fine-grid RF cross-correlation estimator underperformed Loupas at every voltage}, the gap
+\emph{widening} as SNR dropped (it needs speckle SNR the low-voltage data lacks) --- not worth expanding.
 
 \begin{figure}[t]
 \centering
 \begin{subfigure}{0.545\textwidth}
   \includegraphics[width=\textwidth]{sweep_top_montage.png}
-  \caption{Best recipe per voltage, V-template overlaid.}
+  \caption{One fixed recipe (displacement) at every voltage.}
 \end{subfigure}\hfill
 \begin{subfigure}{0.44\textwidth}
   \includegraphics[width=\textwidth]{sweep_snr_trends.png}
   \caption{Optimal levers vs voltage.}
 \end{subfigure}
-\caption{Low-SNR extraction sweep. \emph{(a)} The symmetric V is recovered and rides the locked template at
-every voltage down to 15\,V. \emph{(b)} As SNR drops the winners move to heavier Gaussian smoothing, a
-narrower low-frequency band, and displacement --- there is no single fixed recipe.}
+\caption{Low-SNR extraction sweep. \emph{(a)} With \textbf{one fixed recipe} (id438: band-pass 80--500\,Hz
+/ spatial median / 9 offsets / outward, \emph{displacement}) applied to every voltage --- so the panels are
+directly comparable (same quantity + processing) --- the symmetric V degrades smoothly with SNR: crisp to
+$\sim$25\,V, marginal by 20\,V, lost at 15\,V (ROI $0.44\rightarrow-0.10$). \emph{(b)} The \emph{optimal}
+levers instead shift with SNR (heavier smoothing, narrower low-frequency band, displacement); a
+per-voltage-tuned recipe keeps the V detectable down to 15\,V. There is no single fixed recipe.}
 \label{fig:lowsnr}
 \end{figure}
 
