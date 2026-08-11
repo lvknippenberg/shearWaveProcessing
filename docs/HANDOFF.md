@@ -58,6 +58,26 @@ physics/safety questions. Main outcomes:
   i.e. 2–3× stronger ARF while still legal (thermal/I_spta likely binds first for the 667–800 µs push).
   Verasonics note: set voltage is the bipolar amplitude, so 30 V = 60 V peak-to-peak. No S5-1-specific
   published curve — a one-point **hydrophone calibration** + the scaling gives absolute MI.
+- **Hydrophone MEASUREMENTS + calibration fix (2026-08-10) → code in the acquisition repo
+  `SWI/Mechanical index/` (patched `CalculateSafety.m` + `README.md`); narrative in
+  `docs/mechanical_index_safety.md` §8–10.** We measured our sequences (Onda HGL-0400 + AH-2010-025) and
+  first over-read MI by **~2×** (intensities **~4×**). Root cause: the preamp output was read on a
+  **high-Z (1 MΩ) scope**, but its 20 dB gain / the Onda combined sensitivity are referenced to **50 Ω**
+  (50 Ω source into 1 MΩ ≈ ×2). Fingerprint: preamp clips at 4 Vpp into 50 Ω yet we saw ~4.8 V peak → the
+  "saturation" is the **preamp**, and we were high-Z. Also confirmed the **open-circuit** cert requires the
+  `C_H/(C_H+C_A)≈0.667` divider → **`ParallelCircuit` method is correct**, `Simple` under-reads 1.5×.
+  `CalculateSafety.m` patched: new `ScopeImpedance_Ohm` arg (÷2 @1 MΩ, default 1e6 + warning),
+  `MI_method` defaults to `ParallelCircuit`. **Corrected S5-1 push @30 V ≈ 0.69 MI** (past-focus point) —
+  matches the §5 literature estimate 0.4–0.8, so the estimate is now measurement-validated; L11-5
+  validation gap cut from ~2.5–3× to ~1.5× vs Verasonics. **Rescale old numbers:** Parallel MI ÷2,
+  Simple ×0.75, intensities ÷4 (unsaturated points only). `HydrophoneTables.mat` is `*.mat`-gitignored →
+  `git add -f`; the Onda `.txt` certs are versioned under `safety/calibration/`.
+- **Voltage question (imaging + passive SWE): likely YES for SNR, but MI isn't the gate.** MI headroom is
+  huge (imaging/tracking ≈0.5–0.7 vs 1.9), so raising the tracking/imaging voltage is a plausible
+  displacement-SNR lever for active tracking *and* passive. BUT the binding limit for continuous high-PRF
+  imaging is **I_spta.3 (430 mW/cm² cardiac, ∝ V²·PRF) and probe heating**, not MI — recompute those with
+  the corrected code before raising V. Mind preamp saturation when re-measuring (attenuator / low-V
+  extrapolation). Detail: `docs/mechanical_index_safety.md` §9.
 - **Physics note — symmetry is NOT a cardiac-vs-ARF discriminator.** Cardiac motion CAN look symmetric:
   the r0-anchored **outward directional filter imposes symmetry** on non-propagating/standing/bulk energy
   (splits k_r≈0 energy to both lobes) → a symmetric "V" with no source at r0 (e.g. no-push m8), while a
@@ -84,6 +104,11 @@ So at a typical ~70 bpm: **MVC ≈ push 0–1, AVC ≈ push 7** (t ≈ 350 ms). 
 
 ### Open TODO (this session)
 
+- **Safety follow-ups (`docs/mechanical_index_safety.md` §10):** (1) confirm the ~2.0 impedance factor
+  with a 1 MΩ-vs-50 Ω terminator measurement; (2) finish the corrected MI/I_spta table — needs the
+  **L12-3** and **L11-5 widebeam** transmit frequencies; (3) re-anchor the push element/voltage headroom
+  (§6) to the corrected *focal* MI from the 30 V map; (4) compute I_spta.3 + probe heating before raising
+  the imaging/passive voltage.
 - **Push apodization A/B test (phantom).** For the recommended 41→61 element push, compare **uniform vs
   a light Tukey (α ≈ 0.15)** apodization (Verasonics `TX.Apod`). Default is **uniform** (maximise force —
   we are underpowered, not MI-limited); only adopt the light taper if it visibly cleans off-axis/edge
