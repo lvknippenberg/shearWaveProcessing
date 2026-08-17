@@ -1,7 +1,37 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-08-10.
+for the full passive-SWE investigation record. Last updated 2026-08-14.
+
+## 0. LATEST (2026-08-14): S5-1 hydrophone safety — direct push & imaging measurements
+
+Direct hydrophone characterisation of the S5-1 shear-wave sequences (NI PCI-5112 + Scope-SFP `.hws`),
+with the 2026-08-10 calibration correction applied. Code + data in
+`D:\Luuk van Knippenberg\Claude\MI estimation\`; results also written to the acquisition repo
+(`SWI/Mechanical index/README.md`, 2026-08-14 section) and `docs/mechanical_index_safety.md` still holds
+the narrative. Main outcomes:
+
+- **L11-5 validation vs Verasonics:** after fixing an **elevation misalignment** and saturation,
+  corrected MI ≈ **1.23× Verasonics** (within hydrophone-MI uncertainty); **50 Ω = 1 MΩ÷2** confirms the
+  ÷2 impedance fix; the old uncorrected 1 MΩ reading was ~2× high.
+- **S5-1 pushes are I_sppa.3-limited** (not MI, not I_spta): max **~20 V (79 el)**, **~24 V (61 el)**;
+  MI only ~1.7 there. Depth for derating taken from `Home` (transducer centre) = 37.5 mm at the peak.
+- **I_spta.3 non-binding** thanks to the real burst duty (**20 Hz for 1.2 s, then ≥30 s off →
+  0.77 Hz effective**); a continuous-20 Hz assumption would have wrongly bound it at ~10 V. Still owe a
+  transient-TI check for the 1.2 s burst.
+- **Pulse length scales I_spta only** (MI, I_sppa unchanged) — confirmed from 1900 vs 1500-cycle data.
+- **Focal gain ~1/F# (pressure ~ N^0.6–0.8):** fewer elements → higher allowed voltage but weaker/wider
+  push. **41 el is estimated, not measured** (MI ~1.5–1.8).
+- Tools built: `readHWS.m` (NI HWS reader), `scanPlan.m`, `measurementPlan.m`, `GenerateSafetyFigures.m`,
+  `SafetyTable.m`, `ConfirmPulseLength.m`.
+
+### Open TODO (this session)
+
+- **Measure old vs new push settings** at the S5-1 peak location to validate the extrapolations:
+  **(a) 25 V, 61 elements, 1900 cycles** (recommended config) and **(b) 30 V, 41 elements, 1900 cycles**
+  (alternative). Confirm I_sppa ≈ 190 / MI, and whether 41 el @ 30 V breaches I_sppa (estimate 144–199).
+- **Transient thermal (TI)** for the 1.2 s push burst — the burst-averaged I_spta doesn't capture it.
+- L12-3 safety table still to do; S5-1 + L11-5 now done.
 
 ## 0. LATEST (2026-08-10): LaTeX report, manual-speed tool, cardiac-cycle speeds, MI/safety, GUI fixes
 
