@@ -7,14 +7,12 @@ push-to-push variance is visible by flipping through them. Each figure is a 5x3 
 Each cell shows that measurement's phantom space-time displacement (recipe band bp120-700) for the
 given pulse, titled with the hydrophone-derived safety indices MI / I_sppa.3 / I_spta.3.
 
-SAFETY INDICES: taken from the DIRECT no-preamp hydrophone push measurements at these commanded
-voltages (79 el, table below -- MI and I_sppa.3 derated, from FreqDomainSensitivity.m fixed-f0).
-61 el / 41 el are ESTIMATED from 79 el by focal-gain scaling pr ~ (N/79)^0.7 (I_sppa ~ (N/79)^1.4);
-those cells are marked "~". I_spta.3 = I_sppa.3 * PD * PRF_eff with the push burst duty
-(PRF_eff = 0.77 Hz) and PD ~ cycles (1900 cyc -> ~0.85 ms; scales with cyc/1900).
-
-NB: these no-preamp values supersede the earlier with-preamp-extrapolated table (which read pressure
-~4x high because the AH-2010 preamp saturated above ~15 V); reconcile before quoting a single number.
+SAFETY INDICES: MEASURED for all three apertures from the DIRECT no-preamp, peak-optimised ("_opt")
+hydrophone push captures at these commanded voltages (MI.3 and I_sppa.3 derated 0.3 dB/cm/MHz at
+depth 36.3 mm; see CorrectedMaxVoltage.m / SafetyTable.m). These are the worst-case peak values that
+set the safety limits (41el max 32 V, 61el 23 V, 79el 20 V, all I_sppa.3-limited) -- NOT the lower
+"79 elements repeats" typical set. I_spta.3 = I_sppa.3 * PD * PRF_eff (PD ~ 0.854 ms at 1900 cyc,
+scales with cyc/1900; burst duty PRF_eff = 0.769 Hz).
 
 Usage:  python scripts/phantom_safety_grid.py --root D:\\swp_ph [--pulses 0-9] [--cycles 1500,1900]
 """
@@ -34,21 +32,26 @@ BAND = "disp bp120-700 gauss mean3"
 TX = [20, 25, 30, 35, 40]
 EL = [41, 61, 79]
 
-# 79 el, no-preamp, derated -- MEASURED (FreqDomainSensitivity.m, fixed-f0):
-MI79   = {20: 0.99, 25: 1.27, 30: 1.42, 35: 1.54, 40: 1.84}
-ISPPA79 = {20: 47.0, 25: 67.1, 30: 91.2, 35: 108.8, 40: 128.8}   # W/cm^2
-PRF_EFF = 0.77          # Hz, push burst duty (20 Hz for 1.2 s then >=30 s off)
-PD_1900_S = 0.85e-3     # 10-90% pulse duration at 1900 cycles
+# MEASURED (no-preamp _opt captures, derated) at V = 20,25,30,35,40 -- CorrectedMaxVoltage.m:
+MI_MEAS = {41: [0.93, 1.15, 1.37, 1.64, 1.94],
+           61: [1.33, 1.56, 2.15, 2.66, 2.86],
+           79: [1.61, 2.08, 2.65, 2.86, 2.86]}
+ISPPA_MEAS = {41: [68, 108, 163, 230, 291],
+              61: [143, 220, 327, 471, 586],
+              79: [189, 299, 436, 481, 489]}       # W/cm^2
+VGRID = [20, 25, 30, 35, 40]
+PRF_EFF = 0.769         # Hz, push burst duty (20 Hz for 1.2 s then >=30 s off)
+PD_1900_S = 0.854e-3    # 10-90% pulse duration at 1900 cycles
 
 
 def safety(el, V, cyc):
     """(MI, I_sppa.3 [W/cm2], I_spta.3 [mW/cm2], measured_flag)."""
-    scale_pr = (el / 79.0) ** 0.7
-    mi = MI79[V] * scale_pr
-    isppa = ISPPA79[V] * scale_pr ** 2
+    k = VGRID.index(V)
+    mi = MI_MEAS[el][k]
+    isppa = ISPPA_MEAS[el][k]
     pd = PD_1900_S * (cyc / 1900.0)
     ispta = isppa * pd * PRF_EFF * 1000.0        # W/cm2 -> mW/cm2
-    return mi, isppa, ispta, (el == 79)
+    return mi, isppa, ispta, True
 
 
 def build_index(root):
@@ -84,8 +87,8 @@ def load_st(folder, pulse):
 def make_figure(root, idx, cyc, pulse, outdir):
     fig, axes = plt.subplots(len(TX), len(EL), figsize=(11, 14), squeeze=False)
     fig.suptitle(f"Phantom space-time  |  {cyc} cycles  |  push pulse {pulse}/9\n"
-                 f"rows = TX voltage, cols = elements  (title: MI / Isppa.3 W/cm2 / Ispta.3 mW/cm2; "
-                 f"~ = element-scaled estimate)", fontsize=11)
+                 f"rows = TX voltage, cols = elements  (title: MI / Isppa.3 W/cm2 / Ispta.3 mW/cm2, "
+                 f"measured no-preamp worst-case)", fontsize=11)
     any_data = False
     for i, V in enumerate(TX):
         for j, el in enumerate(EL):
