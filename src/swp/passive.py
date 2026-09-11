@@ -37,6 +37,11 @@ from .mline.select import (
     detect_line_bursts, plot_bursts,
 )
 
+# Upper bound of the slant-stack speed search. Well above physiological shear-wave speed on
+# purpose: a window with no propagating wavefront rails at the bound, and a bound inside the
+# plausible range (the old 6 m/s) made that failure look like a real measurement.
+SPEED_CMAX = 20.0
+
 # Motion-comp steps that the burst-overview pass keeps (it uses the full config recipe minus
 # the directional filter); see run.py MOTION_FILTERS for the active-side equivalent.
 
@@ -154,10 +159,15 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
     print(f"  detected {len(windows)} burst window(s) -> {os.path.basename(bursts_png)}")
 
     # --- full-window space-time plot (the whole recording along the general M-line) ---
-    # Directional-filtered per the passive convention (single direction from the valve end),
-    # so reflections are removed; the burst windows above are placed on this record.
-    mode = base.directional_mode
-    keep = "neg" if mode in ("leftward", "neg") else ("pos" if mode in ("rightward", "pos") else None)
+    # Honours `pipeline.directional`: with it off (the tuned passive default) the overview is
+    # left unfiltered, matching the per-window views below. This previously applied
+    # `directional_mode` unconditionally, so the overview was leftward-filtered while the
+    # windows were not - and the k-omega directional filter is exactly what the passive search
+    # found to inject reverberation banding and bias the apparent speed high
+    # (docs/passive_search.md), so the two figures disagreed by construction.
+    mode = base.directional_mode if base.directional else None
+    keep = ("neg" if mode in ("leftward", "neg")
+            else "pos" if mode in ("rightward", "pos") else None)
     full = np.asarray(ov.st.data)
     r0_full = float(ov.st.r[-1] if keep == "neg" else ov.st.r[0])
     if keep is not None:
@@ -197,9 +207,19 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
         acq_w = dataclasses.replace(acq, iq=acq.iq[i0:i1], t=acq.t[i0:i1])
         for vname, vcfg in views:
             res = run_pipeline(acq_w, ml, vcfg, focus=None)
-            # signed-Radon (slant-stack) speed on the raw band-passed M-mode = wave CENTRE, both
-            # directions (remove_flat=False: the band-pass already removed the bulk band).
-            sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=6.0, remove_flat=False)
+            # Signed-Radon (slant-stack) speed on the raw band-passed M-mode = wave CENTRE, both
+            # directions.
+            #
+            # remove_flat=False is deliberate and was re-tested on C000000001 (2026-09-11):
+            # turning it ON rails 10 of 12 window/view fits at the opposite bound (+/-cmin) and
+            # collapses semblance (e.g. win3 0.95 -> 0.19). The cause is geometric - these
+            # M-lines are ~42-49 mm while a 3 m/s wave at ~20 Hz has lambda ~ 175 mm, so the
+            # line spans only ~0.3 of a wavelength and a GENUINE wave is nearly spatially
+            # uniform along it. Subtracting the per-time spatial mean therefore removes the
+            # signal along with the bulk motion. (Corollary: this line length is marginal for
+            # these speeds; the slant-stack is fitting a fraction of a cycle.)
+            sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=SPEED_CMAX,
+                                       remove_flat=False)
             results.append(res)
             titles.append(f"win{i} {w.t_peak*1e3:.0f} ms  [{vname}]\n"
                           f"c={abs(c):.1f} m/s (semblance {sem:.2f})")

@@ -154,10 +154,18 @@ def push_specificity(res_push, res_nopush, r0: float | None = None) -> dict:
     return {"C_push": cp, "C_nopush": cn, "S": s, "S_diff": cp - cn}
 
 
-def slant_stack_speed(st: SpaceTime, r0: float | None = None, cmin: float = 1.0, cmax: float = 6.0,
-                      n_speeds: int = 121, remove_flat: bool = True, demean: bool = True,
+def slant_stack_speed(st: SpaceTime, r0: float | None = None, cmin: float = 1.0, cmax: float = 20.0,
+                      n_speeds: int = 181, remove_flat: bool = True, demean: bool = True,
                       return_line: bool = False):
     """**Signed tau-p slant-stack** speed of a propagating wavefront, robust to the flat bulk band.
+
+    ``cmax`` is deliberately well above physiological shear-wave speed (was 6 m/s, i.e. the top
+    of the plausible range). A window with no propagating wavefront rails at the bound, and when
+    the bound sits inside the plausible range that shows up as a *credible-looking* ``6.0 m/s``
+    indistinguishable from a real measurement. Searching to 20 m/s makes the same failure report
+    an obviously non-physical number instead, so a railed fit is visible rather than silent.
+    ``n_speeds`` is raised alongside it to keep the slowness resolution finer than before
+    (the grid is uniform in slowness ``p``, not in ``c``).
 
     Both :func:`passive_coherence` (envelope) and a naive signed semblance are maximised by the
     strong **spatially-uniform** low-frequency band (bulk myocardial motion): columns are then
