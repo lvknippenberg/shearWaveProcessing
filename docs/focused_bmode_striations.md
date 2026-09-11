@@ -91,15 +91,65 @@ This fits every surviving observation:
 The effect is modest in absolute terms — a few percent of the angular ripple power. The bulk of
 what the eye sees in the GIF is still speckle and anatomy at 22–38% ripple.
 
+### A quantitative check, and what it implies
+
+Summing the beam patterns over lines and measuring the ripple across one line period predicts
+the scalloping from geometry alone, with nothing fitted. **Which beam pattern applies depends on
+the reconstruction**:
+
+| reconstruction | relevant pattern | overlap | predicted ripple |
+|---|---|---|---|
+| scanline (Verasonics): tx beam × dynamic receive on the *same* line | two-way, 0.882° | 0.79× | **42.4%** (−3.74 dB) |
+| full DAS (ours): every pixel uses the full receive aperture from *every* transmit | one-way, 1.247° | 1.12× | **4.5%** (−0.39 dB) |
+
+Measured in our images (frame-averaged, 45–85 mm): **~5%**. The one-way prediction matches, and
+the two-way figure explains why the same sequence shows far stronger lines under a conventional
+scanline reconstruction.
+
 ### Open question
 
-Whether the residual is genuinely transmit-field scalloping or interference intrinsic to
-coherently summing transmits sampled at 1.111°. Both predict line-spacing periodicity; they
-differ in how the amplitude should scale with focal depth and F-number.
+Whether the residual is transmit-field **scalloping** (a multiplicative sensitivity dip) or
+**interference** intrinsic to coherently summing transmits sampled at 1.111°. Both predict
+line-spacing periodicity and both scale with beam overlap, so the numerical agreement above does
+not by itself settle it.
 
-**Next step: resolution-phantom data** — a uniform scattering medium removes anatomy and
-shadowing, so the residual angular ripple can be measured against a known-flat target, and its
-depth profile compared against the predicted beam-width curve.
+The evidence currently favours **interference**: a multiplicative sensitivity dip would survive
+envelope summing, and it does not (2.27% → 0.08% under incoherent compounding). If that holds,
+dividing out a computed transmit-sensitivity map cannot fix it.
+
+**Discriminator for the phantom:** does the residual survive incoherent compounding? A uniform
+scatterer removes anatomy and shadowing, so the sensitivity pattern can be measured directly
+against a known-flat target, and its depth profile compared with the predicted beam-width curve.
+
+## 4a. What would fix it
+
+Conditional on the hypothesis. The two families trade against different resources.
+
+### In processing (works on existing data, no re-acquisition)
+
+| approach | effect | cost |
+|---|---|---|
+| **Incoherent (envelope) compounding** — `scripts/incoherent_bmode.py` | line-spacing power 2.27% → **0.08%** (28×), demonstrated | discards coherent gain: softer lateral resolution, lower speckle contrast |
+| **REFoCUS / retrospective transmit beamforming** | invert the transmit encoding to synthesise a full synthetic-aperture dataset with uniform transmit coverage, then re-beamform | non-trivial to implement; needs per-transmit channel RF + `TX.Delay` + `TX.Apod` — **all of which we already store** |
+| **Transmit-field normalisation** (divide by the compounded pfield) | cheap to try | predicted **not to work**: you cannot normalise away an interference pattern. Worth one confirming test, not worth building on |
+
+### In acquisition
+
+| change | overlap | cost | predicted ripple (our recon) |
+|---|---|---|---|
+| 73 → **91 lines** | two-way 0.79 → 0.99× | frame rate 25.4 → **20.4 FPS** | — |
+| 79 → **63 elements** (F/3.93 → F/4.93) | one-way 1.12 → 1.41× | lateral resolution 1.72 → **2.15 mm** | 4.53% → **0.35%** |
+| 79 → 55 elements (F/5.64) | one-way → 1.61× | lateral resolution → 2.46 mm | → 0.04% |
+
+The aperture route is counter-intuitive and cheap: **reducing** the transmit aperture widens the
+beam, improving angular sampling at **zero frame-rate cost**, paying ~25% lateral resolution at
+the focus instead. The line-count route keeps resolution and pays frame rate.
+
+### Or: use buffer 1
+
+Buffer 1 is a widebeam B-mode of the same anatomy at 88 FPS with no line structure (0.25% vs
+5.06%). If buffer 3 exists for resolution or penetration, the striations are the price of the
+tighter beam; if it exists for orientation, buffer 1 already does that job cleanly.
 
 ## 5. Separately: the Verasonics reconstruction regions
 
