@@ -1,7 +1,7 @@
-function make_combined_data(data_folder, base_config_dir)
+function make_combined_data(data_folder, base_config_dir, base_config_file)
 %MAKE_COMBINED_DATA  Build CombinedData.mat from the base config + dynamic params.
 %
-%   make_combined_data(DATA_FOLDER, BASE_CONFIG_DIR)
+%   make_combined_data(DATA_FOLDER, BASE_CONFIG_DIR, BASE_CONFIG_FILE)
 %
 %   The Verasonics acquisition only saves the *dynamic* parameters at runtime
 %   (AcquisitionParametersAndECG.mat); the *constant* parameters live in a base
@@ -10,10 +10,19 @@ function make_combined_data(data_folder, base_config_dir)
 %   script does. Ported for the shearWaveProcessing pipeline (called from Python
 %   via `matlab -batch`); the interactive uigetdir is replaced by DATA_FOLDER.
 %
-%   Phantom vs in-vivo is detected from RF_frames(1) (==2 -> phantom, 2 frames).
+%   Phantom vs in-vivo is detected from RF_frames(1) (==2 -> phantom, 2 frames),
+%   which selects the base config. BASE_CONFIG_FILE overrides that choice with an
+%   explicit file: the in-vivo constant parameters differ per acquisition campaign
+%   (S5_1_SWI_PulseInversion_P1-6 / P11-14 / P15-xx) and the Receive/RcvBuffer
+%   layout only matches the campaign the data was acquired with, so a folder from
+%   an earlier campaign must name its own base config. It may be an absolute path
+%   or a file name relative to BASE_CONFIG_DIR.
 
 if nargin < 2 || isempty(base_config_dir)
     base_config_dir = 'D:\Luuk van Knippenberg\SWI\Base config files';
+end
+if nargin < 3
+    base_config_file = '';
 end
 
 cd(data_folder);
@@ -26,7 +35,17 @@ else
 end
 
 % Copy the matching base config (constant parameters) to CombinedData.mat.
-if invivo_data
+if ~isempty(base_config_file)
+    % Explicit override: absolute path, or a name inside base_config_dir.
+    if exist(base_config_file, 'file') == 2
+        bpath = base_config_file;
+    else
+        bpath = fullfile(base_config_dir, base_config_file);
+    end
+    assert(exist(bpath, 'file') == 2, 'base config not found: %s', bpath);
+    fprintf('base config: %s\n', bpath);
+    copyfile(bpath, 'CombinedData.mat');
+elseif invivo_data
     copyfile(fullfile(base_config_dir, 'S5_1_SWI_PulseInversion_P15-xx_runtime.mat'), ...
              'CombinedData.mat');
 else
@@ -68,6 +87,6 @@ load(fullfile(base_config_dir, 'NonzeroRFcolumns.mat'), 'NonzeroRFcolumns')
 % function's own path argument; every dynamic variable -- including
 % RF_frames/RF_rows/RF_cols, which the reader needs to reconstruct the external
 % RF binaries -- is written into CombinedData.mat.
-clear base_config_dir
+clear base_config_dir base_config_file
 save('CombinedData.mat', '-append');
 end

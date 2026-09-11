@@ -604,10 +604,16 @@ def find_mat(folder: Path) -> Path:
     beamformer reads). If only the runtime ``AcquisitionParametersAndECG.mat`` is
     present, ``CombinedData.mat`` is built from it first (base config + dynamic
     params merge; see :mod:`swp.acquisition.combined`).
+
+    An **existing** ``CombinedData.mat`` is validated here rather than trusted: this is
+    the path every already-converted folder takes, so it is where a file merged with the
+    wrong campaign's base config would otherwise slip through into beamforming.
     """
     folder = Path(folder)
     combined = folder / "CombinedData.mat"
     if combined.is_file():
+        from .combined import validate_combined_data
+        validate_combined_data(combined, folder)
         return combined
     if (folder / "AcquisitionParametersAndECG.mat").is_file():
         from .combined import ensure_combined_data
@@ -620,7 +626,7 @@ def find_mat(folder: Path) -> Path:
 
 def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                    compression=DEFAULT_COMPRESSION, save_converted=True, converted_dir=None,
-                   overwrite=False, sw_roi=None, append_params=True):
+                   overwrite=False, sw_roi=None, append_params=True, gif_stretch=None):
     """End-to-end Stage A for one measurement folder: IQ (+ GIFs) into ``output/``.
 
     Args:
@@ -634,6 +640,8 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
             (default False = reuse the existing converted file).
         sw_roi: reconstruction window for the active shear-wave buffer (2);
             ``None`` = the push-focus ROI from the ``SW`` struct (default).
+        gif_stretch: GIF playback duration / acquisition duration. ``None`` uses
+            the module default (1.0 = real time); 3.0 gives 3x slow motion.
     """
     folder = Path(folder)
     mat_path = find_mat(folder)
@@ -645,8 +653,8 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                   overwrite=overwrite, sw_roi=sw_roi, append_params=append_params)
 
     if make_gifs:
-        from .gifs import run as gif_run
-        gif_run(output_dir)
+        from .gifs import run as gif_run, REAL_TIME_STRETCH
+        gif_run(output_dir, stretch=REAL_TIME_STRETCH if gif_stretch is None else gif_stretch)
     return written
 
 
@@ -692,12 +700,16 @@ def _cli():
                         "'xmin,xmax,zmin,zmax' in mm")
     p.add_argument("--compression", default=DEFAULT_COMPRESSION,
                    help="HDF5 compression for IQ + converted files ('lzf', 'gzip', or 'none')")
+    p.add_argument("--gif-stretch", type=float, default=None,
+                   help="GIF playback duration / acquisition duration "
+                        "(default 1 = real time; 3 = 3x slow motion)")
     args = p.parse_args()
     compression = None if str(args.compression).lower() == "none" else args.compression
     process_folder(args.folder, output_dir=args.output, make_gifs=not args.no_gifs,
                    pi_mode=args.pi_mode, compression=compression,
                    save_converted=not args.no_converted, converted_dir=args.converted_dir,
-                   overwrite=args.overwrite, sw_roi=_parse_sw_roi(args.sw_roi))
+                   overwrite=args.overwrite, sw_roi=_parse_sw_roi(args.sw_roi),
+                   gif_stretch=args.gif_stretch)
 
 
 if __name__ == "__main__":

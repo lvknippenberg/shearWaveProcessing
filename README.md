@@ -38,7 +38,7 @@ beamformer used by stages 1–2. Stage 3 needs only numpy/scipy/h5py/matplotlib/
 
 ```
 python run.py convert  <measurement folder>
-python run.py beamform <measurement folder> [--no-gifs] [--overwrite]
+python run.py beamform <measurement folder> [--no-gifs] [--overwrite] [--gif-stretch 3]
 python run.py viz      <measurement folder> --config configs/active.yaml  [--meas N] [--phantom]
 python run.py viz      <measurement folder> --config configs/passive.yaml
 python run.py all      <measurement folder> --config configs/active.yaml [--phantom]
@@ -52,13 +52,69 @@ Stages 1 and 2 share one RF read, so `beamform` also produces the converted file
 separately only if you want the zea database copies without beamforming. Because each stage skips
 inputs that already exist, you can **start from stage 3** whenever the IQ files are present.
 
+### Building `CombinedData.mat`
+
 If the folder has only the runtime `AcquisitionParametersAndECG.mat` (the dynamic parameters saved
 during acquisition) and no `CombinedData.mat`, stages 1–2 build `CombinedData.mat` first by merging
 that file with the constant base config (`swp.acquisition.ensure_combined_data`). This currently
 runs the ported MATLAB merge (`src/swp/acquisition/matlab/make_combined_data.m`) via `matlab
 -batch`, so MATLAB must be available (found on `PATH`, or set `SWP_MATLAB`); the base config
 directory defaults to `D:\Luuk van Knippenberg\SWI\Base config files` (override with
-`SWP_BASE_CONFIG_DIR`). A pure-Python v7.3 writer will replace the MATLAB step later.
+`--base-config-dir` or `SWP_BASE_CONFIG_DIR`). A pure-Python v7.3 writer will replace the MATLAB
+step later.
+
+The in-vivo constant parameters **differ per acquisition campaign**
+(`S5_1_SWI_PulseInversion_P1-6` / `P11-14` / `P15-xx`) and only the campaign's own config has a
+`Receive`/`RcvBuffer` layout matching the data. Using the wrong one slices every RF buffer out of
+the wrong region — and nothing downstream complains, so it is silent corruption.
+
+**You do not need to name a base config.** It is auto-selected by matching each candidate's
+`Resource.RcvBuffer.numFrames`/`rowsPerFrame` against the folder's own `RF_frames`/`RF_rows`, and
+the merged `CombinedData.mat` is then **asserted** to describe the acquisition before it is ever
+read — including an already-existing one, so a file built by an earlier run with a wrong config is
+rejected rather than reused. A mismatch raises `BaseConfigMismatch` printing both layouts.
+
+Audit a whole tree in seconds (reads no RF, writes nothing):
+
+```
+python scripts/process_raw_data.py --root "Z:\raw_data" --check
+```
+
+`--base-config` / `SWP_BASE_CONFIG` still pins one explicitly; it is checked too. Phantom sweeps
+are the one case layout cannot decide (every `BaseConfig_10frames_*` shares a `RcvBuffer`; the push
+settings in the file name are the discriminator), so selection defers to `make_combined_data.m`'s
+naming rule there and validates the result.
+
+Full workflow: **[docs/invivo_processing.md](docs/invivo_processing.md)**.
+
+### Batch processing
+
+```
+python scripts/process_raw_data.py --root "Z:\raw_data"                    # whole study
+python scripts/process_raw_data.py --root "Z:\raw_data" --subject C000000001
+python scripts/process_raw_data.py --folder "<folder>" --overwrite         # force a rebuild
+```
+
+Finds every measurement folder under `<root>/<subject>/`, skips those already carrying IQ + GIFs,
+and reports per-folder success/failure in a closing summary — one failure never stops the batch.
+
+### B-mode GIFs
+
+`beamform` renders one GIF per IQ file into `<folder>/output/`. B-mode buffers play **in real
+time** — a 1.0 s acquisition becomes a 1.0 s GIF, whatever its frame rate. GIF frame delays are
+quantised to whole centiseconds, so `swp.acquisition.gifs.realtime_gif` keeps every frame when the
+nearest legal delay reproduces the duration closely enough, and otherwise resamples onto that
+delay: the ultrafast buffers hit the 20 ms/50 fps floor and are **sub-sampled** (925 Hz
+diverging-wave → ~50 of 926 frames), the slow ones repeat the odd frame. Playback duration lands
+within ~1% of the acquisition duration either way. `--gif-stretch 3` gives 3× slow motion (the old
+default).
+
+The active tracking GIFs (`*_meas*`, buffer 2) span only ~16 ms, so real time is meaningless: they
+keep a fixed 15 fps and the log reports the slow-motion factor.
+
+Note buffer 5's frame rate is `SW.ActualFPS` (~18 Hz — one frame per shear-wave measurement), not
+the widebeam cine rate `Bmode_WB.ActualFPS` (~88 Hz); using the latter made its timestamps, and so
+its real-time playback, ~5× too fast.
 
 ## Phantom measurements
 
@@ -140,9 +196,11 @@ data, and origin handling left as a TODO.
 ```
 run.py                 stage driver (convert / beamform / viz / all)
 configs/               active.yaml, passive.yaml
-scripts/               phantom_voltage_montage.py (cross-folder voltage-sweep montage),
+scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tree, + --check audit),
+                       phantom_voltage_montage.py (cross-folder voltage-sweep montage),
                        check_push_voltage.py (delivered push-voltage sweep check)
-docs/                  HANDOFF.md, phantom_voltage_sweep.md (phantom sweep runbook)
+docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
+                       phantom_voltage_sweep.md (phantom sweep runbook)
 src/swp/
   acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);
                        combined.py + matlab/make_combined_data.m build CombinedData.mat from the runtime .mat;

@@ -75,13 +75,20 @@ from pathlib import Path
 import h5py
 import numpy as np
 
-# 0-based buffer index -> name of the MATLAB struct describing that buffer.
+# 0-based buffer index -> name of the MATLAB struct whose ``ActualFPS`` gives that
+# buffer's *frame* rate.
+#
+# Buffer 5 (index 4) is the exception: its frames are acquired with the widebeam
+# B-mode transmit (``Bmode_WB``), but only **one frame per shear-wave measurement**,
+# so they are spaced at the SW measurement rate (``SW.ActualFPS``, ~18 Hz), not at
+# the widebeam cine rate (~88 Hz). Taking ``Bmode_WB`` here made its timestamps -
+# and therefore any real-time playback - ~5x too fast.
 BUFFER_STRUCT = {
     0: "Bmode_WB",
     1: "SW",
     2: "Bmode_FC",
     3: "Bmode_DW",
-    4: "Bmode_WB",
+    4: "SW",
     5: "Bmode_strain",
 }
 

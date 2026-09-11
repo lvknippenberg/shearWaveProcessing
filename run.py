@@ -45,10 +45,37 @@ def stage_convert(folder, overwrite=False):
     return convert_folder(folder, overwrite=overwrite)
 
 
-def stage_beamform(folder, make_gifs=True, overwrite=False, save_converted=True):
+def stage_beamform(folder, make_gifs=True, overwrite=False, save_converted=True,
+                   gif_stretch=None):
     from swp.acquisition import process_folder
     return process_folder(folder, make_gifs=make_gifs, overwrite=overwrite,
-                          save_converted=save_converted)
+                          save_converted=save_converted, gif_stretch=gif_stretch)
+
+
+def _set_base_config_env(args):
+    """Publish --base-config / --base-config-dir as the env vars swp.acquisition reads.
+
+    ``CombinedData.mat`` is built by the MATLAB merge deep inside stage 1/2
+    (``find_mat`` -> ``ensure_combined_data``), which takes its base config from
+    ``SWP_BASE_CONFIG`` / ``SWP_BASE_CONFIG_DIR``. Setting them here saves threading
+    the flags through every call in between.
+    """
+    if getattr(args, "base_config_dir", None):
+        os.environ["SWP_BASE_CONFIG_DIR"] = args.base_config_dir
+    if getattr(args, "base_config", None):
+        os.environ["SWP_BASE_CONFIG"] = args.base_config
+
+
+def _add_base_config_args(parser):
+    parser.add_argument("--base-config", default=None,
+                        help="Base config .mat for the CombinedData.mat merge (absolute path, "
+                             "or a file name inside --base-config-dir). Overrides the "
+                             "phantom/in-vivo auto-selection - needed when the folder comes "
+                             "from an acquisition campaign other than the newest, e.g. "
+                             "S5_1_SWI_PulseInversion_P1-6_runtime.mat")
+    parser.add_argument("--base-config-dir", default=None,
+                        help="Directory holding the base config .mat files and "
+                             "NonzeroRFcolumns.mat (default: $SWP_BASE_CONFIG_DIR)")
 
 
 # ======================================================================================
@@ -259,12 +286,17 @@ def main():
     pc = sub.add_parser("convert", help="Stage 1: .mat -> converted zea RF .hdf5")
     pc.add_argument("folder")
     pc.add_argument("--overwrite", action="store_true")
+    _add_base_config_args(pc)
 
     pb = sub.add_parser("beamform", help="Stage 2: RF -> IQ + GIFs + SW IQ (with push location)")
     pb.add_argument("folder")
     pb.add_argument("--no-gifs", action="store_true")
     pb.add_argument("--no-converted", action="store_true")
     pb.add_argument("--overwrite", action="store_true")
+    pb.add_argument("--gif-stretch", type=float, default=None,
+                    help="GIF playback duration / acquisition duration "
+                         "(default 1 = real time; 3 = 3x slow motion)")
+    _add_base_config_args(pb)
 
     pv = sub.add_parser("viz", help="Stage 3: IQ -> shear-wave space-time plots (active or passive)")
     pv.add_argument("folder")
@@ -292,13 +324,18 @@ def main():
     pa.add_argument("--meas", type=int, default=None)
     pa.add_argument("--phantom", action="store_true",
                     help="phantom measurement (see 'viz --phantom')")
+    pa.add_argument("--gif-stretch", type=float, default=None,
+                    help="GIF playback duration / acquisition duration "
+                         "(default 1 = real time; 3 = 3x slow motion)")
+    _add_base_config_args(pa)
 
     a = p.parse_args()
+    _set_base_config_env(a)
     if a.stage == "convert":
         stage_convert(a.folder, overwrite=a.overwrite)
     elif a.stage == "beamform":
         stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite,
-                       save_converted=not a.no_converted)
+                       save_converted=not a.no_converted, gif_stretch=a.gif_stretch)
     elif a.stage == "viz":
         stage_viz(a.folder, a.config, meas=a.meas, phantom=a.phantom)
     elif a.stage == "passive":
@@ -306,7 +343,8 @@ def main():
         process_passive(a.folder, a.config, window_ms=a.window_ms, max_events=a.max_events,
                         pad_ms=a.pad_ms, overview_stride=a.overview_stride, redraw=a.redraw)
     elif a.stage == "all":
-        stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite)
+        stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite,
+                       gif_stretch=a.gif_stretch)
         stage_viz(a.folder, a.config, meas=a.meas, phantom=a.phantom)
 
 

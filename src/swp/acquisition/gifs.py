@@ -4,17 +4,22 @@ Each IQ file written by :mod:`beamform_swi` holds a ``beamformed_data`` stack
 ``(n_frames, z, x, 2=[I,Q])`` plus per-frame ``timestamps`` (so the true frame
 rate travels with the data). We envelope-detect, log-compress and write a GIF.
 
-Frame-rate handling (the buffers span very different rates: ~25-925 FPS B-mode,
+Frame-rate handling (the buffers span very different rates: ~18-925 FPS B-mode,
 ~3.7 kHz tracking):
 
-* **B-mode cine buffers** are played at **3x real time** - your rule that 1.2 s of
-  acquisition becomes a 3.6 s GIF. Because the GIF container effectively caps at
-  50 fps, buffers faster than 150 FPS (e.g. the 925 Hz diverging-wave buffer)
-  keep an evenly-spaced subset of frames played at 50 fps, so the *playback
-  duration* still equals 3x real time even though not every frame is shown.
-* **Active tracking** (buffer 2, ``*_meas*``) covers only ~10-30 ms, far too brief
-  for a 3x GIF, so it is played at a fixed **15 fps** and the true duration is
-  reported.
+* **B-mode cine buffers** play in **real time** by default (``stretch=1.0``): a
+  1.0 s acquisition becomes a 1.0 s GIF, whatever its frame rate. A GIF stores
+  each frame's delay in whole **centiseconds**, so an arbitrary acquisition rate
+  is not directly representable; :func:`realtime_gif` keeps every frame when the
+  nearest legal delay reproduces the duration closely enough, and otherwise
+  resamples the clip onto that delay. The ultrafast buffers hit the 20 ms floor
+  and are sub-sampled (925 Hz diverging-wave -> ~50 of 926 frames); the slow ones
+  repeat a frame here and there - but the *playback duration always matches the
+  acquisition duration* (to ~1%). Pass ``stretch>1`` for slow motion (``3.0`` was
+  the old default).
+* **Active tracking** (buffer 2, ``*_meas*``) covers only ~10-30 ms - far too
+  brief to watch in real time - so it is played at a fixed **15 fps** and the
+  resulting slow-motion factor is reported.
 """
 
 from __future__ import annotations
@@ -31,9 +36,13 @@ from zea import File
 from zea.display import to_8bit
 from zea.io_lib import save_video
 
-REAL_TIME_STRETCH = 3.0      # GIF playback = 3x real acquisition time
-GIF_FPS_CAP = 50.0           # GIF container practical max
+REAL_TIME_STRETCH = 1.0      # GIF playback duration / real acquisition duration (1 = real time)
+MIN_DELAY_CS = 2             # 20 ms: fastest delay GIF viewers honour (1 cs is widely clamped)
+MAX_DELAY_CS = 100           # 1 s per frame
 TRACKING_GIF_FPS = 15.0      # fixed rate for the (very brief) tracking movies
+# Keep every frame only while the quantised delay is within this relative error of
+# the true frame interval; beyond it, resample the clip onto the quantised delay.
+TIMING_TOLERANCE = 0.02
 DYNAMIC_RANGE = (-50, 0)
 
 
@@ -68,30 +77,61 @@ def _fps_from_timestamps(bdata, fallback=25.0) -> float:
     return float(1.0 / dt) if dt > 0 else fallback
 
 
+def _save_gif_with_delay(images, out_path, delay_cs: int):
+    """Write a GIF with an exact per-frame delay of ``delay_cs`` centiseconds.
+
+    ``zea.io_lib.save_to_gif`` takes an fps and stores ``round(1000 / fps)`` ms,
+    which Pillow then truncates to whole centiseconds. Passing the *float* fps
+    ``100 / delay_cs`` makes that round-trip exact, so the delay we ask for is the
+    delay the file carries (integer fps like 88 would silently become 1 cs, a
+    delay most viewers clamp to 100 ms).
+    """
+    save_video(images, str(out_path), fps=100.0 / delay_cs)
+
+
 def realtime_gif(images, out_path, acquisition_fps, stretch=REAL_TIME_STRETCH,
-                 fps_cap=GIF_FPS_CAP):
+                 tolerance=TIMING_TOLERANCE):
     """Write a GIF whose playback duration is ``stretch`` x real acquisition time.
 
-    Returns ``(gif_fps, n_shown, realtime_s)``.
+    GIF frame delays are quantised to whole centiseconds, so most acquisition
+    rates cannot be reproduced exactly by simply playing every frame. Two cases:
+
+    * the nearest legal delay is within ``tolerance`` of the true frame interval
+      -> keep every frame at that delay (no resampling, full temporal detail);
+    * otherwise -> resample the clip onto that delay (clamped to
+      ``[MIN_DELAY_CS, MAX_DELAY_CS]``) with nearest-neighbour frame selection, so
+      the playback *duration* is right to within one frame. Buffers faster than
+      50 FPS land on the 20 ms floor and are sub-sampled (925 Hz -> ~50 of 926
+      frames); slower ones repeat a few frames instead.
+
+    Returns ``(gif_fps, n_shown, realtime_s, playback_s)``.
     """
     n = len(images)
-    realtime_s = n / acquisition_fps if acquisition_fps > 0 else 0.0
-    playback_s = stretch * realtime_s
-    gif_fps = n / playback_s if playback_s > 0 else fps_cap
+    if acquisition_fps <= 0:
+        _save_gif_with_delay(images, out_path, MIN_DELAY_CS)
+        return 100.0 / MIN_DELAY_CS, n, 0.0, n * MIN_DELAY_CS / 100.0
 
-    if gif_fps <= fps_cap:
-        save_video(images, str(out_path), fps=max(1, round(gif_fps)))
-        return gif_fps, n, realtime_s
+    realtime_s = n / acquisition_fps
+    target_s = stretch * realtime_s
+    frame_dt = stretch / acquisition_fps               # wanted seconds per shown frame
 
-    # Too many frames for the cap: keep an evenly-spaced subset, play at the cap
-    # so total playback (n_shown / cap) still equals the target playback_s.
-    n_shown = max(2, int(round(playback_s * fps_cap)))
-    idx = np.linspace(0, n - 1, n_shown).round().astype(int)
-    save_video([images[i] for i in idx], str(out_path), fps=round(fps_cap))
-    return fps_cap, n_shown, realtime_s
+    delay_cs = int(round(frame_dt * 100))
+    keep_all = (MIN_DELAY_CS <= delay_cs <= MAX_DELAY_CS
+                and abs(delay_cs / 100.0 - frame_dt) <= tolerance * frame_dt)
+
+    if keep_all:
+        shown = list(images)
+    else:
+        delay_cs = int(np.clip(delay_cs, MIN_DELAY_CS, MAX_DELAY_CS))
+        n_shown = max(2, int(round(target_s * 100.0 / delay_cs)))
+        idx = np.linspace(0, n - 1, n_shown).round().astype(int)
+        shown = [images[i] for i in idx]
+
+    _save_gif_with_delay(shown, out_path, delay_cs)
+    return 100.0 / delay_cs, len(shown), realtime_s, len(shown) * delay_cs / 100.0
 
 
-def gif_for_file(iq_path: Path):
+def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH):
     """Make one GIF from one IQ HDF5 file."""
     is_tracking = "_meas" in iq_path.stem
     with File(str(iq_path)) as f:
@@ -103,31 +143,40 @@ def gif_for_file(iq_path: Path):
     out_path = iq_path.with_suffix(".gif")
 
     if is_tracking:
-        save_video(images, str(out_path), fps=round(TRACKING_GIF_FPS))
+        # ~16 ms of tracking: real time is unwatchable, so fix the rate and say
+        # how much slower than real time the result is. Quantise to a whole
+        # centisecond first, so the rate reported is the rate the file carries.
+        delay_cs = int(np.clip(round(100.0 / TRACKING_GIF_FPS), MIN_DELAY_CS, MAX_DELAY_CS))
+        gif_fps = 100.0 / delay_cs
+        _save_gif_with_delay(images, out_path, delay_cs)
         realtime_ms = len(images) / acquisition_fps * 1e3 if acquisition_fps else 0.0
+        slowdown = (acquisition_fps / gif_fps) if acquisition_fps else 0.0
         print(f"  {iq_path.name}: tracking GIF {len(images)} frames @ "
-              f"{TRACKING_GIF_FPS:.0f} fps (true {realtime_ms:.0f} ms @ "
-              f"{acquisition_fps:.0f} Hz) -> {out_path.name}")
+              f"{gif_fps:.4g} fps (true {realtime_ms:.1f} ms @ "
+              f"{acquisition_fps:.0f} Hz = 1/{slowdown:.0f} x real time)"
+              f" -> {out_path.name}")
     else:
-        gif_fps, n_shown, realtime_s = realtime_gif(images, out_path, acquisition_fps)
-        note = (f"{realtime_s * 1e3:.0f} ms real -> {REAL_TIME_STRETCH:.0f}x at "
-                f"{acquisition_fps:.0f} Hz")
-        if n_shown < len(images):
-            note += f" (showing {n_shown}/{len(images)} @ {gif_fps:.0f} fps)"
+        gif_fps, n_shown, realtime_s, playback_s = realtime_gif(
+            images, out_path, acquisition_fps, stretch=stretch)
+        speed = "real time" if stretch == 1.0 else f"{1 / stretch:g}x real time"
+        note = (f"{acquisition_fps:.1f} Hz, {len(images)} frames = {realtime_s:.2f} s "
+                f"-> {playback_s:.2f} s GIF ({speed}); "
+                f"{n_shown} frames @ {gif_fps:.4g} fps")
         print(f"  {iq_path.name}: B-mode GIF, {note} -> {out_path.name}")
     return out_path
 
 
-def run(iq_dir):
+def run(iq_dir, stretch=REAL_TIME_STRETCH):
     """Make a GIF for every ``*_iq.hdf5`` file in ``iq_dir``."""
     iq_dir = Path(iq_dir)
     files = sorted(iq_dir.glob("*_iq.hdf5"))
     if not files:
         print(f"No *_iq.hdf5 files found in {iq_dir}")
         return
-    print(f"=== GIFs from {len(files)} IQ file(s) in {iq_dir} ===")
+    speed = "real time" if stretch == 1.0 else f"{1 / stretch:g}x real time"
+    print(f"=== GIFs from {len(files)} IQ file(s) in {iq_dir} ({speed}) ===")
     for iq_path in files:
-        gif_for_file(iq_path)
+        gif_for_file(iq_path, stretch=stretch)
 
 
 if __name__ == "__main__":
@@ -135,4 +184,8 @@ if __name__ == "__main__":
 
     p = argparse.ArgumentParser(description="Render B-mode GIFs from *_iq.hdf5 files.")
     p.add_argument("iq_dir", help="Directory containing *_iq.hdf5 files")
-    run(p.parse_args().iq_dir)
+    p.add_argument("--stretch", type=float, default=REAL_TIME_STRETCH,
+                   help="playback duration / acquisition duration "
+                        "(1 = real time, 3 = 3x slow motion)")
+    a = p.parse_args()
+    run(a.iq_dir, stretch=a.stretch)
