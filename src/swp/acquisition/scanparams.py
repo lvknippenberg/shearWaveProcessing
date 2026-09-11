@@ -10,13 +10,36 @@ grid/timestamps. Existing custom elements (``reference_iq``, ``t_reference``, an
 """
 from __future__ import annotations
 
+import os
 import re
+import time
 from pathlib import Path
 
 import numpy as np
 
 from zea import File
 from zea.data.file import CustomElement
+
+# Writing these files goes through a temp file + os.replace. On a network share (the
+# study lives on Z:) that replace intermittently hits "WinError 32: being used by
+# another process" - the previous handle has not been released yet, or a scanner has
+# the file open. Observed roughly once per 100 files, and it silently left the IQ
+# without its scan parameters, which the viz/passive stages then cannot read.
+_LOCK_RETRIES = 6
+_LOCK_BACKOFF_S = 0.5
+
+
+def _retry_on_lock(fn, *args, **kwargs):
+    """Call ``fn``, retrying a few times with backoff on a transient file lock."""
+    for attempt in range(_LOCK_RETRIES):
+        try:
+            return fn(*args, **kwargs)
+        except (PermissionError, OSError) as exc:
+            # WinError 32 = sharing violation; 13 = access denied (same cause here).
+            if getattr(exc, "winerror", None) not in (32, 13) or attempt == _LOCK_RETRIES - 1:
+                raise
+            time.sleep(_LOCK_BACKOFF_S * (2 ** attempt))
+    raise AssertionError("unreachable")
 
 # Fallbacks used only when the sibling converted file is missing. For the SWI Widebeam
 # sequence (S5-1, 2nd-harmonic imaging) the beamformed IQ is demodulated at the 2nd harmonic.
@@ -124,9 +147,11 @@ def append_scan_params_to_iq(iq_path, converted_path=None):
     tmp = iq_path.with_suffix(".tmp.hdf5")
     if tmp.exists():
         tmp.unlink()
-    File.create(str(tmp), data={"beamformed_data": bdata}, custom=keep + new,
-                description="beamformed shear-wave IQ + scan parameters",
-                compression="lzf", overwrite=True, ignore_warnings=True)
-    iq_path.unlink()
-    tmp.rename(iq_path)
+    _retry_on_lock(File.create, str(tmp), data={"beamformed_data": bdata}, custom=keep + new,
+                   description="beamformed shear-wave IQ + scan parameters",
+                   compression="lzf", overwrite=True, ignore_warnings=True)
+    # os.replace is atomic and overwrites in one step. The previous unlink()+rename()
+    # left a window in which the IQ file did not exist at all, so a failure between the
+    # two would have lost the beamformed data outright.
+    _retry_on_lock(os.replace, str(tmp), str(iq_path))
     return iq_path
