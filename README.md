@@ -199,6 +199,7 @@ configs/               active.yaml, passive.yaml
 scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tree, + --check audit),
                        verify_outputs.py (check/repair a processed tree),
                        incoherent_bmode.py (envelope-compounded focused B-mode, for comparison),
+                       refocus_bmode.py (REFoCUS retrospective transmit beamforming),
                        phantom_voltage_montage.py (cross-folder voltage-sweep montage),
                        check_push_voltage.py (delivered push-voltage sweep check)
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
