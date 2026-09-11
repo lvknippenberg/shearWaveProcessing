@@ -42,6 +42,15 @@ class BufferSpec:
     # Marks the ultrafast buffer whose B-mode frame stream doubles as the passive
     # shear-wave tracking sequence.
     passive_source: bool = False
+    # Weight each transmit's contribution by its simulated transmit field when
+    # beamforming (zea's ``Beamform(enable_pfield=...)``). Worth it only for FOCUSED
+    # transmits, whose field is strongly non-uniform: measured on C000000001,
+    # buffer 3 gains 3.5 dB at p90 (43.6 -> 47.1% of the sector above -50 dB), while
+    # the widebeam buffer 1 LOSES field of view (56.6 -> 50.2%, pfield down-weights
+    # the sector periphery) and the diverging buffer 4 is unchanged (74.7 -> 75.0%)
+    # because its transmit field is already near-uniform. Cost is negligible: the
+    # simulation is cached per geometry (<1 s) and per-frame time is unchanged.
+    pfield: bool = False
 
     @property
     def index(self) -> int:
@@ -56,7 +65,7 @@ SEQUENCE: list[BufferSpec] = [
                role="active shear-wave: reference + ARF push + tracking",
                pi_mode="sliding"),
     BufferSpec(3, "bmode_focused", "bmode", "Bmode_FC",
-               role="focused B-mode, ~25 FPS"),
+               role="focused B-mode, ~25 FPS", pfield=True),
     BufferSpec(4, "passive_sw", "bmode", "Bmode_DW",
                role="ultrafast diverging-wave B-mode, ~925 FPS (passive elastography source)",
                passive_source=True),
