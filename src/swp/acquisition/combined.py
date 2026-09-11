@@ -61,6 +61,7 @@ def ensure_combined_data(folder, base_config_dir_=None, overwrite=False) -> Path
     folder = Path(folder)
     combined = folder / "CombinedData.mat"
     if combined.is_file() and not overwrite:
+        repair_buffer2_receive(folder)
         return combined
 
     dynamic = folder / "AcquisitionParametersAndECG.mat"
@@ -98,5 +99,82 @@ def ensure_combined_data(folder, base_config_dir_=None, overwrite=False) -> Path
             "MATLAB reported success but CombinedData.mat was not created "
             f"in {folder}"
         )
+    repair_buffer2_receive(folder)
     print(f"  [CombinedData] done -> {combined}")
     return combined
+
+
+# ---------------------------------------------------------------------------------------------
+# Buffer-2 receive-layout repair
+# ---------------------------------------------------------------------------------------------
+# The base config supplies the constant `Receive` struct, i.e. the map from raw RF samples to
+# acquisitions. The buffer-2 (shear-wave tracking) receive length follows `SW.endDepth`, which is
+# a *runtime* setting -- so a base config recorded at one endDepth silently mis-slices data
+# acquired at another. This bit the 2026-08-17/18 campaigns: the `PhantomSweep/BaseConfig_10frames_*`
+# files were recorded at endDepth 200 wl (2688 samples) while the data was acquired at 300 wl
+# (3968 samples), and every tracking frame was read from a progressively shifted region of the
+# buffer. The B-modes looked normal (their buffers are fixed full-depth) while the tracking
+# speckle correlation collapsed from 0.98 to 0.40 and no shear wave survived.
+#
+# `repair_buffer2_receive` recomputes the layout from the runtime parameters the way Verasonics
+# does and rewrites it, and is called by `ensure_combined_data` on every build.
+
+def buffer2_receive_samples(max_acq_length, samples_per_wave):
+    """Verasonics buffer-2 receive length: 2 * maxAcqLength * samplesPerWave, rounded up to 128."""
+    import math
+    return int(math.ceil(2.0 * float(max_acq_length) * float(samples_per_wave) / 128.0) * 128)
+
+
+def repair_buffer2_receive(folder, verbose=True):
+    """Make the buffer-2 ``Receive`` layout in ``CombinedData.mat`` match the acquisition.
+
+    Returns ``(status, have, want)`` with status ``"ok"`` (already correct) or ``"fixed"``.
+    Raises if the corrected layout would not fit in the buffer's ``rowsPerFrame``.
+    """
+    import h5py
+    import numpy as np
+    import scipy.io as sio
+
+    folder = Path(folder)
+    combined = folder / "CombinedData.mat"
+    dynamic = folder / "AcquisitionParametersAndECG.mat"
+    if not dynamic.is_file():
+        # Rebuilt-from-workspace folders carry their own consistent Receive; nothing to check.
+        return "skipped", None, None
+    max_acq = float(sio.loadmat(dynamic, squeeze_me=True,
+                                struct_as_record=False)["SW"].maxAcqLength)
+
+    def _refs(group, field):
+        return np.atleast_1d(np.array(group[field]).squeeze())
+
+    with h5py.File(combined, "r+") as f:
+        R = f["Receive"]
+        vals = lambda k: np.array([float(np.array(f[r]).squeeze()) for r in _refs(R, k)])  # noqa: E731
+        bufnum, acqnum = vals("bufnum"), vals("acqNum")
+        start, end, spw = vals("startSample"), vals("endSample"), vals("samplesPerWave")
+        idx = np.where(bufnum == 2)[0]
+        if idx.size == 0:
+            return "skipped", None, None
+        want = buffer2_receive_samples(max_acq, float(np.unique(spw[idx])[0]))
+        have = int(np.unique(end[idx] - start[idx] + 1)[0])
+        if have == want:
+            return "ok", have, want
+
+        rpf = [float(np.array(f[r]).squeeze())
+               for r in _refs(f["Resource"]["RcvBuffer"], "rowsPerFrame")]
+        n_per_frame = int(acqnum[idx].max())
+        if n_per_frame * want > rpf[1]:
+            raise RuntimeError(
+                f"{folder}: corrected buffer-2 layout ({n_per_frame} x {want} samples) exceeds "
+                f"rowsPerFrame {rpf[1]:.0f}"
+            )
+        r_ss, r_es, r_ed = _refs(R, "startSample"), _refs(R, "endSample"), _refs(R, "endDepth")
+        end_depth = want / (2.0 * float(np.unique(spw[idx])[0]))
+        for i in idx:
+            s = 1.0 + (acqnum[i] - 1.0) * want
+            for ref, value in ((r_ss[i], s), (r_es[i], s + want - 1), (r_ed[i], end_depth)):
+                f[ref][...] = np.array(value, dtype=f[ref].dtype).reshape(f[ref].shape)
+    if verbose:
+        print(f"  [CombinedData] buffer-2 receive layout repaired: {have} -> {want} samples "
+              f"(base config endDepth did not match the acquisition)")
+    return "fixed", have, want
