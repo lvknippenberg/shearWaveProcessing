@@ -268,7 +268,15 @@ Measured on point targets, median over 79 targets:
 |---|---|---|---|---|
 | **standard (coherent all-73)** | **1.40 mm** | **0.97 mm** | **13.8 dB** | 2.02% |
 | REFoCUS adjoint | **1.87 mm (+34%)** | 1.03 mm | 12.9 dB | 0.59% (3.4x) |
+| REFoCUS tikhonov | 1.84 mm (+31%) | 1.06 mm | 12.6 dB | 0.14% |
+| REFoCUS tsvd | 1.78 mm (+27%) | 1.05 mm | 12.4 dB | 0.14% |
 | incoherent (envelope) | 7.48 mm (+434%) | 2.66 mm | 6.7 dB | 0.65% (3.1x) |
+
+All three REFoCUS inversions land in the same place - 27-34% wider laterally - so the penalty is
+inherent to the under-determined 73x80 inversion, not to the choice of regulariser. Note also that
+the 2.835 deg "peak" for every non-standard reconstruction is the bottom of the search band: once
+the line-spacing term is removed there is no peak left to find, which is the correct outcome and
+not a competing artefact.
 
 **The in-vivo lateral-correlation figure said REFoCUS IMPROVED resolution (21.29 vs 24.45 mm).
 That was wrong** - an anatomy-scale correlation length is not a PSF, as flagged at the time. On
@@ -357,6 +365,7 @@ cleaner in-vivo B-mode. If it is ever revisited, it needs a physically generated
 | `scripts/incoherent_bmode.py <folder> --buffer 3` | envelope-compounded reconstruction + GIF, written alongside the normal output |
 | `analysis/phantom_psf.py` (working folder) | point-target PSF/CNR + angular ripple per reconstruction |
 | `analysis/c1_field_correct.py` (working folder) | builds both field maps on any folder's grid and applies them (S5b) |
+| `analysis/frame_montage.py` (working folder) | tiles one frame from N GIFs into a still PNG - the fastest way to re-judge striations |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
