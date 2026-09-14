@@ -76,8 +76,27 @@ if ~invivo_data
 end
 
 % Merge the dynamic push transmits (TX_tmp) into the tail of the base TX array.
-TX(end-length(TX_tmp)+1:end) = TX_tmp;
-clear TX_tmp;
+%
+% A whole-struct assignment fails with "Subscripted assignment between dissimilar structures"
+% whenever the two TX arrays carry different field sets. That happens when the base config is a
+% SETUP-time workspace rather than a runtime one: VSX adds hardware fields (VDASApod, VDASStates,
+% CumOnTime, Numpulses, perChWvfm, ...) to TX only once the sequence is loaded, so a setup-time
+% TX has ~14 fields while the runtime TX_tmp has ~23. (This is why the in-vivo base configs are
+% named *_runtime.mat.) Assign the fields the two have in common: the base TX keeps its schema
+% and the dynamic push values are filled in.
+tx_idx = numel(TX)-numel(TX_tmp)+1 : numel(TX);
+common_fields = intersect(fieldnames(TX), fieldnames(TX_tmp));
+missing_fields = setdiff(fieldnames(TX_tmp), fieldnames(TX));
+if ~isempty(missing_fields)
+    fprintf('note: base TX lacks %d TX_tmp field(s) (%s) - assigning the %d common ones\n', ...
+            numel(missing_fields), strjoin(missing_fields', ', '), numel(common_fields));
+end
+for k = 1:numel(TX_tmp)
+    for c = 1:numel(common_fields)
+        TX(tx_idx(k)).(common_fields{c}) = TX_tmp(k).(common_fields{c});
+    end
+end
+clear TX_tmp tx_idx common_fields missing_fields k c;
 
 % Per-buffer saved-channel masks for reconstructing the external RF binaries.
 load(fullfile(base_config_dir, 'NonzeroRFcolumns.mat'), 'NonzeroRFcolumns')

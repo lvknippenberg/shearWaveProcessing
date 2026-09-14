@@ -69,12 +69,27 @@ def _h5_ref_values(f, group, field):
 
 
 def rcvbuffer_layout(mat_path):
-    """``(numFrames, rowsPerFrame)`` from a v7.3 workspace's ``Resource.RcvBuffer``."""
-    import h5py
-    with h5py.File(str(mat_path), "r") as f:
-        rb = f["Resource"]["RcvBuffer"]
-        return ([int(v) for v in _h5_ref_values(f, rb, "numFrames")],
-                [int(v) for v in _h5_ref_values(f, rb, "rowsPerFrame")])
+    """``(numFrames, rowsPerFrame)`` from a workspace's ``Resource.RcvBuffer``.
+
+    Handles both MATLAB v7.3 (HDF5, read with h5py) and older v7 files (read with scipy). A
+    session's own base config is often saved as plain v7; without the fallback h5py raises and
+    the config is silently invisible to auto-selection, even though it is the correct one.
+    Note the pipeline still needs **v7.3** to actually beamform - the zea reader is h5py-based -
+    so a matching v7 file has to be re-saved with ``-v7.3`` before use.
+    """
+    import numpy as np
+    try:
+        import h5py
+        with h5py.File(str(mat_path), "r") as f:
+            rb = f["Resource"]["RcvBuffer"]
+            return ([int(v) for v in _h5_ref_values(f, rb, "numFrames")],
+                    [int(v) for v in _h5_ref_values(f, rb, "rowsPerFrame")])
+    except OSError:
+        import scipy.io as sio
+        d = sio.loadmat(str(mat_path), squeeze_me=True, struct_as_record=False,
+                        variable_names=["Resource"])
+        rb = np.atleast_1d(d["Resource"].RcvBuffer)
+        return ([int(b.numFrames) for b in rb], [int(b.rowsPerFrame) for b in rb])
 
 
 def acquisition_layout(folder):
@@ -101,11 +116,43 @@ def acquisition_layout(folder):
     raise FileNotFoundError(f"no RF_frames/RF_rows available in {folder}")
 
 
+def is_phantom(folder):
+    """True for a phantom acquisition, by the same test ``make_combined_data.m`` uses.
+
+    The merge branches on ``RF_frames(1) == 2`` (the B-mode buffers hold 2 frames on a
+    phantom, many on a cardiac acquisition).
+    """
+    try:
+        frames, _ = acquisition_layout(folder)
+    except (FileNotFoundError, KeyError, OSError):
+        return False
+    return bool(frames) and frames[0] == 2
+
+
+def _sw_nframes(folder):
+    """``SW.Nframes`` (the phantom push count) from the runtime .mat, or ``None``."""
+    dynamic = Path(folder) / "AcquisitionParametersAndECG.mat"
+    if not dynamic.is_file():
+        return None
+    try:
+        import scipy.io as sio
+        d = sio.loadmat(str(dynamic), squeeze_me=True, struct_as_record=False)
+        return int(d["SW"].Nframes)
+    except Exception:                                  # noqa: BLE001
+        return None
+
+
 def base_config_matches(mat_path, folder, raise_on_mismatch=False):
     """True when ``mat_path``'s RcvBuffer layout matches the acquisition in ``folder``.
 
     Compares only the buffers the acquisition actually wrote, so a config describing
     extra buffers is fine as long as the shared ones agree.
+
+    **Phantoms:** ``make_combined_data.m`` rewrites ``RcvBuffer(2).numFrames`` and
+    ``RcvBuffer(5).numFrames`` to ``SW.Nframes`` for phantom acquisitions, because the push
+    count is a runtime setting. The same rewrite is applied here before comparing - otherwise a
+    perfectly good ``BaseConfig_10frames_*`` is rejected for a 20-push phantom purely because
+    it is named for 10.
     """
     frames, rows = acquisition_layout(folder)
     try:
@@ -114,6 +161,15 @@ def base_config_matches(mat_path, folder, raise_on_mismatch=False):
         if raise_on_mismatch:
             raise BaseConfigMismatch(f"{mat_path}: no readable Resource.RcvBuffer ({exc})")
         return False
+
+    cfg_frames = list(cfg_frames)
+    if is_phantom(folder):
+        n_sw = _sw_nframes(folder)
+        if n_sw:
+            for k in (1, 4):                           # buffers 2 and 5, 0-based
+                if k < len(cfg_frames):
+                    cfg_frames[k] = n_sw
+
     n = min(len(frames), len(cfg_frames))
     ok = (n == len(frames)
           and cfg_frames[:n] == frames[:n] and cfg_rows[:n] == rows[:n])
