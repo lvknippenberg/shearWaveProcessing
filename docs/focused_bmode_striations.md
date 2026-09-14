@@ -3,7 +3,7 @@
 Investigation log for the fine radial lines visible in the buffer-3 GIF, which the widebeam
 (buffer 1) and diverging-wave (buffer 4) B-modes do not show. Records the sequence geometry as
 read from the data, what was **ruled out** and by which measurement, and the hypothesis that
-currently survives. Status: **open — awaiting resolution-phantom data.**
+currently survives. Status: **CLOSED (2026-09-14)** — mechanism confirmed on a resolution phantom; no available fix is worth its cost. See §8.
 
 All numbers below are read from `CombinedData.mat` for
 `Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54` unless stated.
@@ -242,6 +242,72 @@ Note also that region-based reconstruction sits at the *few-beams-per-pixel* end
 measured as intrinsically more line-prone (6 beams ≈ 2.84%, 1 beam 10.31%, vs 2.27% for full
 compounding). So a Verasonics-reconstructed image of this sequence should show *stronger* line
 structure than ours, plus a coverage boundary past ~110–120 mm at the edges.
+
+## 5a. Resolution-phantom results — and the conclusions they REVERSED
+
+Phantom: `D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51`
+(2026-06-18, 79 point targets over 30-105 mm). Its focused sequence is **identical to in-vivo**
+on all seven parameters (`na`, `txFocus`, `txFNum`, `rayDelta`, `theta`, `aperture`, `radius`),
+so the results transfer.
+
+### Mechanism: confirmed
+
+The standard reconstruction's ripple peaks at **1.284 deg** on the phantom, against **1.264 deg**
+in vivo and a one-way beam width of **1.247 deg**. Three independent measurements agree, on data
+with no anatomy or rib shadowing to confuse the spectrum.
+
+The synthesised **2nd-harmonic** complex transmit field peaks at **1.260 deg**; the fundamental
+at 2.430 deg, i.e. twice the period, exactly as harmonic doubling predicts. So the scalloping is
+transmit-related and lives in the harmonic band the images are formed in.
+
+### REFoCUS DEGRADES resolution — reversing §4a
+
+Measured on point targets, median over 79 targets:
+
+| reconstruction | lateral -6 dB | axial -6 dB | target CNR | ripple |
+|---|---|---|---|---|
+| **standard (coherent all-73)** | **1.40 mm** | **0.97 mm** | **13.8 dB** | 2.02% |
+| REFoCUS adjoint | **1.87 mm (+34%)** | 1.03 mm | 12.9 dB | 0.59% (3.4x) |
+| incoherent (envelope) | 7.48 mm (+434%) | 2.66 mm | 6.7 dB | 0.65% (3.1x) |
+
+**The in-vivo lateral-correlation figure said REFoCUS IMPROVED resolution (21.29 vs 24.45 mm).
+That was wrong** - an anatomy-scale correlation length is not a PSF, as flagged at the time. On
+real point targets REFoCUS is wider at every depth. The trade is 3.4x less ripple for 34% of
+lateral resolution.
+
+### The residual largely SURVIVES envelope summing — reversing §4's "open question"
+
+Using **absolute** ripple amplitude (the fraction-of-power alone misleads, since the totals are
+20.6 / 17.5 / 8.1%): standard **2.02%**, incoherent **0.65%** - only **3.1x** down, not the 28x a
+single in-vivo frame suggested. A multiplicative dip survives envelope summing, so this points at
+amplitude scalloping rather than pure interference.
+
+### Normalising by the transmit field does NOT work
+
+| correction map | ripple @ line spacing | its own peak | result |
+|---|---|---|---|
+| zea `compute_pfield` (returns float32 **magnitudes**, so only `sum|A|`) | 0.02% | 1.063 deg | ~100x too smooth: **no-op** |
+| synthesised coherent `|sum A|`, fundamental | 2.43% | 2.430 deg | wrong period |
+| synthesised coherent `|sum A|`, 2nd harmonic | 13.05% | **1.260 deg** | right period, but **anti-correlated with the image (-0.68)** |
+
+The anti-correlation is robust - mirroring the map or negating `t0_delays` leaves it at -0.68 -
+so it is not a sign error. The reason is that `|sum A|` is the sensitivity for a **point
+scatterer**, while the ripple is measured in **speckle**, whose mean intensity follows the
+*incoherent* compound `sum|A|^2` - and that one is flat. Neither model predicts the speckle
+ripple with the right sign, so there is no correction map to divide by.
+
+### Verdict
+
+**Keep the standard reconstruction.** Every method that reduces the ripple costs resolution, the
+one that would not cost resolution cannot be built from the available field models, and the
+artefact is ~2% angular ripple on a buffer that exists for orientation and never feeds the
+shear-wave estimators.
+
+### Loose end worth a look later
+
+Dividing by the harmonic map at gamma 0.5-1.0 **improves** the PSF (1.40 -> **1.07 mm**, -24%)
+and CNR (13.8 -> **18.2 dB**) while *increasing* ripple. It is behaving as a deconvolution rather
+than a flat-field correction. Unrelated to the striations, but a real resolution-enhancement lead.
 
 ## 6. Reproducing
 
