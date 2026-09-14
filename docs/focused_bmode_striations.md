@@ -428,6 +428,87 @@ either table is worth 27-434% of lateral resolution to remove an artefact that s
 that cuts the line ripple (2.69 -> 0.56% in vivo) while holding dynamic range (51.5 vs 51.3 dB).
 The price is measured and real: 34% wider laterally on the phantom.
 
+## 5d. The simulated centre beam vs its region - and why no field map can fix this
+
+The user supplied `CenterTransmit.mat`: the Verasonics-simulated field of the centre beam (region
+37 of 73) together with the `TransmitPData` defining which pixels that transmit reconstructs. This
+is the direct measurement the "too focused" hypothesis needed, and it both **confirms the geometry
+and rules it out as the cause**. Scripts: `analysis/center_transmit_vs_region.py`,
+`region_truncation_test.py`, `region_truncation_figure.py`. Figure: `montages/region_vs_beam.png`.
+
+### The geometry claim is correct
+
+Region 37 is a `SectorFT` with a virtual apex 12.1 mm behind the array and a full angle of
+**6.667 deg = exactly 6.00x the 1.111 deg line spacing**. Every pixel is therefore reconstructed
+from 6 transmits, not 1. Against that, the simulated beam:
+
+| depth | beam half-max | beam -20 dB | region | region / beam | region px inside the beam |
+|---|---|---|---|---|---|
+| 20 mm | 13.80 mm | 23.41 mm | 3.70 mm | 0.27 | 100% |
+| 40 mm | 8.38 mm | 18.97 mm | 5.67 mm | 0.68 | 100% |
+| 60 mm | **3.20 mm** | 12.32 mm | 8.13 mm | 2.54 | 38% |
+| 80 mm | 3.70 mm | 9.61 mm | 10.60 mm | **2.87** | 34% |
+| 100 mm | 5.17 mm | 16.76 mm | 13.06 mm | 2.52 | 39% |
+| 140 mm | 11.58 mm | 34.25 mm | 17.49 mm | 1.51 | 65% |
+
+So yes - **from ~45 mm down, the beam is narrower than the region it reconstructs**, by up to
+2.9x at 80 mm, and only about a third of each region's pixels sit within the beam's half-max
+width. The region edge lands near the beam's **-20 dB** contour (at 80 mm: 9.61 vs 10.60 mm).
+Above ~45 mm the relationship inverts and the beam is wider than its region.
+
+(The profile is a Verasonics magnitude/intensity map, so the absolute dB calibration of the
+"half-max" column is not certain. Nothing below depends on it - the -20 dB column brackets it, and
+the spectral argument is independent of beam width entirely.)
+
+### But it produces the wrong artefact, by a factor of 3.5 and at the wrong period
+
+Replicating the simulated beam at all 73 steering angles and compounding it two ways - freely, and
+truncated to each transmit's own +/-3.333 deg region, which is what the beamformer does:
+
+| compound | ripple rms | peak period |
+|---|---|---|
+| untruncated (free field) | 0.38% | **1.111 deg** |
+| region-truncated | 0.76% | **1.111 deg** |
+| **measured image (phantom)** | 16.98% (2.02% at the line spacing) | **1.284 deg** |
+
+Region truncation **does** do something: it doubles the sensitivity ripple and discards 36% of the
+compounded energy (a smooth 0.63-0.72 efficiency loss across depth - that costs SNR, not texture).
+But the result is 0.76% modulation where the image shows 2.02% at the line spacing, and both
+predictions peak at **1.111 deg while the image peaks at 1.284 deg**.
+
+### Why that is decisive, not just suggestive
+
+The 73 transmits form a **regular 1.111 deg lattice**. Any per-transmit *amplitude* effect -
+beam narrowness, region truncation, apodisation, element dropout, a pfield weighting, anything
+that scales a transmit's contribution without touching its phase - is a function sampled on that
+lattice, so it can only produce angular structure at 1/1.111 deg/cycle and its harmonics. The
+measured image peak at 1.284 deg is **not a harmonic of 1.111 deg** (0.779 vs 0.900, 1.800,
+2.700 cyc/deg), and the separation is ~8 spectral bins, well beyond the resolution of the
+estimate.
+
+**An amplitude mechanism cannot put energy at 1.284 deg. So the striations are not amplitude
+scalloping, and no magnitude map - Verasonics TXPD, zea `pfield`, or a synthesised
+Rayleigh-Sommerfeld field - contains the information needed to remove them.** That is why every
+normalisation attempt in S5a and S5b failed, and it explains the sign of the failure too: the
+correction maps carry their own structure at a *different* period, so dividing by them adds a
+second pattern instead of cancelling the first (measured anti-correlation -0.68).
+
+This also retires an earlier loose end. S2 noted the image peak sits near the one-way beam width
+rather than the line spacing and left that unexplained; it is now clear the peak simply is not on
+the transmit lattice at all, which is a positive statement about what the mechanism *cannot* be.
+
+### What this implies
+
+* **The residual is cross-transmit phase interference**, consistent with everything else measured:
+  it drops 3.1x (not to zero) under envelope summing, and it survives every magnitude correction.
+* **The only reconstruction-side fix is one that changes the phase relationship**, which is exactly
+  what REFoCUS does - it inverts the encoding rather than compensating a weight. That is why it is
+  the one method that reduced the ripple without blurring (S5c), and it still costs 34% laterally.
+* **The 6x region overlap is doing its job.** Using fewer transmits per pixel is monotonically
+  worse (S2: single nearest beam = 10.31%), so the wide regions are a mitigation, not the cause.
+* **Acquisition-side**, the lever is the transmit pitch relative to the beam, not the F-number. But
+  at 2.02% (0.12 dB on the phantom) the artefact does not justify a sequence change.
+
 ## 6. Reproducing
 
 | script | what |
@@ -437,6 +518,8 @@ The price is measured and real: 34% wider laterally on the phantom.
 | `analysis/c1_field_correct.py` (working folder) | builds both field maps on any folder's grid and applies them (S5b) |
 | `analysis/frame_montage.py` (working folder) | tiles one frame from N GIFs into a still PNG - the fastest way to re-judge striations |
 | `analysis/method_scorecard.py` (working folder) | all 8 reconstructions x both datasets on one consistent metric set (S5c) |
+| `analysis/center_transmit_vs_region.py` (working folder) | beam width vs region width from `CenterTransmit.mat` (S5d) |
+| `analysis/region_truncation_test.py` (working folder) | compounds the simulated beam over 73 angles, with/without region truncation (S5d) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
