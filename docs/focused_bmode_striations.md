@@ -358,6 +358,76 @@ cleaner in-vivo B-mode. If it is ever revisited, it needs a physically generated
 (a nonlinear propagation model) rather than the squared-linear stand-in used here, whose ripple is
 ~6x too deep.
 
+## 5c. Scorecard: all 8 reconstructions, one consistent metric set
+
+Earlier tables in this doc mixed two different "ripple" numbers - a FRACTION of ripple power in the
+line-spacing band, and an ABSOLUTE ripple amplitude. They are not comparable. `analysis/
+method_scorecard.py` recomputes everything as **absolute amplitude**, over a **30-105 mm** band on
+the phantom and 45-85 mm in vivo (so these do not match the S5a numbers, which used 45-85 mm on
+both - the ripple concentrates at the focal depth, so a wider band dilutes it).
+
+It also adds the metric the earlier tables lacked. `rip_line` only sees the 1.111 deg band, so a
+reconstruction can score well there and still show obvious BROAD radial streaks. The discriminator
+for "radial lines" is not amplitude but **depth persistence**: speckle decorrelates with range, a
+transmit-field streak does not. `persist` correlates the near-half and far-half angular profiles.
+
+**Phantom** (79 point targets):
+
+| method | rip_line | ang_rms | persist | lateral | CNR | dyn.rng |
+|---|---|---|---|---|---|---|
+| **standard** | 1.41% | 17.7% | 0.034 | **1.40 mm** | 13.8 dB | 58.3 dB |
+| incoherent | 0.59% | 7.8% | 0.074 | 7.48 mm | 6.7 dB | 36.6 dB |
+| REFoCUS adjoint | 0.99% | 16.2% | 0.036 | 1.87 mm | 12.9 dB | 61.7 dB |
+| REFoCUS tikhonov | 1.03% | 16.2% | 0.040 | 1.84 mm | 12.6 dB | 54.2 dB |
+| REFoCUS tsvd | 1.05% | 16.1% | 0.034 | 1.78 mm | 12.4 dB | 50.1 dB |
+| / pfield | 1.41% | 17.6% | 0.031 | 1.41 mm | 13.6 dB | 54.6 dB |
+| / harmonic g=0.5 | 4.95% | 29.2% | 0.168 | 1.14 mm | 16.7 dB | 52.6 dB |
+| / harmonic g=1.0 | 11.36% | 51.0% | 0.281 | **1.07 mm** | **18.2 dB** | 51.5 dB |
+
+**In vivo C000000001** (no point targets, so no PSF):
+
+| method | rip_line | ang_rms | persist | spk SNR | dyn.rng |
+|---|---|---|---|---|---|
+| **standard** | 2.69% | 15.0% | 0.533 | 0.74 | 51.3 dB |
+| incoherent | 0.50% | 8.7% | 0.729 | 1.73 | 36.1 dB |
+| **REFoCUS adjoint** | **0.56%** | 16.8% | 0.666 | 0.69 | 51.5 dB |
+| REFoCUS tikhonov | 1.50% | 13.1% | 0.472 | 0.85 | 43.8 dB |
+| REFoCUS tsvd | **3.26%** | 15.1% | 0.221 | 1.38 | **36.2 dB** |
+| / pfield | 2.69% | 14.9% | 0.534 | 0.70 | 45.2 dB |
+| / harmonic g=0.5 | 6.01% | 28.3% | 0.542 | 0.62 | 47.1 dB |
+| / harmonic g=1.0 | 14.67% | 54.4% | 0.477 | 0.45 | 55.0 dB |
+
+Three things these two tables show that no single-dataset table could:
+
+**1. The harmonic division really does sharpen - the PSF gain is not a metric artefact.** 1.40 ->
+1.07 mm (-24%) and CNR +4.4 dB, on 79 wire targets. But it buys that by stamping depth-persistent
+radial structure: `persist` rises 8x (0.034 -> 0.281) and `ang_rms` triples. And the mechanism
+should be treated with suspicion - dividing by a map with 24 dB of span and ~1.26 deg structure
+narrows a point target partly by suppressing its shoulders, which shrinks the -6 dB width without
+necessarily improving two-point separability. On a phantom of isolated wires that reads as pure
+gain; in vivo, where nearly every pixel is speckle, the same operation is just texture.
+
+**2. The phantom FLATTERS the SVD inversions.** tikhonov and tsvd look interchangeable with adjoint
+on the phantom (1.78-1.87 mm, rip_line ~1.0%). In vivo they separate hard: tsvd's line ripple is
+**3.26%, worse than the standard reconstruction it was meant to fix**, and its dynamic range
+collapses 51.3 -> 36.2 dB. That is textbook rank-deficient inversion amplifying noise, and the
+phantom cannot show it because its SNR is far higher than a heart at 100 mm. **Any future
+phantom-only verdict on a regularised inversion should be distrusted for this reason.**
+
+**3. `persist` is only meaningful on the phantom.** In vivo every method scores 0.22-0.73 because
+anatomy is itself depth-persistent - a bright ridge spans many radii. The phantom's speckle region
+is the only place the metric isolates the transmit field.
+
+### Verdict
+
+**Keep standard.** On the phantom its striation is 1.41% absolute envelope modulation - **0.12 dB** -
+and does not persist through depth (0.034). In vivo it is 2.69%, or **0.23 dB**. Nothing else on
+either table is worth 27-434% of lateral resolution to remove an artefact that small.
+
+**If it ever must be removed, use REFoCUS adjoint and nothing else.** It is the only alternative
+that cuts the line ripple (2.69 -> 0.56% in vivo) while holding dynamic range (51.5 vs 51.3 dB).
+The price is measured and real: 34% wider laterally on the phantom.
+
 ## 6. Reproducing
 
 | script | what |
@@ -366,6 +436,7 @@ cleaner in-vivo B-mode. If it is ever revisited, it needs a physically generated
 | `analysis/phantom_psf.py` (working folder) | point-target PSF/CNR + angular ripple per reconstruction |
 | `analysis/c1_field_correct.py` (working folder) | builds both field maps on any folder's grid and applies them (S5b) |
 | `analysis/frame_montage.py` (working folder) | tiles one frame from N GIFs into a still PNG - the fastest way to re-judge striations |
+| `analysis/method_scorecard.py` (working folder) | all 8 reconstructions x both datasets on one consistent metric set (S5c) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
