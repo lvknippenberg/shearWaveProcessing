@@ -51,7 +51,7 @@ import numpy as np
 
 import zea
 from zea import File, Parameters, init_device
-from zea.ops import Beamform, Cast, Demodulate
+from zea.ops import Beamform, Cast, Demodulate, Refocus
 from zea.data.file import CustomElement
 from zea.data.convert.verasonics import VerasonicsFile
 
@@ -245,7 +245,8 @@ def plan_patches_and_chunk(params, n_tx, n_el):
 
 
 def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
-                            enable_pfield: bool = False) -> zea.Pipeline:
+                            enable_pfield: bool = False,
+                            refocus: str | None = None) -> zea.Pipeline:
     """RF/IQ -> complex-IQ beamforming pipeline (delay-and-sum), ``(n_frames, z, x, 2)``.
 
     Baseband buffers (Verasonics BS100BW/BS50BW, e.g. the active shear-wave
@@ -260,7 +261,12 @@ def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
             dim 2); skips the demodulation step. Defaults to False (real RF).
         enable_pfield (bool): weight each transmit by its simulated transmit
             field. Set per buffer via ``BufferSpec.pfield`` - only the focused
-            buffer benefits; see that field for the measurements.
+            buffer benefits; see that field for the measurements. Ignored when
+            ``refocus`` is set, since ``Refocus`` rewrites the transmit
+            parameters and the per-transmit weights no longer mean anything.
+        refocus (str | None): retrospective transmit beamforming method
+            (``"adjoint"`` by default for the focused buffer, see
+            ``BufferSpec.refocus``). ``None`` runs plain delay-and-sum.
 
     Returns:
         zea.Pipeline: The beamforming pipeline.
@@ -268,11 +274,17 @@ def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
     operations = [Cast(dtype="float32")]
     if not is_baseband:
         operations.append(Demodulate())
+    if refocus:
+        operations.append(Refocus(method=refocus))
+        enable_pfield = False
     operations.append(
         Beamform(beamformer="delay_and_sum", num_patches=num_patches,
                  enable_pfield=enable_pfield)
     )
-    return zea.Pipeline(operations, with_batch_dim=True, jit_options=_jit_options())
+    # Refocus's SVD-based methods are not XLA-jittable; adjoint is, but the pipeline
+    # is built once per buffer so the safe choice costs nothing measurable.
+    jit = None if refocus and refocus != "adjoint" else _jit_options()
+    return zea.Pipeline(operations, with_batch_dim=True, jit_options=jit)
 
 
 def _ensure_cpu_t_peak(params):
@@ -318,7 +330,7 @@ def _is_oom_error(exc) -> bool:
                                   "resource exhausted", "cuda error: out of memory"))
 
 
-def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False):
+def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False, refocus=None):
     """Beamform ``(n_frames, n_tx, n_ax, n_el, 1)`` -> IQ ``(n_frames, z, x, 2)``.
 
     ``num_patches``/``chunk`` come from the GPU-scaled memory budget. If a call
@@ -327,14 +339,17 @@ def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False):
     block is retried - so this completes on any GPU regardless of the budget guess.
     """
     n_tx, n_el = raw.shape[1], raw.shape[3]
+    # Refocus expands the transmit axis from n_tx to n_el VIRTUAL transmits, so the
+    # memory budget has to be planned for n_el. Budgeting for n_tx OOMs (73 -> 80 here).
+    n_tx_effective = n_el if refocus else n_tx
     # Baseband/IQ buffers arrive with a channel dim of 2 ([I, Q]) and must not be
     # demodulated again; real-RF buffers have channel dim 1. Branch the pipeline
     # accordingly (see build_beamform_pipeline).
     is_baseband = raw.shape[-1] == 2
     _ensure_cpu_t_peak(params)   # zea torch-GPU t_peak workaround (see helper docstring)
-    num_patches, chunk = plan_patches_and_chunk(params, n_tx, n_el)
+    num_patches, chunk = plan_patches_and_chunk(params, n_tx_effective, n_el)
     pipe = build_beamform_pipeline(num_patches, is_baseband=is_baseband,
-                                   enable_pfield=enable_pfield)
+                                   enable_pfield=enable_pfield, refocus=refocus)
     bf_in = pipe.prepare_parameters(params)
 
     n_frames = raw.shape[0]
@@ -354,7 +369,7 @@ def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False):
                 num_patches *= 2
                 chunk = max(1, chunk // 2)
                 pipe = build_beamform_pipeline(num_patches, is_baseband=is_baseband,
-                                               enable_pfield=enable_pfield)
+                                               enable_pfield=enable_pfield, refocus=refocus)
                 bf_in = pipe.prepare_parameters(params)
                 print(f"    OOM - retrying with num_patches={num_patches}, chunk={chunk}")
                 continue
@@ -410,14 +425,20 @@ def process_bmode_buffer(vf, spec, out_dir, grid, fps, stem, compression,
         return None
 
     apply_grid(params, grid)
-    iq, num_patches = beamform_frames(raw, params, enable_pfield=spec.pfield)
+    iq, num_patches = beamform_frames(raw, params, enable_pfield=spec.pfield,
+                                      refocus=spec.refocus)
     coords = _grid_coordinates(params)
 
     out_path = out_dir / f"{stem}_buffer{spec.matlab}_iq.hdf5"
+    # Record WHICH reconstruction produced the file. The default for buffer 3 changed
+    # from plain DAS to REFoCUS adjoint, and the filename does not carry that - so
+    # files written before the change are only distinguishable by this string.
+    recon = f"REFoCUS {spec.refocus}" if spec.refocus else (
+        "delay-and-sum, pfield-weighted" if spec.pfield else "delay-and-sum")
     _save_beamformed(out_path, iq, coords, fps=fps,
-                     description=f"{spec.name}: {spec.role}", compression=compression)
+                     description=f"{spec.name}: {spec.role} [{recon}]", compression=compression)
     print(f"  buffer {spec.matlab} ({spec.name}): {raw.shape[0]} frames n_tx={raw.shape[1]} "
-          f"patches={num_patches}{' pfield' if spec.pfield else ''} -> IQ {iq.shape} "
+          f"patches={num_patches} {recon} -> IQ {iq.shape} "
           f"@ {fps or 0:.1f} FPS -> {out_path.name}")
     return out_path
 

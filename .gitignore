@@ -19,3 +19,14 @@ results/
 *.mat
 # keep small M-line records in version control if you want; ignored by default
 mlines/
+
+# study/ - the investigation record. Scripts, docs, logs and figures are tracked;
+# the regenerable caches are not (they run to ~1 GB).
+study/analysis/*.npy
+study/analysis/tilecache/
+study/montages/*.gif
+!study/montages/*.png
+
+# The study logs are the provenance for every number in docs/ - keep them tracked.
+# A global gitignore (core.excludesFile) excludes *.log; a repo rule overrides it.
+!study/logs/*.log

@@ -15,7 +15,7 @@ currently survives. Status: **REOPENED (2026-09-14)** — the mechanism is confi
 > 1.15-1.19 - so the peak was smeared across periods and its amplitude spread over neighbouring
 > bins.
 >
-> Re-measured about the apex (`analysis/apex_referenced_ripple.py`), the standard reconstruction's
+> Re-measured about the apex (`study/analysis/apex_referenced_ripple.py`), the standard reconstruction's
 > line-spacing ripple is **15.41%, not 2.02%**, and its peak sits at **1.112 deg - exactly the
 > 1.1111 deg transmit pitch**. The decimation test confirms it: pitch 2.222 deg -> peak 2.144 deg,
 > pitch 3.333 deg -> 3.159 deg.
@@ -108,7 +108,7 @@ that the widebeam profile does not have.
 ## 3a. Where the power actually sits (peak fit, not a windowed sum)
 
 Scanning the whole frame-averaged angular spectrum rather than probing one assumed frequency
-(`analysis/buffer1_own_spacing.py` in the Claude working folder):
+(`study/analysis/buffer1_own_spacing.py` in the Claude working folder):
 
 | buffer | transmit step | distinct spectral peaks (45–85 mm) |
 |---|---|---|
@@ -356,7 +356,7 @@ than a flat-field correction. Unrelated to the striations, but a real resolution
 The phantom left one loose end worth chasing: dividing by the synthesised harmonic field made the
 ripple *worse* but made point targets *sharper* (1.40 -> 1.07 mm, CNR +4.4 dB), behaving like a
 crude deconvolution. Both maps were therefore rebuilt on C000000001's buffer-3 grid and applied
-in vivo. Script: `analysis/c1_field_correct.py` in the working folder.
+in vivo. Script: `study/analysis/c1_field_correct.py` in the working folder.
 
 | C1 buffer 3, 26 frames | ripple @ spacing | its peak | lat. corr | speckle SNR | dyn. range |
 |---|---|---|---|---|---|
@@ -384,7 +384,7 @@ on the phantom the wire targets could, which is the whole reason the phantom was
 
 **This is the third time in this investigation that a normalised or proxy metric pointed the wrong
 way** (after the single-frame ripple fraction and the in-vivo REFoCUS correlation length). The
-visual check is unambiguous and took seconds: `montages/c1_field_correction.gif`.
+visual check is unambiguous and took seconds: `study/montages/c1_field_correction.gif`.
 
 **Conclusion unchanged: keep the standard reconstruction.** The deconvolution lead is real on the
 phantom but is not separable from field-texture imprinting in vivo, so it is not a route to a
@@ -395,7 +395,7 @@ cleaner in-vivo B-mode. If it is ever revisited, it needs a physically generated
 ## 5c. Scorecard: all 8 reconstructions, one consistent metric set
 
 Earlier tables in this doc mixed two different "ripple" numbers - a FRACTION of ripple power in the
-line-spacing band, and an ABSOLUTE ripple amplitude. They are not comparable. `analysis/
+line-spacing band, and an ABSOLUTE ripple amplitude. They are not comparable. `study/analysis/
 method_scorecard.py` recomputes everything as **absolute amplitude**, over a **30-105 mm** band on
 the phantom and 45-85 mm in vivo (so these do not match the S5a numbers, which used 45-85 mm on
 both - the ripple concentrates at the focal depth, so a wider band dilutes it).
@@ -467,8 +467,8 @@ The price is measured and real: 34% wider laterally on the phantom.
 The user supplied `CenterTransmit.mat`: the Verasonics-simulated field of the centre beam (region
 37 of 73) together with the `TransmitPData` defining which pixels that transmit reconstructs. This
 is the direct measurement the "too focused" hypothesis needed, and it both **confirms the geometry
-and rules it out as the cause**. Scripts: `analysis/center_transmit_vs_region.py`,
-`region_truncation_test.py`, `region_truncation_figure.py`. Figure: `montages/region_vs_beam.png`.
+and rules it out as the cause**. Scripts: `study/analysis/center_transmit_vs_region.py`,
+`region_truncation_test.py`, `region_truncation_figure.py`. Figure: `study/montages/region_vs_beam.png`.
 
 ### The geometry claim is correct
 
@@ -546,7 +546,7 @@ the transmit lattice at all, which is a positive statement about what the mechan
 ## 5e. Would reconstructing each pixel from fewer transmits help?
 
 Direct test, all 73 transmits of the phantom beamformed separately and recomposited nearest-k
-(`analysis/nearest_k_composite.py`, re-measured apex-referenced in `nearest_k_apex.py`). k=6 is
+(`study/analysis/nearest_k_composite.py`, re-measured apex-referenced in `nearest_k_apex.py`). k=6 is
 what the pipeline already does, since the 6.667 deg region on a 1.111 deg lattice covers exactly 6
 transmits - and it reproduces the stored standard reconstruction, which validates the composite
 rule.
@@ -603,7 +603,7 @@ nearest-1 has no cross-transmit term of any kind, yet it still shows ripple at t
 strip: a pixel at the strip edge sits 0.556 deg off the beam axis and is insonified more weakly.
 
 That is a phase-free geometric prediction and `CenterTransmit.mat` makes it directly
-(`analysis/mosaic_prediction.py`) - mosaic the simulated beam in +/-0.556 deg strips and measure:
+(`study/analysis/mosaic_prediction.py`) - mosaic the simulated beam in +/-0.556 deg strips and measure:
 
 | effective sensitivity | predicted ripple @ pitch | peak |
 |---|---|---|
@@ -643,7 +643,7 @@ withdrawn in the CORRECTION banner, is why every normalisation attempt in S5a/S5
 
 GPU beamform only, C000000001 buffer 3, 26 frames x 73 transmits onto a 382x529 grid, each method
 given an untimed one-frame warm-up so kernel autotuning does not land on one stopwatch
-(`analysis/timing_refocus.py`):
+(`study/analysis/timing_refocus.py`):
 
 | method | total | per frame |
 |---|---|---|
@@ -701,18 +701,18 @@ estimators, whose phase must not be touched.
 | script | what |
 |---|---|
 | `scripts/incoherent_bmode.py <folder> --buffer 3` | envelope-compounded reconstruction + GIF, written alongside the normal output |
-| `analysis/phantom_psf.py` (working folder) | point-target PSF/CNR + angular ripple per reconstruction |
-| `analysis/c1_field_correct.py` (working folder) | builds both field maps on any folder's grid and applies them (S5b) |
-| `analysis/frame_montage.py` (working folder) | tiles one frame from N GIFs into a still PNG - the fastest way to re-judge striations |
-| `analysis/method_scorecard.py` (working folder) | all 8 reconstructions x both datasets on one consistent metric set (S5c) |
-| `analysis/center_transmit_vs_region.py` (working folder) | beam width vs region width from `CenterTransmit.mat` (S5d) |
-| `analysis/region_truncation_test.py` (working folder) | compounds the simulated beam over 73 angles, with/without region truncation (S5d) |
-| `analysis/apex_referenced_ripple.py` (working folder) | **the corrected ripple metric - use this one** |
-| `analysis/nearest_k_composite.py` / `nearest_k_apex.py` (working folder) | per-transmit stack + nearest-k ladder (S5e) |
-| `analysis/ripple_metric_control.py` (working folder) | synthetic-speckle control for the ripple metric |
-| `analysis/mosaic_prediction.py` (working folder) | predicts the nearest-1 ripple from the simulated beam alone (S5f) |
-| `analysis/timing_refocus.py` (working folder) | standard vs REFoCUS beamforming time (S5g) |
-| `analysis/buffer_lattice_ripple.py` (working folder) | per-buffer lattice ripple with REFoCUS as a null test (S5g) |
+| `study/analysis/phantom_psf.py`  | point-target PSF/CNR + angular ripple per reconstruction |
+| `study/analysis/c1_field_correct.py`  | builds both field maps on any folder's grid and applies them (S5b) |
+| `study/analysis/frame_montage.py`  | tiles one frame from N GIFs into a still PNG - the fastest way to re-judge striations |
+| `study/analysis/method_scorecard.py`  | all 8 reconstructions x both datasets on one consistent metric set (S5c) |
+| `study/analysis/center_transmit_vs_region.py`  | beam width vs region width from `CenterTransmit.mat` (S5d) |
+| `study/analysis/region_truncation_test.py`  | compounds the simulated beam over 73 angles, with/without region truncation (S5d) |
+| `study/analysis/apex_referenced_ripple.py`  | **the corrected ripple metric - use this one** |
+| `study/analysis/nearest_k_composite.py` / `nearest_k_apex.py`  | per-transmit stack + nearest-k ladder (S5e) |
+| `study/analysis/ripple_metric_control.py`  | synthetic-speckle control for the ripple metric |
+| `study/analysis/mosaic_prediction.py`  | predicts the nearest-1 ripple from the simulated beam alone (S5f) |
+| `study/analysis/timing_refocus.py`  | standard vs REFoCUS beamforming time (S5g) |
+| `study/analysis/buffer_lattice_ripple.py`  | per-buffer lattice ripple with REFoCUS as a null test (S5g) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The

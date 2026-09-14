@@ -1,0 +1,122 @@
+=== refocus tikhonov ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+     memory
+GPU        
+0       23848
+1       20641
+2       20790
+3       23812
+4       24115
+5       23844
+6       24115
+7        8112
+Selecting 1 GPU based on available memory.
+Selected GPU 4 with Free Memory: 24115.00 MiB
+Hiding GPUs [0, 1, 2, 3, 5, 6, 7] from the system.
+--------------------------------------------------
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer3.hdf5' [2m(/data/raw_data, 88.4 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+buffer 3 (bmode_focused): raw (2, 73, 3968, 80, 1)  25.4 FPS
+  encoding matrix H is (73 tx x 80 el)  -- UNDER-DETERMINED, inversion is rank-deficient
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Refocus method='tikhonov' uses SVD, which is not supported by the XLA JIT compiler. Marking this operation as non-jittable.
+    frame 0/2  (25s)
+  REFoCUS[tikhonov] + beamform: 2 frames in 49s -> IQ (2, 382, 529, 2)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5[0m
+  ripple power at the 1.111 deg transmit spacing: 0.13%   total ripple RMS 22.8%
+  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5' [2m(/data/beamformed_data/values, 3.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5' [2m(/data/beamformed_data/timestamps, 8 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tikhonov_iq.gif[0m[0m
+  CombinedData_buffer3_refocus-tikhonov_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_refocus-tikhonov_iq.gif
+  wrote CombinedData_buffer3_refocus-tikhonov_iq.hdf5 + .gif
+EXIT_tikhonov=0
+=== refocus tsvd ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+     memory
+GPU        
+0       23848
+1       20641
+2       20790
+3       23812
+4       24115
+5       23844
+6       24115
+7        8112
+Selecting 1 GPU based on available memory.
+Selected GPU 4 with Free Memory: 24115.00 MiB
+Hiding GPUs [0, 1, 2, 3, 5, 6, 7] from the system.
+--------------------------------------------------
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer3.hdf5' [2m(/data/raw_data, 88.4 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+buffer 3 (bmode_focused): raw (2, 73, 3968, 80, 1)  25.4 FPS
+  encoding matrix H is (73 tx x 80 el)  -- UNDER-DETERMINED, inversion is rank-deficient
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Refocus method='tsvd' uses SVD, which is not supported by the XLA JIT compiler. Marking this operation as non-jittable.
+    frame 0/2  (24s)
+  REFoCUS[tsvd] + beamform: 2 frames in 48s -> IQ (2, 382, 529, 2)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5[0m
+  ripple power at the 1.111 deg transmit spacing: 0.13%   total ripple RMS 22.6%
+  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5' [2m(/data/beamformed_data/values, 3.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5' [2m(/data/beamformed_data/timestamps, 8 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_refocus-tsvd_iq.gif[0m[0m
+  CombinedData_buffer3_refocus-tsvd_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_refocus-tsvd_iq.gif
+  wrote CombinedData_buffer3_refocus-tsvd_iq.hdf5 + .gif
+EXIT_tsvd=0
+=== field maps ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+     memory
+GPU        
+0       23848
+1       20641
+2       20790
+3       23812
+4       24115
+5       23844
+6       24115
+7        8112
+Selecting 1 GPU based on available memory.
+Selected GPU 4 with Free Memory: 24115.00 MiB
+Hiding GPUs [0, 1, 2, 3, 5, 6, 7] from the system.
+--------------------------------------------------
+phantom buffer 3: 2 frames, grid (382, 529), 25.4 FPS
+[1m[38;5;36mzea[0m[0m: Loading cached result for compute_pfield.
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\torch\_utils.py:106: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  untyped_storage = torch.UntypedStorage(self.size(), device=device)
+  compute_pfield: 1s
+  synthesised harmonic field: 1s
+  pfield compound : span  13.8 dB  ripple  0.02% @ 1.063 deg  corr with image +0.187
+  synth harmonic  : span  24.0 dB  ripple  8.97% @ 1.260 deg  corr with image +0.293
+
+reconstruction                   ripple      peak  lat.corr  spk SNR  dyn.rng
+------------------------------------------------------------------------------
+standard (no correction)          2.02%    1.284deg     0.79mm     0.31    58.3dB
+/ pfield compound                 2.02%    1.284deg     1.18mm     0.35    54.6dB
+/ synth harmonic, gamma 0.25      3.92%    1.284deg     0.79mm     0.33    55.4dB
+/ synth harmonic, gamma 0.50      7.29%    1.260deg     0.79mm     0.35    52.6dB
+/ synth harmonic, gamma 0.75     11.61%    1.260deg     0.79mm     0.35    51.6dB
+/ synth harmonic, gamma 1.00     17.00%    1.260deg     0.79mm     0.34    51.5dB
+
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_pfieldnorm_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_pfieldnorm_iq.hdf5' [2m(/data/beamformed_data/values, 3.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_pfieldnorm_iq.hdf5' [2m(/data/beamformed_data/timestamps, 8 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_pfieldnorm_iq.gif[0m[0m
+  CombinedData_buffer3_pfieldnorm_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_pfieldnorm_iq.gif
+  wrote CombinedData_buffer3_pfieldnorm_iq.hdf5 + .gif
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_deconv-g050_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_deconv-g050_iq.gif[0m[0m
+  CombinedData_buffer3_deconv-g050_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_deconv-g050_iq.gif
+  wrote CombinedData_buffer3_deconv-g050_iq.hdf5 + .gif
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_deconv-g100_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_deconv-g100_iq.gif[0m[0m
+  CombinedData_buffer3_deconv-g100_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_deconv-g100_iq.gif
+  wrote CombinedData_buffer3_deconv-g100_iq.hdf5 + .gif
+
+saved phantom_field_correct_metrics.npy
+EXIT_field=0

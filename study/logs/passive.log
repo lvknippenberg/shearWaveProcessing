@@ -1,0 +1,58 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+passive workflow on CombinedData_buffer4_iq.hdf5
+  Acquisition[passive/normal] iq(926, 382, 495) refnone x[-97.5,97.5]mm z[0.0,150.3]mm prf=926Hz f_demod=3.906MHz dz=394um dx=395um
+  recipe: mode=frame_to_frame filters=['temporal_bandpass', 'spatial_smooth', 'temporal_moving_mean'] directional=False
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer4_iq.hdf5' [2m(/data/beamformed_data/values, 1.3 GB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer4_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (47.1 mm) -> passive_general_mline.npz (+ .png)
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 50 ms, window [1, 100] ms
+    #1: peak 438 ms, window [388, 488] ms
+    #2: peak 608 ms, window [558, 658] ms
+    #3: peak 788 ms, window [738, 838] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (48.9 mm) -> passive_win0_mline.npz (+ .png)
+    window #0 [disp bp10-150 gauss mean3]: space-time (111, 250) c=3.58 sem=0.858
+    window #0 [disp bp5-150 median NO-temporal]: space-time (111, 250) c=1.87 sem=0.888
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (110, 250) c=3.77 sem=0.661
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (43.1 mm) -> passive_win1_mline.npz (+ .png)
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-2.23 sem=0.475
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.40 sem=0.516
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.00 sem=0.411
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (44.3 mm) -> passive_win2_mline.npz (+ .png)
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.87 sem=0.512
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=6.00 sem=0.703
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.27 sem=0.579
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (41.9 mm) -> passive_win3_mline.npz (+ .png)
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.00 sem=0.941
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.11 sem=0.909
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.00 sem=0.820
+done -> Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\swp_passive\passive_windows_montage.png
+EXIT=0

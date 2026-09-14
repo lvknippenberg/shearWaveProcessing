@@ -1,0 +1,103 @@
+=== batch + incoherent done; starting REFoCUS sweep ===
+
+########## REFoCUS method=adjoint ##########
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+7/8 GPUs were disabled
+     memory
+GPU        
+0       17892
+Selecting 1 GPU based on available memory.
+Selected GPU 0 with Free Memory: 17892.00 MiB
+--------------------------------------------------
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\converted\CombinedData_buffer3.hdf5' [2m(/data/raw_data, 1.1 GB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+buffer 3 (bmode_focused): raw (26, 73, 3968, 80, 1)  25.4 FPS
+  encoding matrix H is (73 tx x 80 el)  -- UNDER-DETERMINED, inversion is rank-deficient
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+    frame 0/26  (5s)
+    frame 5/26  (18s)
+    frame 10/26  (31s)
+    frame 15/26  (44s)
+    frame 20/26  (57s)
+    frame 25/26  (69s)
+  REFoCUS[adjoint] + beamform: 26 frames in 69s -> IQ (26, 382, 529, 2)
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-adjoint_iq.hdf5[0m
+  line-spacing power 0.16%   total ripple RMS 19.4%
+  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-adjoint_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-adjoint_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-adjoint_iq.gif[0m[0m
+  CombinedData_buffer3_refocus-adjoint_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_refocus-adjoint_iq.gif
+  wrote CombinedData_buffer3_refocus-adjoint_iq.hdf5 + .gif
+method=adjoint exit=0
+
+########## REFoCUS method=tikhonov ##########
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+7/8 GPUs were disabled
+     memory
+GPU        
+0       17892
+Selecting 1 GPU based on available memory.
+Selected GPU 0 with Free Memory: 17892.00 MiB
+--------------------------------------------------
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\converted\CombinedData_buffer3.hdf5' [2m(/data/raw_data, 1.1 GB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+buffer 3 (bmode_focused): raw (26, 73, 3968, 80, 1)  25.4 FPS
+  encoding matrix H is (73 tx x 80 el)  -- UNDER-DETERMINED, inversion is rank-deficient
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Refocus method='tikhonov' uses SVD, which is not supported by the XLA JIT compiler. Marking this operation as non-jittable.
+    frame 0/26  (32s)
+    frame 5/26  (186s)
+    frame 10/26  (334s)
+    frame 15/26  (488s)
+    frame 20/26  (641s)
+    frame 25/26  (792s)
+  REFoCUS[tikhonov] + beamform: 26 frames in 793s -> IQ (26, 382, 529, 2)
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5[0m
+  line-spacing power 1.60%   total ripple RMS 16.8%
+  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tikhonov_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tikhonov_iq.gif[0m[0m
+  CombinedData_buffer3_refocus-tikhonov_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_refocus-tikhonov_iq.gif
+  wrote CombinedData_buffer3_refocus-tikhonov_iq.hdf5 + .gif
+method=tikhonov exit=0
+
+########## REFoCUS method=tsvd ##########
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+7/8 GPUs were disabled
+     memory
+GPU        
+0       17892
+Selecting 1 GPU based on available memory.
+Selected GPU 0 with Free Memory: 17892.00 MiB
+--------------------------------------------------
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\converted\CombinedData_buffer3.hdf5' [2m(/data/raw_data, 1.1 GB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+buffer 3 (bmode_focused): raw (26, 73, 3968, 80, 1)  25.4 FPS
+  encoding matrix H is (73 tx x 80 el)  -- UNDER-DETERMINED, inversion is rank-deficient
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Refocus method='tsvd' uses SVD, which is not supported by the XLA JIT compiler. Marking this operation as non-jittable.
+    frame 0/26  (32s)
+    frame 5/26  (184s)
+    frame 10/26  (333s)
+    frame 15/26  (480s)
+    frame 20/26  (631s)
+    frame 25/26  (788s)
+  REFoCUS[tsvd] + beamform: 26 frames in 788s -> IQ (26, 382, 529, 2)
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5[0m
+  line-spacing power 4.46%   total ripple RMS 20.1%
+  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tsvd_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_refocus-tsvd_iq.gif[0m[0m
+  CombinedData_buffer3_refocus-tsvd_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_refocus-tsvd_iq.gif
+  wrote CombinedData_buffer3_refocus-tsvd_iq.hdf5 + .gif
+method=tsvd exit=0
+REFOCUS_EXIT=0

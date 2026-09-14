@@ -51,6 +51,24 @@ class BufferSpec:
     # because its transmit field is already near-uniform. Cost is negligible: the
     # simulation is cached per geometry (<1 s) and per-frame time is unchanged.
     pfield: bool = False
+    # Retrospective transmit beamforming (zea ``Refocus``) before delay-and-sum.
+    # ``None`` = plain DAS; a string selects the inversion method.
+    #
+    # Default "adjoint" for the FOCUSED buffer only. Its 73 beams on a 1.1111 deg
+    # lattice are the one case in this sequence with a fine enough pitch and beams
+    # narrow enough to vary across it, so it is the only buffer that carries the
+    # radial striations (docs/focused_bmode_striations.md S5g): apex-referenced
+    # ripple at the transmit pitch is 15.55%, and REFoCUS adjoint takes it to 3.82%.
+    # Buffer 1 (21 widebeams, 4 deg, virtual source 123 mm behind the array) shows
+    # no reduction under the same test - there is nothing there to fix - and buffers
+    # 2/4 feed the displacement estimators, whose phase must not be touched.
+    #
+    # Costs: +6% beamforming time (adjoint is a matched filter, one H^H multiply,
+    # not an inversion) and 34% wider lateral PSF on the resolution phantom
+    # (1.40 -> 1.87 mm, 79 point targets). ``pfield`` is ignored when refocusing:
+    # Refocus rewrites the transmit parameters, so the per-transmit weights no
+    # longer correspond to anything.
+    refocus: str | None = None
 
     @property
     def index(self) -> int:
@@ -65,7 +83,7 @@ SEQUENCE: list[BufferSpec] = [
                role="active shear-wave: reference + ARF push + tracking",
                pi_mode="sliding"),
     BufferSpec(3, "bmode_focused", "bmode", "Bmode_FC",
-               role="focused B-mode, ~25 FPS", pfield=True),
+               role="focused B-mode, ~25 FPS", pfield=True, refocus="adjoint"),
     BufferSpec(4, "passive_sw", "bmode", "Bmode_DW",
                role="ultrafast diverging-wave B-mode, ~925 FPS (passive elastography source)",
                passive_source=True),

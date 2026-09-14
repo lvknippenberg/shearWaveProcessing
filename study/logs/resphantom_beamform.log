@@ -1,0 +1,169 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  [CombinedData] base config (given): CombinedData.mat
+  [CombinedData] building via MATLAB -> CombinedData.mat
+    C:\Program Files\MATLAB\R2026a\bin\matlab.EXE -batch make_combined_data('D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51','D:/Luuk van Knippenberg/SWI/Base config files','D:\swp_res\Elasticity phantom\DefaultPatient_SW_data_18-June-2026_14-05-44\CombinedData.mat')
+base config: D:\swp_res\Elasticity phantom\DefaultPatient_SW_data_18-June-2026_14-05-44\CombinedData.mat
+[Warning: Figure is saved in CombinedData.mat, which might result in a large file size or unexpected behavior when loading the figure. To reduce file size, avoid saving graphics
+objects by specifying which data variables to save. To save a graphics figure with additional options for loading, use the savefig function.] 
+[> In make_combined_data (line 110)]
+  [CombinedData] done -> D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\CombinedData.mat (RcvBuffer layout verified)
+-------------------GPU settings-------------------
+7/8 GPUs were disabled
+     memory
+GPU        
+0       24115
+Selecting 1 GPU based on available memory.
+Selected GPU 0 with Free Memory: 24115.00 MiB
+--------------------------------------------------
+=== beamforming CombinedData.mat -> D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output (backend torch, jit None, save_converted=True) ===
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl \u2192 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer1.hdf5[0m
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\numpy.py:230: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.ones(size=shape, dtype=dtype, device=get_device())
+    patch budget 6.44e+07 elements (GPU 25.756696576 GB)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer1_iq.hdf5[0m
+  buffer 1 (bmode_widebeam): 2 frames n_tx=21 patches=6 -> IQ (2, 382, 509, 2) @ 88.2 FPS -> CombinedData_buffer1_iq.hdf5
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl \u2192 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer2.hdf5[0m
+  buffer 2 (active_sw): 20 measurement(s), reference 39 + tracking 59 frames @ 3704 Hz [sliding]
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas1_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas2_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas3_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas4_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas5_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas6_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas7_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas8_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas9_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas10_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas11_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas12_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas13_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas14_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas15_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas16_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas17_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas18_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas19_iq.hdf5[0m
+    saved 20 per-measurement file(s), tracking IQ (59, 76, 100, 2), reference IQ (39, 76, 100, 2)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.hdf5' [2m(/data/beamformed_data/values, 3.4 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.hdf5' [2m(/data/beamformed_data/coordinates, 89.1 KB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.hdf5' [2m(/data/beamformed_data/timestamps, 236 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.hdf5' [2m(/data/beamformed_data/start_time_offset, 4 B)[0m stored without chunking, which zea cannot read concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas1_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas2_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas3_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas4_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas5_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas6_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas7_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas8_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas9_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas10_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas11_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas12_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas13_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas14_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas15_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas16_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas17_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas18_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas19_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl \u2192 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer3.hdf5[0m
+[1m[38;5;36mzea[0m[0m: Loading cached result for compute_pfield.
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_iq.hdf5[0m
+  buffer 3 (bmode_focused): 2 frames n_tx=73 patches=19 pfield -> IQ (2, 382, 529, 2) @ 25.4 FPS -> CombinedData_buffer3_iq.hdf5
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl \u2192 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer4.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer4_iq.hdf5[0m
+  buffer 4 (passive_sw): 2 frames n_tx=2 patches=1 -> IQ (2, 382, 495, 2) @ 925.9 FPS -> CombinedData_buffer4_iq.hdf5
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer4_iq.tmp.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl \u2192 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\converted\CombinedData_buffer5.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer5_iq.hdf5[0m
+  buffer 5 (bmode_during_sw): 20 frames n_tx=21 patches=6 -> IQ (20, 382, 509, 2) @ 18.2 FPS -> CombinedData_buffer5_iq.hdf5
+=== GIFs from 24 IQ file(s) in D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output (real time; adaptive levels, curve gamma2) ===
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer1_iq.gif[0m[0m
+  CombinedData_buffer1_iq.hdf5: B-mode GIF, 88.2 Hz, 2 frames = 0.02 s -> 0.04 s GIF (real time); 2 frames @ 50 fps -> CombinedData_buffer1_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas0_iq.gif[0m[0m
+  CombinedData_buffer2_meas0_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas0_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas10_iq.gif[0m[0m
+  CombinedData_buffer2_meas10_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas10_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas11_iq.gif[0m[0m
+  CombinedData_buffer2_meas11_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas11_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas12_iq.gif[0m[0m
+  CombinedData_buffer2_meas12_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas12_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas13_iq.gif[0m[0m
+  CombinedData_buffer2_meas13_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas13_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas14_iq.gif[0m[0m
+  CombinedData_buffer2_meas14_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas14_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas15_iq.gif[0m[0m
+  CombinedData_buffer2_meas15_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas15_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas16_iq.gif[0m[0m
+  CombinedData_buffer2_meas16_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas16_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas17_iq.gif[0m[0m
+  CombinedData_buffer2_meas17_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas17_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas18_iq.gif[0m[0m
+  CombinedData_buffer2_meas18_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas18_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas19_iq.gif[0m[0m
+  CombinedData_buffer2_meas19_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas19_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas1_iq.gif[0m[0m
+  CombinedData_buffer2_meas1_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas1_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas2_iq.gif[0m[0m
+  CombinedData_buffer2_meas2_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas2_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas3_iq.gif[0m[0m
+  CombinedData_buffer2_meas3_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas3_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas4_iq.gif[0m[0m
+  CombinedData_buffer2_meas4_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas4_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas5_iq.gif[0m[0m
+  CombinedData_buffer2_meas5_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas5_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas6_iq.gif[0m[0m
+  CombinedData_buffer2_meas6_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas6_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas7_iq.gif[0m[0m
+  CombinedData_buffer2_meas7_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas7_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas8_iq.gif[0m[0m
+  CombinedData_buffer2_meas8_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas8_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer2_meas9_iq.gif[0m[0m
+  CombinedData_buffer2_meas9_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas9_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 2 frames = 0.08 s -> 0.08 s GIF (real time); 2 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer4_iq.gif[0m[0m
+  CombinedData_buffer4_iq.hdf5: B-mode GIF, 925.9 Hz, 2 frames = 0.00 s -> 0.04 s GIF (real time); 2 frames @ 50 fps -> CombinedData_buffer4_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mD:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output\CombinedData_buffer5_iq.gif[0m[0m
+  CombinedData_buffer5_iq.hdf5: B-mode GIF, 18.2 Hz, 20 frames = 1.10 s -> 1.10 s GIF (real time); 22 frames @ 20 fps -> CombinedData_buffer5_iq.gif
+EXIT=0

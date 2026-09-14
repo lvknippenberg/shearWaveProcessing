@@ -1,0 +1,23 @@
+==============================================================================
+buffer 2 (tracking) IQ (59, 76, 101, 2)   reference (39, 76, 101, 2)
+  per-frame mean envelope, first 8: [2609.   197.3  187.3  188.5  189.6  188.7  189.7  189.7]
+  frame0 / median(frames1..) = 13.609
+  reference mean envelope (last 3): [188.2 188.7 188.5]
+  frame0 / median(reference) = 14.228
+
+buffer 4 (passive) IQ (60, 382, 495, 2)
+
+speckle statistics (mid frame):
+  buffer 2 tracking: speckle SNR mean/std = 1.51 (n=24 blocks; Rayleigh ideal 1.91)
+  buffer 4 passive : speckle SNR mean/std = 1.49 (n=329 blocks; Rayleigh ideal 1.91)
+
+frame-to-frame complex correlation (tracking quality):
+  buffer 2 tracking: frame-to-frame |corr| median 0.8687  first 5 [0.133 0.896 0.899 0.902 0.895]
+  buffer 4 passive : frame-to-frame |corr| median 0.8149  first 5 [0.948 0.946 0.943 0.94  0.938]
+
+geometry:
+  buffer 2: grid (76, 101)  x [  -30.0,    9.4] mm  z [  40.9,  70.4] mm
+            pixel 394 x 394 um
+  buffer 4: grid (382, 495)  x [  -97.5,   97.5] mm  z [   0.0, 150.3] mm
+            pixel 394 x 395 um
+EXIT=0

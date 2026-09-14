@@ -1,0 +1,54 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+=== GIFs from 24 IQ file(s) in Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output (real time) ===
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/values, 133.5 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/timestamps, 360 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+D:\Luuk van Knippenberg\envs\zea_latest\Lib\site-packages\keras\src\backend\torch\core.py:243: UserWarning: expandable_segments not supported on this platform (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\c10/cuda/CUDAAllocatorConfig.h:40.)
+  return torch.as_tensor(x, dtype=dtype, device=get_device())
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.gif[0m[0m
+  CombinedData_buffer1_iq.hdf5: B-mode GIF, 88.2 Hz, 90 frames = 1.02 s -> 1.02 s GIF (real time); 51 frames @ 50 fps -> CombinedData_buffer1_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas0_iq.gif[0m[0m
+  CombinedData_buffer2_meas0_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas0_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas10_iq.gif[0m[0m
+  CombinedData_buffer2_meas10_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas10_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas11_iq.gif[0m[0m
+  CombinedData_buffer2_meas11_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas11_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas12_iq.gif[0m[0m
+  CombinedData_buffer2_meas12_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas12_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas13_iq.gif[0m[0m
+  CombinedData_buffer2_meas13_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas13_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas14_iq.gif[0m[0m
+  CombinedData_buffer2_meas14_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas14_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas15_iq.gif[0m[0m
+  CombinedData_buffer2_meas15_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas15_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas16_iq.gif[0m[0m
+  CombinedData_buffer2_meas16_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas16_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas17_iq.gif[0m[0m
+  CombinedData_buffer2_meas17_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas17_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas18_iq.gif[0m[0m
+  CombinedData_buffer2_meas18_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas18_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas19_iq.gif[0m[0m
+  CombinedData_buffer2_meas19_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas19_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas1_iq.gif[0m[0m
+  CombinedData_buffer2_meas1_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas1_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas2_iq.gif[0m[0m
+  CombinedData_buffer2_meas2_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas2_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas3_iq.gif[0m[0m
+  CombinedData_buffer2_meas3_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas3_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas4_iq.gif[0m[0m
+  CombinedData_buffer2_meas4_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas4_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas5_iq.gif[0m[0m
+  CombinedData_buffer2_meas5_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas5_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas6_iq.gif[0m[0m
+  CombinedData_buffer2_meas6_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas6_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas7_iq.gif[0m[0m
+  CombinedData_buffer2_meas7_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas7_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas8_iq.gif[0m[0m
+  CombinedData_buffer2_meas8_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas8_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer2_meas9_iq.gif[0m[0m
+  CombinedData_buffer2_meas9_iq.hdf5: tracking GIF 59 frames @ 14.29 fps (true 15.9 ms @ 3704 Hz = 1/259 x real time) -> CombinedData_buffer2_meas9_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer4_iq.gif[0m[0m
+  CombinedData_buffer4_iq.hdf5: B-mode GIF, 925.9 Hz, 926 frames = 1.00 s -> 1.00 s GIF (real time); 50 frames @ 50 fps -> CombinedData_buffer4_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer5_iq.gif[0m[0m
+  CombinedData_buffer5_iq.hdf5: B-mode GIF, 18.2 Hz, 20 frames = 1.10 s -> 1.10 s GIF (real time); 22 frames @ 20 fps -> CombinedData_buffer5_iq.gif

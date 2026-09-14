@@ -1,0 +1,157 @@
+=== shared-normalisation montage of 44 file(s) ===
+  [1/44] C000000001: 51 fr @ 2cs, p99.9 100215, floor 112.2
+  [2/44] C000000002: 51 fr @ 2cs, p99.9 53821, floor 106.5
+  [3/44] C000000003: 51 fr @ 2cs, p99.9 61827, floor 90.8
+  [4/44] C000000004: 51 fr @ 2cs, p99.9 65758, floor 148.7
+  [5/44] C000000005: 51 fr @ 2cs, p99.9 81670, floor 121.9
+  [6/44] C000000007: 51 fr @ 2cs, p99.9 64381, floor 103.4
+  [7/44] C000000008: 51 fr @ 2cs, p99.9 47799, floor 81.8
+  [8/44] C000000009: 51 fr @ 2cs, p99.9 51463, floor 96.3
+  [9/44] C000000010: 51 fr @ 2cs, p99.9 81189, floor 171.6
+  [10/44] C000000011: 60 fr @ 2cs, p99.9 30059, floor 70.5
+  [11/44] C000000012: 60 fr @ 2cs, p99.9 45474, floor 113.9
+  [12/44] C000000013: 60 fr @ 2cs, p99.9 78286, floor 109.9
+  [13/44] C000000014: 60 fr @ 2cs, p99.9 112787, floor 117.0
+  [14/44] C000000015: 60 fr @ 2cs, p99.9 37483, floor 87.4
+  [15/44] C000000016: 60 fr @ 2cs, p99.9 60115, floor 111.9
+  [16/44] C000000017: 60 fr @ 2cs, p99.9 68690, floor 121.6
+  [17/44] C000000018: 60 fr @ 2cs, p99.9 74382, floor 142.1
+  [18/44] C000000019: 60 fr @ 2cs, p99.9 115132, floor 122.9
+  [19/44] C000000020: 60 fr @ 2cs, p99.9 54547, floor 88.4
+  [20/44] C000000021: 60 fr @ 2cs, p99.9 52715, floor 88.3
+  [21/44] C000000022: 60 fr @ 2cs, p99.9 59662, floor 111.0
+  [22/44] C000000023: 60 fr @ 2cs, p99.9 138725, floor 124.3
+  [23/44] C000000024: 60 fr @ 2cs, p99.9 63564, floor 183.6
+  [24/44] C000000025: 60 fr @ 2cs, p99.9 77326, floor 140.7
+  [25/44] C000000026: 60 fr @ 2cs, p99.9 49945, floor 100.7
+  [26/44] C000000027: 60 fr @ 2cs, p99.9 114334, floor 105.5
+  [27/44] C000000028: 60 fr @ 2cs, p99.9 72804, floor 110.3
+  [28/44] C000000029: 60 fr @ 2cs, p99.9 27410, floor 62.2
+  [29/44] C000000030: 60 fr @ 2cs, p99.9 59793, floor 160.7
+  [30/44] C000000031: 60 fr @ 2cs, p99.9 74506, floor 133.5
+  [31/44] C000000032: 60 fr @ 2cs, p99.9 31649, floor 63.7
+  [32/44] C000000033: 60 fr @ 2cs, p99.9 33575, floor 87.9
+  [33/44] C000000034: 60 fr @ 2cs, p99.9 70575, floor 92.8
+  [34/44] C000000035: 60 fr @ 2cs, p99.9 27564, floor 82.4
+  [35/44] C000000036: 60 fr @ 2cs, p99.9 85917, floor 86.4
+  [36/44] C000000037: 60 fr @ 2cs, p99.9 36064, floor 82.3
+  [37/44] C000000038: 60 fr @ 2cs, p99.9 47261, floor 74.0
+  [38/44] C000000039: 60 fr @ 2cs, p99.9 42385, floor 99.5
+  [39/44] C000000040: 60 fr @ 2cs, p99.9 38453, floor 90.9
+  [40/44] C000000041: 60 fr @ 2cs, p99.9 32655, floor 93.1
+  [41/44] C000000042: 60 fr @ 2cs, p99.9 23895, floor 55.9
+  [42/44] C000000043: 60 fr @ 2cs, p99.9 49792, floor 80.9
+  [43/44] C000000044: 60 fr @ 2cs, p99.9 17087, floor 52.9
+  [44/44] C000000045: 60 fr @ 2cs, p99.9 54694, floor 113.1
+  cached tiles -> D:\Luuk van Knippenberg\Claude\SWE_study_processing\analysis\tilecache\buffer1.npz
+  AUTO: reference = 95926 (90th pct of per-subject p99.9), range = 59 dB (down to the median noise floor 102.1)
+
+  reference (median) = 95926
+  per-subject level spread = 18.2 dB (-15.0 .. +3.2 dB about the reference)
+  grid 8x6, tile 170x128 -> 1360x876, 60 frames
+  wrote D:\Luuk van Knippenberg\Claude\SWE_study_processing\montages\all_buffer1_adaptive.gif (28.5 MB, 60 frames, 1.20 s loop)
+=== shared-normalisation montage of 44 file(s) ===
+  [1/44] C000000001: 26 fr @ 4cs, p99.9 2979, floor 3.3
+  [2/44] C000000002: 26 fr @ 4cs, p99.9 2451, floor 3.1
+  [3/44] C000000003: 26 fr @ 4cs, p99.9 2580, floor 3.1
+  [4/44] C000000004: 26 fr @ 4cs, p99.9 2721, floor 4.1
+  [5/44] C000000005: 26 fr @ 4cs, p99.9 4589, floor 3.5
+  [6/44] C000000007: 26 fr @ 4cs, p99.9 2316, floor 3.1
+  [7/44] C000000008: 26 fr @ 4cs, p99.9 1505, floor 2.7
+  [8/44] C000000009: 26 fr @ 4cs, p99.9 1860, floor 3.0
+  [9/44] C000000010: 26 fr @ 4cs, p99.9 3524, floor 4.6
+  [10/44] C000000011: 32 fr @ 4cs, p99.9 1000, floor 2.5
+  [11/44] C000000012: 32 fr @ 4cs, p99.9 1746, floor 3.3
+  [12/44] C000000013: 32 fr @ 4cs, p99.9 5445, floor 3.2
+  [13/44] C000000014: 32 fr @ 4cs, p99.9 7558, floor 3.3
+  [14/44] C000000015: 32 fr @ 4cs, p99.9 2278, floor 2.8
+  [15/44] C000000016: 32 fr @ 4cs, p99.9 2568, floor 3.3
+  [16/44] C000000017: 32 fr @ 4cs, p99.9 2551, floor 3.5
+  [17/44] C000000018: 32 fr @ 4cs, p99.9 4333, floor 3.8
+  [18/44] C000000019: 32 fr @ 4cs, p99.9 7996, floor 3.4
+  [19/44] C000000020: 32 fr @ 4cs, p99.9 2199, floor 2.9
+  [20/44] C000000021: 32 fr @ 4cs, p99.9 2950, floor 2.9
+  [21/44] C000000022: 32 fr @ 4cs, p99.9 1978, floor 3.5
+  [22/44] C000000023: 32 fr @ 4cs, p99.9 8770, floor 3.5
+  [23/44] C000000024: 32 fr @ 4cs, p99.9 2613, floor 4.7
+  [24/44] C000000025: 32 fr @ 4cs, p99.9 4107, floor 3.9
+  [25/44] C000000026: 32 fr @ 4cs, p99.9 1921, floor 3.1
+  [26/44] C000000027: 32 fr @ 4cs, p99.9 7371, floor 3.2
+  [27/44] C000000028: 32 fr @ 4cs, p99.9 7368, floor 3.2
+  [28/44] C000000029: 32 fr @ 4cs, p99.9 1192, floor 2.3
+  [29/44] C000000030: 32 fr @ 4cs, p99.9 2590, floor 3.9
+  [30/44] C000000031: 32 fr @ 4cs, p99.9 3253, floor 3.7
+  [31/44] C000000032: 32 fr @ 4cs, p99.9 1110, floor 2.3
+  [32/44] C000000033: 32 fr @ 4cs, p99.9 1984, floor 2.9
+  [33/44] C000000034: 32 fr @ 4cs, p99.9 2742, floor 3.2
+  [34/44] C000000035: 32 fr @ 4cs, p99.9 798, floor 2.9
+  [35/44] C000000036: 32 fr @ 4cs, p99.9 2290, floor 3.4
+  [36/44] C000000037: 32 fr @ 4cs, p99.9 1198, floor 2.8
+  [37/44] C000000038: 32 fr @ 4cs, p99.9 1453, floor 2.7
+  [38/44] C000000039: 32 fr @ 4cs, p99.9 1530, floor 3.2
+  [39/44] C000000040: 32 fr @ 4cs, p99.9 1368, floor 2.8
+  [40/44] C000000041: 32 fr @ 4cs, p99.9 1231, floor 3.1
+  [41/44] C000000042: 32 fr @ 4cs, p99.9 1200, floor 2.1
+  [42/44] C000000043: 32 fr @ 4cs, p99.9 1742, floor 2.9
+  [43/44] C000000044: 32 fr @ 4cs, p99.9 458, floor 2.1
+  [44/44] C000000045: 32 fr @ 4cs, p99.9 4330, floor 3.3
+  cached tiles -> D:\Luuk van Knippenberg\Claude\SWE_study_processing\analysis\tilecache\buffer3_standard.npz
+  AUTO: reference = 6791 (90th pct of per-subject p99.9), range = 67 dB (down to the median noise floor 3.2)
+
+  reference (median) = 6791
+  per-subject level spread = 25.6 dB (-23.4 .. +2.2 dB about the reference)
+  grid 8x6, tile 170x123 -> 1360x846, 32 frames
+  wrote D:\Luuk van Knippenberg\Claude\SWE_study_processing\montages\all_buffer3_standard_adaptive.gif (13.5 MB, 32 frames, 1.28 s loop)
+=== shared-normalisation montage of 44 file(s) ===
+  [1/44] C000000001: 26 fr @ 4cs, p99.9 389431, floor 375.8
+  [2/44] C000000002: 26 fr @ 4cs, p99.9 329546, floor 322.7
+  [3/44] C000000003: 26 fr @ 4cs, p99.9 317664, floor 324.2
+  [4/44] C000000004: 26 fr @ 4cs, p99.9 327846, floor 469.4
+  [5/44] C000000005: 26 fr @ 4cs, p99.9 608361, floor 366.4
+  [6/44] C000000007: 26 fr @ 4cs, p99.9 287900, floor 332.1
+  [7/44] C000000008: 26 fr @ 4cs, p99.9 188164, floor 290.9
+  [8/44] C000000009: 26 fr @ 4cs, p99.9 226428, floor 319.5
+  [9/44] C000000010: 26 fr @ 4cs, p99.9 440574, floor 519.0
+  [10/44] C000000011: 32 fr @ 4cs, p99.9 108052, floor 253.8
+  [11/44] C000000012: 32 fr @ 4cs, p99.9 218802, floor 357.0
+  [12/44] C000000013: 32 fr @ 4cs, p99.9 789252, floor 343.9
+  [13/44] C000000014: 32 fr @ 4cs, p99.9 986965, floor 354.2
+  [14/44] C000000015: 32 fr @ 4cs, p99.9 333799, floor 289.6
+  [15/44] C000000016: 32 fr @ 4cs, p99.9 384731, floor 370.1
+  [16/44] C000000017: 32 fr @ 4cs, p99.9 328566, floor 378.9
+  [17/44] C000000018: 32 fr @ 4cs, p99.9 572416, floor 409.9
+  [18/44] C000000019: 32 fr @ 4cs, p99.9 1076092, floor 372.1
+  [19/44] C000000020: 32 fr @ 4cs, p99.9 275489, floor 314.2
+  [20/44] C000000021: 32 fr @ 4cs, p99.9 380261, floor 306.6
+  [21/44] C000000022: 32 fr @ 4cs, p99.9 258201, floor 380.7
+  [22/44] C000000023: 32 fr @ 4cs, p99.9 1262072, floor 379.0
+  [23/44] C000000024: 32 fr @ 4cs, p99.9 331800, floor 532.2
+  [24/44] C000000025: 32 fr @ 4cs, p99.9 527676, floor 435.9
+  [25/44] C000000026: 32 fr @ 4cs, p99.9 247210, floor 329.9
+  [26/44] C000000027: 32 fr @ 4cs, p99.9 1027695, floor 329.6
+  [27/44] C000000028: 32 fr @ 4cs, p99.9 940038, floor 342.2
+  [28/44] C000000029: 32 fr @ 4cs, p99.9 145393, floor 234.4
+  [29/44] C000000030: 32 fr @ 4cs, p99.9 327136, floor 443.3
+  [30/44] C000000031: 32 fr @ 4cs, p99.9 400040, floor 420.5
+  [31/44] C000000032: 32 fr @ 4cs, p99.9 111797, floor 233.6
+  [32/44] C000000033: 32 fr @ 4cs, p99.9 233094, floor 312.7
+  [33/44] C000000034: 32 fr @ 4cs, p99.9 322597, floor 350.9
+  [34/44] C000000035: 32 fr @ 4cs, p99.9 91499, floor 306.6
+  [35/44] C000000036: 32 fr @ 4cs, p99.9 294966, floor 371.3
+  [36/44] C000000037: 32 fr @ 4cs, p99.9 135446, floor 286.2
+  [37/44] C000000038: 32 fr @ 4cs, p99.9 181070, floor 274.2
+  [38/44] C000000039: 32 fr @ 4cs, p99.9 181247, floor 334.0
+  [39/44] C000000040: 32 fr @ 4cs, p99.9 186966, floor 289.4
+  [40/44] C000000041: 32 fr @ 4cs, p99.9 144300, floor 323.5
+  [41/44] C000000042: 32 fr @ 4cs, p99.9 145771, floor 209.0
+  [42/44] C000000043: 32 fr @ 4cs, p99.9 226918, floor 294.6
+  [43/44] C000000044: 32 fr @ 4cs, p99.9 40454, floor 208.7
+  [44/44] C000000045: 32 fr @ 4cs, p99.9 527016, floor 350.5
+  cached tiles -> D:\Luuk van Knippenberg\Claude\SWE_study_processing\analysis\tilecache\buffer3_refocus.npz
+  AUTO: reference = 894802 (90th pct of per-subject p99.9), range = 69 dB (down to the median noise floor 333.0)
+
+  reference (median) = 894802
+  per-subject level spread = 29.9 dB (-26.9 .. +3.0 dB about the reference)
+  grid 8x6, tile 170x123 -> 1360x846, 32 frames
+  wrote D:\Luuk van Knippenberg\Claude\SWE_study_processing\montages\all_buffer3_refocus_adaptive.gif (13.8 MB, 32 frames, 1.28 s loop)
+ADAPTIVE_EXIT=0

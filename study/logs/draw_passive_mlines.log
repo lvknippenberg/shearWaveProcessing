@@ -1,0 +1,27 @@
+=== general passive M-lines: 43 to draw, 1 already saved, 0 without CombinedData_buffer4_iq.hdf5 ===
+
+For each folder: a B-mode window opens. Left-click points along the anatomy the
+shear wave travels through, then press ENTER (with the figure focused) to accept.
+Close the window without clicking to SKIP that folder. Ctrl-C stops the run;
+everything drawn so far is saved and the script resumes where you left off.
+
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45\output\CombinedData_buffer4_iq.hdf5' [2m(/data/beamformed_data/values, 1.3 GB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45\output\CombinedData_buffer4_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [1/43] C000000002/SWE02_SW_data_28-April-2026_10-09-45: saved (63.3 mm)
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+
+  [2/43] C000000003/VIS_03_SW_data_16-June-2026_10-09-42: saved (62.7 mm)
+
+>>> M-LINE: left-click points along the anatomy in ANY order (e.g. the two ends then the middle);
+>>> the cyan line updates live once you have >= 2 points. Drag a point to move it, right-click to
+>>> delete one. Press ENTER (figure focused) to finish.
+

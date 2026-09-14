@@ -1,0 +1,46 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+-------------------GPU settings-------------------
+     memory
+GPU        
+0       14918
+1       20641
+2       20790
+3       23812
+4       24115
+5       23844
+6       24115
+7        8112
+Selecting 1 GPU based on available memory.
+Selected GPU 4 with Free Memory: 24115.00 MiB
+Hiding GPUs [0, 1, 2, 3, 5, 6, 7] from the system.
+--------------------------------------------------
+C000000001 buffer 3: 26 frames, grid (382, 529), 25.4 FPS
+  pfield compound : span  13.8 dB  ripple  0.02% @ 1.063 deg  corr with image +0.252
+  synth harmonic  : span  24.0 dB  ripple  8.97% @ 1.260 deg  corr with image +0.157
+
+reconstruction                   ripple      peak  lat.corr  spk SNR  dyn.rng
+------------------------------------------------------------------------------
+standard (no correction)          2.69%    1.284deg     9.07mm     0.74    51.3dB
+/ pfield compound                 2.69%    1.284deg     7.49mm     0.70    45.2dB
+/ synth harmonic, gamma 0.25      2.99%    1.260deg     6.70mm     0.69    48.2dB
+/ synth harmonic, gamma 0.50      6.01%    1.260deg     5.52mm     0.62    47.1dB
+/ synth harmonic, gamma 0.75      9.82%    1.260deg     3.55mm     0.53    50.4dB
+/ synth harmonic, gamma 1.00     14.67%    1.260deg     1.18mm     0.45    55.0dB
+
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_pfieldnorm_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_pfieldnorm_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_pfieldnorm_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_pfieldnorm_iq.gif[0m[0m
+  CombinedData_buffer3_pfieldnorm_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_pfieldnorm_iq.gif
+  wrote CombinedData_buffer3_pfieldnorm_iq.hdf5 + .gif
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_deconv-g050_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_deconv-g050_iq.gif[0m[0m
+  CombinedData_buffer3_deconv-g050_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_deconv-g050_iq.gif
+  wrote CombinedData_buffer3_deconv-g050_iq.hdf5 + .gif
+[1m[38;5;36mzea[0m[0m: File saved to [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_deconv-g100_iq.hdf5[0m
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_deconv-g100_iq.gif[0m[0m
+  CombinedData_buffer3_deconv-g100_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_deconv-g100_iq.gif
+  wrote CombinedData_buffer3_deconv-g100_iq.hdf5 + .gif
+
+saved c1_field_correct_metrics.npy
+EXIT=0
