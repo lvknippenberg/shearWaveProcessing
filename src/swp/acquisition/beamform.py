@@ -634,7 +634,8 @@ def find_mat(folder: Path) -> Path:
 
 def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                    compression=DEFAULT_COMPRESSION, save_converted=True, converted_dir=None,
-                   overwrite=False, sw_roi=None, append_params=True, gif_stretch=None):
+                   overwrite=False, sw_roi=None, append_params=True, gif_stretch=None,
+                   gif_curve=None, gif_gain_db=None, gif_legacy_display=False):
     """End-to-end Stage A for one measurement folder: IQ (+ GIFs) into ``output/``.
 
     Args:
@@ -650,6 +651,9 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
             ``None`` = the push-focus ROI from the ``SW`` struct (default).
         gif_stretch: GIF playback duration / acquisition duration. ``None`` uses
             the module default (1.0 = real time); 3.0 gives 3x slow motion.
+        gif_curve / gif_gain_db: display tone curve and brightness for the GIFs
+            (``None`` = module defaults). ``gif_legacy_display`` restores the old
+            clip-max / fixed -50..0 dB rendering.
     """
     folder = Path(folder)
     mat_path = find_mat(folder)
@@ -661,8 +665,12 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                   overwrite=overwrite, sw_roi=sw_roi, append_params=append_params)
 
     if make_gifs:
-        from .gifs import run as gif_run, REAL_TIME_STRETCH
-        gif_run(output_dir, stretch=REAL_TIME_STRETCH if gif_stretch is None else gif_stretch)
+        from .gifs import run as gif_run, DEFAULT_CURVE, DEFAULT_GAIN_DB, REAL_TIME_STRETCH
+        gif_run(output_dir,
+                stretch=REAL_TIME_STRETCH if gif_stretch is None else gif_stretch,
+                curve=DEFAULT_CURVE if gif_curve is None else gif_curve,
+                gain_db=DEFAULT_GAIN_DB if gif_gain_db is None else gif_gain_db,
+                adaptive=not gif_legacy_display)
     return written
 
 

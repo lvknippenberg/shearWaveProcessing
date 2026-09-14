@@ -112,6 +112,22 @@ default).
 The active tracking GIFs (`*_meas*`, buffer 2) span only ~16 ms, so real time is meaningless: they
 keep a fixed 15 fps and the log reports the slow-motion factor.
 
+**Display (brightness / contrast).** Levels are derived **per acquisition** from that clip's own
+distribution — white point at the 99.9th percentile of the in-sector envelope, range down to its
+noise floor (5th percentile) — and a **`gamma2`** tone curve then redistributes the mid-tones
+(`swp.viz.tonecurves`). The previous rendering used the clip *maximum* as the white point with a
+fixed 50 dB window, which left most acquisitions too dark: the maximum is one specular reflector
+and the tissue bulk sits far below it. On the study this roughly doubles mean displayed
+brightness (e.g. C000000044 buffer 1: mean grey 12.4 → 31.1) without clipping.
+
+```
+python run.py beamform <folder> [--gif-curve linear] [--gif-gain-db 6] [--gif-legacy-display]
+```
+
+`--gif-gain-db` brightens further and lets the brightest structures clip (0.8% of pixels at
++12 dB); `--gif-legacy-display` restores the old look exactly. This is a **display** step — the
+stored IQ is untouched, so nothing downstream changes.
+
 Note buffer 5's frame rate is `SW.ActualFPS` (~18 Hz — one frame per shear-wave measurement), not
 the widebeam cine rate `Bmode_WB.ActualFPS` (~88 Hz); using the latter made its timestamps, and so
 its real-time playback, ~5× too fast.

@@ -43,26 +43,66 @@ TRACKING_GIF_FPS = 15.0      # fixed rate for the (very brief) tracking movies
 # Keep every frame only while the quantised delay is within this relative error of
 # the true frame interval; beyond it, resample the clip onto the quantised delay.
 TIMING_TOLERANCE = 0.02
-DYNAMIC_RANGE = (-50, 0)
+DYNAMIC_RANGE = (-50, 0)     # legacy fixed window (see ``adaptive=False``)
+
+# --- display (post-processing applied to the GIFs only; the stored IQ is untouched) ---
+# The old rendering used the clip **maximum** as the white point and a fixed 50 dB window. On
+# this study that left most acquisitions too dark: the maximum is a single specular reflector,
+# and the tissue bulk sits far below it. Deriving both ends from the clip's own distribution -
+# white point from the 99.9th percentile, range down to the noise floor - fixes that, and a
+# tone curve then redistributes the mid-tones. Measured per acquisition, so a weak acoustic
+# window is still rendered to full contrast rather than being crushed by a global scale.
+DEFAULT_CURVE = "gamma2"     # digitised Verasonics-style S-curve; see swp.viz.tonecurves
+DEFAULT_GAIN_DB = 0.0        # brightness; >0 lowers the white point and starts clipping
+HI_PCT, LO_PCT = 99.9, 5.0   # white point / noise-floor percentiles, over in-sector pixels
+DR_LIMITS = (25.0, 90.0)     # clamp the derived range, so a degenerate clip cannot blow it up
 
 
-def iq_to_bmode(iq: np.ndarray, dynamic_range=DYNAMIC_RANGE) -> list[np.ndarray]:
+def iq_to_bmode(iq: np.ndarray, dynamic_range=DYNAMIC_RANGE, curve=DEFAULT_CURVE,
+                gain_db=DEFAULT_GAIN_DB, adaptive=True) -> list[np.ndarray]:
     """Envelope-detect + log-compress an IQ stack into 8-bit B-mode frames.
 
     Args:
         iq: ``(n_frames, z, x, 2)`` array of [I, Q].
+        dynamic_range: fixed ``(lo_dB, hi_dB)`` window, used only when ``adaptive`` is False.
+        curve: display tone curve name (:mod:`swp.viz.tonecurves`); ``"linear"`` disables it.
+        gain_db: brightness. Positive values lower the white point, brightening the image and
+            allowing the brightest structures to clip.
+        adaptive: derive the white point and range from this clip's own distribution
+            (default). ``False`` restores the previous behaviour exactly: normalise by the
+            clip maximum and apply the fixed ``dynamic_range`` with no tone curve.
 
     Returns:
-        List of ``(z, x)`` uint8 frames. Normalisation uses the whole clip's
-        maximum so brightness is stable across frames.
+        List of ``(z, x)`` uint8 frames. Levels are taken over the whole clip, so brightness
+        is stable across frames.
     """
     envelope = np.sqrt(iq[..., 0] ** 2 + iq[..., 1] ** 2)     # (n_frames, z, x)
-    peak = envelope.max()
-    if peak > 0:
-        envelope = envelope / peak
+
+    if not adaptive:
+        peak = envelope.max()
+        if peak > 0:
+            envelope = envelope / peak
+        with np.errstate(divide="ignore"):
+            db = 20.0 * np.log10(envelope + 1e-12)
+        return [to_8bit(frame, dynamic_range, pillow=False) for frame in db]
+
+    from ..viz.tonecurves import apply_curve
+
+    # In-sector pixels only: outside the sector the envelope is exactly 0, which would drag the
+    # low percentile to zero and make the derived range meaningless.
+    inside = envelope[envelope > 0]
+    if inside.size == 0:                                   # empty/all-zero buffer
+        return [np.zeros(envelope.shape[1:], np.uint8) for _ in range(envelope.shape[0])]
+    ref = float(np.percentile(inside, HI_PCT)) / (10.0 ** (gain_db / 20.0))
+    floor = float(np.percentile(inside, LO_PCT))
+    ref = max(ref, 1e-12)
+    dr = 20.0 * np.log10(ref / floor) if floor > 0 else DR_LIMITS[1]
+    dr = float(np.clip(dr, *DR_LIMITS))
+
     with np.errstate(divide="ignore"):
-        db = 20.0 * np.log10(envelope + 1e-12)
-    return [to_8bit(frame, dynamic_range, pillow=False) for frame in db]
+        db = 20.0 * np.log10(envelope / ref + 1e-12)
+    norm = np.clip((db + dr) / dr, 0.0, 1.0)
+    return [(apply_curve(frame, curve) * 255).astype(np.uint8) for frame in norm]
 
 
 def _fps_from_timestamps(bdata, fallback=25.0) -> float:
@@ -131,7 +171,8 @@ def realtime_gif(images, out_path, acquisition_fps, stretch=REAL_TIME_STRETCH,
     return 100.0 / delay_cs, len(shown), realtime_s, len(shown) * delay_cs / 100.0
 
 
-def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH):
+def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH, curve=DEFAULT_CURVE,
+                 gain_db=DEFAULT_GAIN_DB, adaptive=True):
     """Make one GIF from one IQ HDF5 file."""
     is_tracking = "_meas" in iq_path.stem
     with File(str(iq_path)) as f:
@@ -139,7 +180,7 @@ def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH):
         iq = np.asarray(bdata.values[:])
         acquisition_fps = _fps_from_timestamps(bdata)
 
-    images = iq_to_bmode(iq)
+    images = iq_to_bmode(iq, curve=curve, gain_db=gain_db, adaptive=adaptive)
     out_path = iq_path.with_suffix(".gif")
 
     if is_tracking:
@@ -166,7 +207,8 @@ def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH):
     return out_path
 
 
-def run(iq_dir, stretch=REAL_TIME_STRETCH):
+def run(iq_dir, stretch=REAL_TIME_STRETCH, curve=DEFAULT_CURVE,
+        gain_db=DEFAULT_GAIN_DB, adaptive=True):
     """Make a GIF for every ``*_iq.hdf5`` file in ``iq_dir``."""
     iq_dir = Path(iq_dir)
     files = sorted(iq_dir.glob("*_iq.hdf5"))
@@ -174,9 +216,11 @@ def run(iq_dir, stretch=REAL_TIME_STRETCH):
         print(f"No *_iq.hdf5 files found in {iq_dir}")
         return
     speed = "real time" if stretch == 1.0 else f"{1 / stretch:g}x real time"
-    print(f"=== GIFs from {len(files)} IQ file(s) in {iq_dir} ({speed}) ===")
+    disp = (f"adaptive levels, curve {curve}"
+            + (f", {gain_db:+.0f} dB" if gain_db else "")) if adaptive else "legacy fixed -50..0 dB"
+    print(f"=== GIFs from {len(files)} IQ file(s) in {iq_dir} ({speed}; {disp}) ===")
     for iq_path in files:
-        gif_for_file(iq_path, stretch=stretch)
+        gif_for_file(iq_path, stretch=stretch, curve=curve, gain_db=gain_db, adaptive=adaptive)
 
 
 if __name__ == "__main__":
@@ -187,5 +231,13 @@ if __name__ == "__main__":
     p.add_argument("--stretch", type=float, default=REAL_TIME_STRETCH,
                    help="playback duration / acquisition duration "
                         "(1 = real time, 3 = 3x slow motion)")
+    p.add_argument("--curve", default=DEFAULT_CURVE,
+                   help=f"display tone curve (default {DEFAULT_CURVE}); 'linear' disables it")
+    p.add_argument("--gain-db", type=float, default=DEFAULT_GAIN_DB,
+                   help="brightness in dB; >0 brightens and allows clipping")
+    p.add_argument("--legacy-display", action="store_true",
+                   help="restore the old rendering: clip-max white point, fixed -50..0 dB, "
+                        "no tone curve")
     a = p.parse_args()
-    run(a.iq_dir, stretch=a.stretch)
+    run(a.iq_dir, stretch=a.stretch, curve=a.curve, gain_db=a.gain_db,
+        adaptive=not a.legacy_display)

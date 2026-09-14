@@ -46,10 +46,13 @@ def stage_convert(folder, overwrite=False):
 
 
 def stage_beamform(folder, make_gifs=True, overwrite=False, save_converted=True,
-                   gif_stretch=None):
+                   gif_stretch=None, gif_curve=None, gif_gain_db=None,
+                   gif_legacy_display=False):
     from swp.acquisition import process_folder
     return process_folder(folder, make_gifs=make_gifs, overwrite=overwrite,
-                          save_converted=save_converted, gif_stretch=gif_stretch)
+                          save_converted=save_converted, gif_stretch=gif_stretch,
+                          gif_curve=gif_curve, gif_gain_db=gif_gain_db,
+                          gif_legacy_display=gif_legacy_display)
 
 
 def _set_base_config_env(args):
@@ -296,6 +299,12 @@ def main():
     pb.add_argument("--gif-stretch", type=float, default=None,
                     help="GIF playback duration / acquisition duration "
                          "(default 1 = real time; 3 = 3x slow motion)")
+    pb.add_argument("--gif-curve", default=None,
+                    help="GIF display tone curve (default gamma2); 'linear' disables it")
+    pb.add_argument("--gif-gain-db", type=float, default=None,
+                    help="GIF brightness in dB (default 0); >0 brightens and allows clipping")
+    pb.add_argument("--gif-legacy-display", action="store_true",
+                    help="old GIF rendering: clip-max white point, fixed -50..0 dB, no curve")
     _add_base_config_args(pb)
 
     pv = sub.add_parser("viz", help="Stage 3: IQ -> shear-wave space-time plots (active or passive)")
@@ -335,7 +344,9 @@ def main():
         stage_convert(a.folder, overwrite=a.overwrite)
     elif a.stage == "beamform":
         stage_beamform(a.folder, make_gifs=not a.no_gifs, overwrite=a.overwrite,
-                       save_converted=not a.no_converted, gif_stretch=a.gif_stretch)
+                       save_converted=not a.no_converted, gif_stretch=a.gif_stretch,
+                       gif_curve=a.gif_curve, gif_gain_db=a.gif_gain_db,
+                       gif_legacy_display=a.gif_legacy_display)
     elif a.stage == "viz":
         stage_viz(a.folder, a.config, meas=a.meas, phantom=a.phantom)
     elif a.stage == "passive":
