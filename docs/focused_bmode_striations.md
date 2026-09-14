@@ -145,6 +145,36 @@ The aperture route is counter-intuitive and cheap: **reducing** the transmit ape
 beam, improving angular sampling at **zero frame-rate cost**, paying ~25% lateral resolution at
 the focus instead. The line-count route keeps resolution and pays frame rate.
 
+### Measured: all five reconstructions, same RF (buffer 3, C000000001, 26 frames)
+
+| reconstruction | line-spacing power | ripple RMS | lat. corr. | dyn. range | time |
+|---|---|---|---|---|---|
+| coherent all-73 (current pipeline) | 3.77% | 17.6% | 24.45 mm | 32.9 dB | 62 s |
+| incoherent (envelope sum) | 0.31% | 14.4% | 38.64 mm | **18.7 dB** | 155 s |
+| **REFoCUS adjoint** | **0.16%** | 19.4% | **21.29 mm** | **33.7 dB** | **69 s** |
+| REFoCUS tikhonov | 1.60% | 16.8% | 24.45 mm | 28.7 dB | 793 s |
+| REFoCUS tsvd | 4.46% | 20.1% | 26.03 mm | 21.1 dB | 788 s |
+
+**REFoCUS `adjoint` is the best option on every axis** - 24x less line-spacing structure than the
+current pipeline, *better* lateral correlation, best dynamic range, at essentially the same cost
+as the normal beamform (69 s vs 62 s for 26 frames).
+
+Two findings that the metrics alone would have got wrong, and which only looking at the images
+revealed:
+
+* **Incoherent compounding is not viable.** Its low line-spacing power and low ripple come from
+  being washed out, not from being better: dynamic range collapses to 18.7 dB and the sector is
+  uniformly grey with anatomy barely separable from background. The metrics rewarded smoothing.
+* **The SVD inversions confirm the rank-deficiency.** `tikhonov` shows fine amplified noise
+  throughout and `tsvd` is *worse than doing nothing* (4.46% vs the 3.77% baseline), both with
+  visible texture and 11x slower. With H under-determined at 73 x 80, inverting harder amplifies
+  noise - which is why `adjoint` (the matched filter, which does not attempt a full inversion) is
+  the right choice here.
+
+**Caveat before adopting:** one dataset, and the lateral-correlation column is an anatomy-scale
+proxy (~24 mm), not a true resolution measure. Resolution-phantom point targets are what would
+justify switching buffer 3 to REFoCUS in the pipeline.
+
 ### Or: use buffer 1
 
 Buffer 1 is a widebeam B-mode of the same anatomy at 88 FPS with no line structure (0.25% vs
