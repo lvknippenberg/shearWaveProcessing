@@ -430,17 +430,51 @@ def snap_to_band(bmode_frame, mline: MLine, coords, window_mm: float = 6.0, n_no
 
 
 # ---------------------------------------------------------------------------
-def _bmode_from_iq_frame(values_iq: np.ndarray, dynamic_range=(-50, 0)) -> np.ndarray:
-    """Single-frame ``(z, x, 2=[I,Q])`` -> 8-bit B-mode ``(z, x)`` for display."""
-    from zea.display import to_8bit
+def _display_8bit(env, legacy=False, dynamic_range=(-50, 0)):
+    """Envelope stack/frame -> 8-bit, using the **same display as the GIFs**.
 
-    env = np.sqrt(values_iq[..., 0] ** 2 + values_iq[..., 1] ** 2).astype(np.float32)
-    peak = env.max()
-    if peak > 0:
-        env /= peak
+    Shares :func:`swp.acquisition.gifs.iq_to_bmode`'s rule - white point at the 99.9th
+    percentile of the in-sector envelope, range down to its noise floor, then the default tone
+    curve - so what you draw an M-line on looks like the GIF you judged the data from. The old
+    clip-max / fixed -50..0 dB rendering left these low-SNR diverging-wave acquisitions too dark
+    to pick anatomy out of; it is kept behind ``legacy`` for reproducing earlier figures.
+
+    Levels are taken over the **whole stack** when given one, so brightness does not flicker
+    between frames of a cine.
+    """
+    env = np.asarray(env, dtype=np.float32)
+    if legacy:
+        from zea.display import to_8bit
+
+        peak = env.max()
+        if peak > 0:
+            env = env / peak
+        with np.errstate(divide="ignore"):
+            db = 20.0 * np.log10(env + 1e-12)
+        out = to_8bit(db, dynamic_range, pillow=False)
+        return out
+
+    from ..acquisition.gifs import DEFAULT_CURVE, DR_LIMITS, HI_PCT, LO_PCT
+    from ..viz.tonecurves import apply_curve
+
+    inside = env[env > 0]
+    if inside.size == 0:
+        return np.zeros(env.shape, np.uint8)
+    ref = max(float(np.percentile(inside, HI_PCT)), 1e-12)
+    floor = float(np.percentile(inside, LO_PCT))
+    dr = 20.0 * np.log10(ref / floor) if floor > 0 else DR_LIMITS[1]
+    dr = float(np.clip(dr, *DR_LIMITS))
     with np.errstate(divide="ignore"):
-        db = 20.0 * np.log10(env + 1e-12)
-    return to_8bit(db, dynamic_range, pillow=False)
+        db = 20.0 * np.log10(env / ref + 1e-12)
+    norm = np.clip((db + dr) / dr, 0.0, 1.0)
+    return (apply_curve(norm, DEFAULT_CURVE) * 255).astype(np.uint8)
+
+
+def _bmode_from_iq_frame(values_iq: np.ndarray, dynamic_range=(-50, 0),
+                         legacy=False) -> np.ndarray:
+    """Single-frame ``(z, x, 2=[I,Q])`` -> 8-bit B-mode ``(z, x)`` for display."""
+    env = np.sqrt(values_iq[..., 0] ** 2 + values_iq[..., 1] ** 2).astype(np.float32)
+    return _display_8bit(env, legacy=legacy, dynamic_range=dynamic_range)
 
 
 def load_bmode_frame(bmode_iq_path, frame: int):
@@ -744,13 +778,7 @@ def load_bmode_cine(bmode_iq_path, start: int = 0, count: int = 40, stride: int 
         vals = np.asarray(bdata.values[start:stop:stride])       # (k, z, x, 2)
         coords = np.asarray(bdata.coordinates[:], dtype=np.float32)
     env = np.sqrt(vals[..., 0] ** 2 + vals[..., 1] ** 2)
-    peak = env.max()
-    if peak > 0:
-        env = env / peak
-    with np.errstate(divide="ignore"):
-        db = 20.0 * np.log10(env + 1e-12)
-    db = np.clip((db + 50.0) / 50.0, 0.0, 1.0)                   # -50..0 dB -> 0..1
-    return (db * 255).astype(np.uint8), coords, n
+    return _display_8bit(env), coords, n
 
 
 def draw_mline_on_bmode(bmode_u8, coords, mline: MLine, out_path, title=None):
