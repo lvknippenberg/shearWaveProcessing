@@ -90,6 +90,9 @@ def main():
     p.add_argument("--param", type=float, default=None,
                    help="regularisation / ramp parameter (see zea.ops.Refocus)")
     p.add_argument("--max-frames", type=int, default=None)
+    p.add_argument("--spacing-deg", type=float, default=None,
+                   help="transmit angular spacing for the ripple metric (default: read from the "
+                        "buffer - 1.111 for the focused buffer 3, 4.0 for the widebeam buffers)")
     a = p.parse_args()
 
     folder = Path(a.folder)
@@ -146,8 +149,10 @@ def main():
                                  f"beamforming -> synthetic aperture",
                      compression=DEFAULT_COMPRESSION)
     env = np.sqrt(iq[..., 0] ** 2 + iq[..., 1] ** 2)
-    pw, rms = line_spacing_power(env, coords)
-    print(f"  line-spacing power {pw:.2f}%   total ripple RMS {rms:.1f}%")
+    spacing = a.spacing_deg or (1.1111 if a.buffer == 3 else 4.0)
+    pw, rms = line_spacing_power(env, coords, spacing_deg=spacing)
+    print(f"  ripple power at the {spacing:.3f} deg transmit spacing: {pw:.2f}%   "
+          f"total ripple RMS {rms:.1f}%")
     print(f"  (coherent all-73 ~5%, incoherent ~0.08% - see docs/focused_bmode_striations.md)")
 
     from swp.acquisition.gifs import gif_for_file

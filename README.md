@@ -200,10 +200,13 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        verify_outputs.py (check/repair a processed tree),
                        incoherent_bmode.py (envelope-compounded focused B-mode, for comparison),
                        refocus_bmode.py (REFoCUS retrospective transmit beamforming),
+                       draw_passive_mlines.py (front-load the general passive M-lines),
+                       gif_montage.py (synchronised montage of several GIFs),
                        phantom_voltage_montage.py (cross-folder voltage-sweep montage),
                        check_push_voltage.py (delivered push-voltage sweep check)
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
+                       passive_mlines.md (drawing + resuming the passive M-lines),
                        phantom_voltage_sweep.md (phantom sweep runbook)
 src/swp/
   acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);

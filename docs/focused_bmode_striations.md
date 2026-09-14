@@ -71,6 +71,33 @@ A **20× enrichment at exactly the line spacing**, focused-only, concentrated ar
 depth and absent at depth. Visible directly as a fine oscillation on the focused angular profile
 that the widebeam profile does not have.
 
+## 3a. Where the power actually sits (peak fit, not a windowed sum)
+
+Scanning the whole frame-averaged angular spectrum rather than probing one assumed frequency
+(`analysis/buffer1_own_spacing.py` in the Claude working folder):
+
+| buffer | transmit step | distinct spectral peaks (45–85 mm) |
+|---|---|---|
+| 1 widebeam (21 tx) | 4.0° | **18.0° only** — no peak at its own 4.0° step |
+| 3 focused (73 tx) | 1.111° | 12.0° **and 1.264°** (17.3% of ripple power) |
+
+Two things follow:
+
+* **Buffer 1 is genuinely clean of transmit-periodic structure.** It has no distinct peak at its
+  own 4.0° transmit spacing; its only peak is broad 18° shading (sector illumination / anatomy).
+  This holds even though buffer 1 is **2.9× under-sampled** by the coherent plane-wave
+  compounding criterion (4.0° step vs λ/D = 1.39°) — far worse than buffer 3's 0.79×. Its
+  9.4° diverging-wave opening angle (2.36× overlap) evidently protects it.
+* **Buffer 3's artefact periodicity is the beam width, not the sampling step.** 1.264° measured
+  vs 1.247° one-way −6 dB beam width (1.4% apart) vs 1.111° line spacing (14% apart). A pure
+  sampling/aliasing effect would land on the line spacing; landing on the beam width points at
+  the beam pattern itself. *Caveat:* the 1.247° figure is a derived estimate (0.886 λ F#), so
+  agreement at the 1–2% level should not be over-read.
+
+**Methodological lesson:** measure the *peak*, not the power in a window around an assumed
+frequency. The windowed metric reported a spurious 5.87% "artefact at 4°" for buffer 1 that a
+peak fit shows is simply the skirt of its low-frequency shading.
+
 ## 4. Current hypothesis
 
 **The focused sector scan is angularly under-sampled near its focus, so the compounded transmit
@@ -78,7 +105,11 @@ field scallops at the line spacing.**
 
 This fits every surviving observation:
 
-* the periodicity is exactly `rayDelta` (1.111°), not some other scale;
+* the periodicity is **1.264°** (measured: isolated spectral peak at 0.791 cycles/deg, 17.3% of
+  ripple power). Note this matches the **one-way −6 dB beam width (1.247°)**, *not* the line
+  spacing `rayDelta` (1.111°) — a 14% offset, well outside the spectral resolution. An earlier
+  draft claimed it sat exactly at `rayDelta`; that was read off a ±12% power window rather than
+  a peak fit, and is wrong. See §3a;
 * it is focused-only — the widebeam and diverging-wave buffers insonify the whole sector per
   transmit and have no per-line structure to scallop (0.25% / 0.04%);
 * it peaks in the 45–85 mm band and vanishes by 105–145 mm, matching where the beams are

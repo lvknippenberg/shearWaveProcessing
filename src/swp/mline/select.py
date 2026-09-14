@@ -672,6 +672,87 @@ def select_mline(bmode_u8, coords, min_points: int = 2, n_samples: int = 250,
     return fit_spline(ordered_m, n_samples=n_samples)
 
 
+def select_mline_cine(frames_u8, coords, min_points: int = 2, n_samples: int = 250,
+                      title: str | None = None, fps: float = 20.0) -> MLine:
+    """Like :func:`select_mline`, but the B-mode **plays as a loop** while you click.
+
+    Cardiac anatomy is far easier to identify in motion than in a single frame - a still frame
+    of a low-SNR diverging-wave acquisition often does not show the wall clearly, while the same
+    data in motion does. A matplotlib timer swaps the displayed frame; the point selector is
+    unaffected and behaves exactly as in :func:`select_mline` (the M-line is a fixed geometric
+    line, so it does not matter which frame is showing when you click).
+
+    Args:
+        frames_u8: ``(n_frames, z, x)`` uint8 B-mode stack to loop over.
+        fps: playback rate of the loop (default 20).
+    """
+    _ensure_gui_backend()
+    import matplotlib.pyplot as plt
+
+    frames_u8 = np.asarray(frames_u8)
+    if frames_u8.ndim == 2:                      # a single frame: no animation to run
+        return select_mline(frames_u8, coords, min_points, n_samples, title)
+
+    xs, zs = _grid_axes(coords)
+    extent = [xs[0] * 1e3, xs[-1] * 1e3, zs[-1] * 1e3, zs[0] * 1e3]
+    fig, ax = plt.subplots(figsize=(7, 8))
+    im = ax.imshow(frames_u8[0], cmap="gray", extent=extent, aspect="auto", vmin=0, vmax=255)
+    ax.set_xlabel("x (mm)"); ax.set_ylabel("z (mm)")
+    if title:
+        fig.suptitle(title)
+
+    state = {"k": 0}
+
+    def _tick():
+        state["k"] = (state["k"] + 1) % len(frames_u8)
+        im.set_data(frames_u8[state["k"]])
+        # draw_idle keeps the click/drag handlers responsive while the loop plays
+        fig.canvas.draw_idle()
+
+    timer = fig.canvas.new_timer(interval=int(1000 / max(fps, 1)))
+    timer.add_callback(_tick)
+    timer.start()
+
+    print(f"\n>>> M-LINE (cine, {len(frames_u8)} frames looping at {fps:.0f} fps): left-click "
+          "points along the anatomy\n>>> in ANY order; the cyan line updates live once you have "
+          ">= 2 points. Drag a point to move it,\n>>> right-click to delete one. Press ENTER "
+          "(figure focused) to finish.\n")
+    try:
+        pts_mm = MLineSelector(ax, min_points=min_points, n_samples=n_samples).run()
+    finally:
+        timer.stop()
+    if len(pts_mm) < min_points:
+        raise ValueError(
+            f"Need at least {min_points} points, got {len(pts_mm)}. (Click on the image "
+            "window, then press ENTER; the window must have focus for clicks to register.)"
+        )
+    ordered_m = _order_points(np.asarray(pts_mm, dtype=float), anchor=pts_mm[0]) * 1e-3
+    return fit_spline(ordered_m, n_samples=n_samples)
+
+
+def load_bmode_cine(bmode_iq_path, start: int = 0, count: int = 40, stride: int = 1):
+    """Read a short run of B-mode frames + grid coords for the cine selector.
+
+    Returns ``(frames_u8 (n, z, x), coords, n_total)``. Frames are log-compressed against the
+    **stack** maximum so brightness does not flicker between them.
+    """
+    with File(str(bmode_iq_path)) as f:
+        bdata = f.data.beamformed_data
+        n = bdata.values.shape[0]
+        start = int(np.clip(start, 0, max(n - 1, 0)))
+        stop = int(min(start + count * stride, n))
+        vals = np.asarray(bdata.values[start:stop:stride])       # (k, z, x, 2)
+        coords = np.asarray(bdata.coordinates[:], dtype=np.float32)
+    env = np.sqrt(vals[..., 0] ** 2 + vals[..., 1] ** 2)
+    peak = env.max()
+    if peak > 0:
+        env = env / peak
+    with np.errstate(divide="ignore"):
+        db = 20.0 * np.log10(env + 1e-12)
+    db = np.clip((db + 50.0) / 50.0, 0.0, 1.0)                   # -50..0 dB -> 0..1
+    return (db * 255).astype(np.uint8), coords, n
+
+
 def draw_mline_on_bmode(bmode_u8, coords, mline: MLine, out_path, title=None):
     """Save a PNG of the chosen M-line drawn on the B-mode (a record of what was sampled)."""
     import matplotlib
