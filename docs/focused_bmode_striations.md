@@ -583,6 +583,60 @@ if the map is anti-phase, does *multiplying* work where dividing failed? Tested:
 1.14 mm. So the pair behaves as a mild blur/deconvolution, not as a scalloping correction in
 either direction. Still not a fix.
 
+## 5f. Two separate mechanisms, and which one is actually in our images
+
+Two corrections to how S5d and S5e were framed.
+
+### The pipeline does not use the Verasonics regions
+
+`read_swi_meta` reads `PData.Origin`, `PDelta` and `Size` - the field of view and pixel pitch -
+and **never touches `PData.Region`**. zea beamforms every pixel from **all 73 transmits**, with an
+optional per-transmit `pfield` weight (`BufferSpec.pfield`, on for buffer 3). So the
+region-truncation model in S5d describes what the *Verasonics* reconstruction does, not ours; our
+reconstruction is the *untruncated* column of that table. And the nearest-k ladder in S5e is a
+diagnostic, not a description of the pipeline - the pipeline is "nearest-73".
+
+### The single-transmit ripple IS the non-uniform beam - confirmed quantitatively
+
+nearest-1 has no cross-transmit term of any kind, yet it still shows ripple at the transmit pitch
+(7.41%). The only mechanism available is the beam being non-uniform across its own 1.111 deg
+strip: a pixel at the strip edge sits 0.556 deg off the beam axis and is insonified more weakly.
+
+That is a phase-free geometric prediction and `CenterTransmit.mat` makes it directly
+(`analysis/mosaic_prediction.py`) - mosaic the simulated beam in +/-0.556 deg strips and measure:
+
+| effective sensitivity | predicted ripple @ pitch | peak |
+|---|---|---|
+| sqrt(profile) | 2.63% | 1.111 deg |
+| profile (fundamental) | 3.83% | 1.111 deg |
+| **profile^2 (2nd harmonic)** | **6.05%** | **1.111 deg** |
+| profile^3 | 8.45% | 1.111 deg |
+
+**Measured nearest-1: 7.41% at 1.112 deg.** The 2nd-harmonic row is the physically right one -
+buffer 3 transmits at 1.95 MHz and demodulates at 3.9 MHz, and harmonic amplitude goes roughly as
+the square of the fundamental - and it lands within 20% of the measurement, at exactly the right
+period, from a model with no free parameters and no phase. **So yes: in a one-transmit-per-pixel
+reconstruction the striations are simply the transmit beam profile, and they would be correctable
+by a sensitivity map.**
+
+### But that is not the reconstruction we use
+
+Our pipeline sums all 73 transmits per pixel, so there are no strips and no strip edges - the
+mechanism above does not apply to it. For the all-73 compound the same phase-free model predicts
+**0.37%** against **14.97%** measured: 40x short. The coherent sum is not smoothing the
+single-beam non-uniformity away, it is adding an interference term roughly twice as large
+(7.41% -> 14.97%).
+
+The measured reconstructions agree: incoherent compounding, which keeps the amplitudes and discards
+the phase, gives 1.84% - the same order as the 0.37% prediction and ~8x below the coherent 14.97%.
+That ratio is the interference term.
+
+**So the artefact has two contributors and our images are dominated by the wrong one for
+normalisation purposes.** Amplitude non-uniformity is real, predictable and correctable, but it is
+a minor term in an all-transmit coherent sum. What dominates is cross-transmit phase interference,
+which no magnitude map contains the information to undo - and that, not the period argument
+withdrawn in the CORRECTION banner, is why every normalisation attempt in S5a/S5b failed.
+
 ## 6. Reproducing
 
 | script | what |
@@ -597,6 +651,7 @@ either direction. Still not a fix.
 | `analysis/apex_referenced_ripple.py` (working folder) | **the corrected ripple metric - use this one** |
 | `analysis/nearest_k_composite.py` / `nearest_k_apex.py` (working folder) | per-transmit stack + nearest-k ladder (S5e) |
 | `analysis/ripple_metric_control.py` (working folder) | synthetic-speckle control for the ripple metric |
+| `analysis/mosaic_prediction.py` (working folder) | predicts the nearest-1 ripple from the simulated beam alone (S5f) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
