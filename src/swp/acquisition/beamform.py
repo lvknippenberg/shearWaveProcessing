@@ -272,11 +272,16 @@ def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
         zea.Pipeline: The beamforming pipeline.
     """
     operations = [Cast(dtype="float32")]
-    if not is_baseband:
-        operations.append(Demodulate())
+    # Refocus declares input_data_type=RAW_DATA: it inverts the transmit encoding using the
+    # transmit delays and must see the raw RF, BEFORE demodulation. Putting it after Demodulate
+    # runs it on baseband IQ and silently produces a different (wrong) image - it does not error.
     if refocus:
+        if is_baseband:
+            raise ValueError("refocus needs raw RF; this buffer is already baseband IQ")
         operations.append(Refocus(method=refocus))
         enable_pfield = False
+    if not is_baseband:
+        operations.append(Demodulate())
     operations.append(
         Beamform(beamformer="delay_and_sum", num_patches=num_patches,
                  enable_pfield=enable_pfield)
