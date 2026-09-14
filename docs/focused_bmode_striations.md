@@ -637,6 +637,65 @@ a minor term in an all-transmit coherent sum. What dominates is cross-transmit p
 which no magnitude map contains the information to undo - and that, not the period argument
 withdrawn in the CORRECTION banner, is why every normalisation attempt in S5a/S5b failed.
 
+## 5g. Cost of REFoCUS, and which buffers are affected at all
+
+### Beamforming time
+
+GPU beamform only, C000000001 buffer 3, 26 frames x 73 transmits onto a 382x529 grid, each method
+given an untimed one-frame warm-up so kernel autotuning does not land on one stopwatch
+(`analysis/timing_refocus.py`):
+
+| method | total | per frame |
+|---|---|---|
+| standard (`enable_pfield=True`, as the pipeline runs it) | **47.9 s** | 1840 ms |
+| REFoCUS adjoint | **50.8 s** | 1955 ms |
+
+**REFoCUS adjoint costs +6%.** It is essentially free because `adjoint` is a matched filter -
+one `H^H` multiply - not an inversion. The SVD variants are the expensive ones (S2: ~11x).
+Buffer 1 for scale: 90 frames, 21 transmits, 49.8 s standard (554 ms/frame).
+
+Note REFoCUS expands the transmit axis from n_tx to **n_el virtual transmits** (73 -> 80 here), so
+the patch budget has to be planned for n_el. Budgeting for n_tx OOMs on a 24 GB card.
+
+### Only buffer 3 has the artefact
+
+Transmit geometry, read from the converted parameters (`polar_angles` is already in the sector-apex
+convention - buffer 3's 1.1111 deg matches `CenterTransmit.mat`'s region geometry exactly):
+
+| buffer | transmits | angular span | **pitch** | transmit focus |
+|---|---|---|---|---|
+| 1 widebeam | 21 | -40..+40 deg | **4.0000 deg** | -123.2 mm (virtual source behind array) |
+| 3 focused | 73 | -40..+40 deg | **1.1111 deg** | +78.9 mm |
+| 4 diverging | 2 | -6..+6 deg | 12.000 deg | -12.3 mm |
+
+Measured apex-referenced, each buffer at its own pitch, with the same function that produced the
+15.41% figure - and with REFoCUS as a **null test**, since REFoCUS removes per-transmit structure
+and should therefore suppress a genuine lattice artefact and leave image content alone:
+
+| | @ its pitch | @ 2x pitch | standard -> REFoCUS @pitch |
+|---|---|---|---|
+| **buffer 3 focused** | **15.55%** | 2.46% | **15.55% -> 3.82%** (4x down) |
+| buffer 1 widebeam | 4.08% | 13.47% | 4.08% -> 4.98% (**no reduction**) |
+| buffer 4 diverging | n/a - two transmits are not a lattice | | |
+
+**Buffer 1 is clean, and the null test is what proves it.** It does carry angular structure - 13.47%
+at 8 deg, twice its transmit pitch - but REFoCUS does not reduce any of it (13.47 -> 15.08% at
+8 deg, 4.08 -> 4.98% at 4 deg). A transmit-lattice artefact cannot survive REFoCUS; buffer 3's
+drops 4x under the identical test. So buffer 1's 8 deg content is anatomy and speckle at that
+angular scale, not a reconstruction artefact. The original "buffer 1 is clean" conclusion in S3
+was reached with the broken origin-referenced metric, so it needed re-deriving - but it survives.
+
+Why only buffer 3: the mechanism needs **many overlapping beams on a fine regular lattice**.
+Buffer 1's 21 widebeams come from a virtual source 123 mm behind the array, so each beam is broad
+and its amplitude varies little across a 4 deg step; buffer 4 has two transmits, and two is not a
+lattice. Buffer 3's 73 focused beams at 1.111 deg are the only case with both a fine pitch and
+beams narrow enough to vary across it.
+
+**Practical consequence:** REFoCUS is worth considering for buffer 3 alone, where it costs +6%
+compute and 34% lateral resolution (S5a) to take the artefact from 15.55% to 3.82%. There is
+nothing for it to fix in buffers 1 or 4, and buffer 2 (active tracking) and 4 feed the displacement
+estimators, whose phase must not be touched.
+
 ## 6. Reproducing
 
 | script | what |
@@ -652,6 +711,8 @@ withdrawn in the CORRECTION banner, is why every normalisation attempt in S5a/S5
 | `analysis/nearest_k_composite.py` / `nearest_k_apex.py` (working folder) | per-transmit stack + nearest-k ladder (S5e) |
 | `analysis/ripple_metric_control.py` (working folder) | synthetic-speckle control for the ripple metric |
 | `analysis/mosaic_prediction.py` (working folder) | predicts the nearest-1 ripple from the simulated beam alone (S5f) |
+| `analysis/timing_refocus.py` (working folder) | standard vs REFoCUS beamforming time (S5g) |
+| `analysis/buffer_lattice_ripple.py` (working folder) | per-buffer lattice ripple with REFoCUS as a null test (S5g) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
