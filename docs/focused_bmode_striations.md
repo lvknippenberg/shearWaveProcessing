@@ -309,11 +309,54 @@ Dividing by the harmonic map at gamma 0.5-1.0 **improves** the PSF (1.40 -> **1.
 and CNR (13.8 -> **18.2 dB**) while *increasing* ripple. It is behaving as a deconvolution rather
 than a flat-field correction. Unrelated to the striations, but a real resolution-enhancement lead.
 
+## 5b. In-vivo check of the two field-normalisation maps (C000000001, 2026-09-14)
+
+The phantom left one loose end worth chasing: dividing by the synthesised harmonic field made the
+ripple *worse* but made point targets *sharper* (1.40 -> 1.07 mm, CNR +4.4 dB), behaving like a
+crude deconvolution. Both maps were therefore rebuilt on C000000001's buffer-3 grid and applied
+in vivo. Script: `analysis/c1_field_correct.py` in the working folder.
+
+| C1 buffer 3, 26 frames | ripple @ spacing | its peak | lat. corr | speckle SNR | dyn. range |
+|---|---|---|---|---|---|
+| **standard** | **2.69%** | 1.284 deg | 9.07 mm | **0.74** | 51.3 dB |
+| / pfield compound | 2.69% | 1.284 deg | 7.49 mm | 0.70 | 45.2 dB |
+| / synth harmonic, g=0.25 | 2.99% | 1.260 deg | 6.70 mm | 0.69 | 48.2 dB |
+| / synth harmonic, g=0.50 | 6.01% | 1.260 deg | 5.52 mm | 0.62 | 47.1 dB |
+| / synth harmonic, g=1.00 | 14.67% | 1.260 deg | 1.18 mm | 0.45 | 55.0 dB |
+
+Both phantom results reproduce in vivo:
+
+* **The pfield compound is a no-op.** It spans 13.8 dB across the sector, but its own ripple at the
+  line spacing is 0.02% against the image's 2.69%, and dividing by it leaves the image ripple
+  unchanged to three digits. It costs 6 dB of dynamic range for nothing. This is inherent, not a
+  tuning problem: `compute_pfield` returns magnitudes, so the only compound available is the
+  incoherent `sum|A|`, which is smooth by construction. The striations live in `|sum A|`.
+* **Dividing by the harmonic field monotonically worsens the striations**, 2.69% -> 14.67%.
+
+The interesting column is `lat. corr`, which collapses 9.07 -> 1.18 mm and *looks* like a 7.7x
+resolution gain. It is not. The ripple peak moves off the image's 1.284 deg onto the field map's
+own **1.260 deg** at every gamma - the map is imprinting its texture on the image. Speckle SNR
+falling 0.74 -> 0.45 is the same effect seen a second way: added multiplicative texture. A
+correlation length cannot separate "resolved finer anatomy" from "stamped with a finer pattern";
+on the phantom the wire targets could, which is the whole reason the phantom was needed.
+
+**This is the third time in this investigation that a normalised or proxy metric pointed the wrong
+way** (after the single-frame ripple fraction and the in-vivo REFoCUS correlation length). The
+visual check is unambiguous and took seconds: `montages/c1_field_correction.gif`.
+
+**Conclusion unchanged: keep the standard reconstruction.** The deconvolution lead is real on the
+phantom but is not separable from field-texture imprinting in vivo, so it is not a route to a
+cleaner in-vivo B-mode. If it is ever revisited, it needs a physically generated harmonic field
+(a nonlinear propagation model) rather than the squared-linear stand-in used here, whose ripple is
+~6x too deep.
+
 ## 6. Reproducing
 
 | script | what |
 |---|---|
 | `scripts/incoherent_bmode.py <folder> --buffer 3` | envelope-compounded reconstruction + GIF, written alongside the normal output |
+| `analysis/phantom_psf.py` (working folder) | point-target PSF/CNR + angular ripple per reconstruction |
+| `analysis/c1_field_correct.py` (working folder) | builds both field maps on any folder's grid and applies them (S5b) |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
