@@ -3,7 +3,41 @@
 Investigation log for the fine radial lines visible in the buffer-3 GIF, which the widebeam
 (buffer 1) and diverging-wave (buffer 4) B-modes do not show. Records the sequence geometry as
 read from the data, what was **ruled out** and by which measurement, and the hypothesis that
-currently survives. Status: **CLOSED (2026-09-14)** — mechanism confirmed on a resolution phantom; no available fix is worth its cost. See §8.
+currently survives. Status: **REOPENED (2026-09-14)** — the mechanism is confirmed and the method ranking holds, but the artefact is ~10x larger than reported (see the CORRECTION below), so the cost/benefit of REFoCUS adjoint needs revisiting. See §5e.
+
+> ## CORRECTION (2026-09-14, after S5d) - read before using any ripple number below
+>
+> **Every angular-ripple figure in S2-S5d was measured about the wrong centre and understates the
+> artefact by about 10x.** The metric resampled the image about the ARRAY ORIGIN (`theta =
+> arctan2(x, z)`), but the sector is steered from a **virtual apex 12.1 mm behind the array face**
+> (`CenterTransmit.mat`: `Region.Shape.Position(3) = -24.57 lambda`). A structure periodic at
+> 1.1111 deg in apex-angle is not periodic in origin-angle - over the 45-85 mm band the ratio runs
+> 1.15-1.19 - so the peak was smeared across periods and its amplitude spread over neighbouring
+> bins.
+>
+> Re-measured about the apex (`analysis/apex_referenced_ripple.py`), the standard reconstruction's
+> line-spacing ripple is **15.41%, not 2.02%**, and its peak sits at **1.112 deg - exactly the
+> 1.1111 deg transmit pitch**. The decimation test confirms it: pitch 2.222 deg -> peak 2.144 deg,
+> pitch 3.333 deg -> 3.159 deg.
+>
+> What this changes:
+> * **S5d's central argument is WITHDRAWN.** It argued the image peak was *not* a harmonic of the
+>   transmit pitch and concluded on spectral grounds that no amplitude mechanism could produce it.
+>   The peak IS at the pitch; that argument was an artefact of the geometry error. The *conclusion*
+>   that the beam/region geometry is not the cause still stands, but now on magnitude alone - the
+>   region-truncation prediction is 0.76% against a measured 15.41%, i.e. 20x too small (both
+>   apex-referenced, so directly comparable).
+> * **The "artefact is only 0.12-0.23 dB, too small to care" framing in S5c is wrong.** 15.41% is
+>   **1.24 dB** of envelope modulation. That is visible, which is why it was noticed in the first
+>   place, and it makes REFoCUS adjoint a more serious option than S5c concluded.
+> * **Rankings are unaffected.** All reconstructions were measured the same wrong way, so their
+>   order is unchanged; only the magnitudes move. Apex-referenced: standard 15.41%, REFoCUS adjoint
+>   1.54%, tikhonov 1.46%, tsvd 1.39%, incoherent 1.84% - a ~10x reduction rather than the ~3.4x
+>   reported in S5a.
+>
+> This is the fourth time in this investigation a metric rather than the data gave the wrong
+> answer. The others: single-frame ripple (speckle-dominated), a windowed power sum read as a peak,
+> and an anatomy-scale correlation length read as a PSF.
 
 All numbers below are read from `CombinedData.mat` for
 `Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54` unless stated.
@@ -509,6 +543,46 @@ the transmit lattice at all, which is a positive statement about what the mechan
 * **Acquisition-side**, the lever is the transmit pitch relative to the beam, not the F-number. But
   at 2.02% (0.12 dB on the phantom) the artefact does not justify a sequence change.
 
+## 5e. Would reconstructing each pixel from fewer transmits help?
+
+Direct test, all 73 transmits of the phantom beamformed separately and recomposited nearest-k
+(`analysis/nearest_k_composite.py`, re-measured apex-referenced in `nearest_k_apex.py`). k=6 is
+what the pipeline already does, since the 6.667 deg region on a 1.111 deg lattice covers exactly 6
+transmits - and it reproduces the stored standard reconstruction, which validates the composite
+rule.
+
+| composite | ripple @ pitch | peak | lateral -6 dB | CNR |
+|---|---|---|---|---|
+| nearest-1 (classical line imaging) | **7.41%** | 1.091 deg | 2.05 mm | 12.0 dB |
+| nearest-2 | 12.40% | 1.091 deg | 1.62 mm | 13.3 dB |
+| nearest-3 | 13.02% | 1.112 deg | 1.57 mm | 13.2 dB |
+| **nearest-6 (= region rule)** | 14.99% | 1.112 deg | 1.44 mm | 13.6 dB |
+| nearest-12 | 14.88% | 1.112 deg | 1.39 mm | 13.7 dB |
+| nearest-73 | 14.97% | 1.112 deg | **1.32 mm** | 13.9 dB |
+| REFoCUS adjoint | **1.54%** | 3.001 deg | 1.87 mm | 12.9 dB |
+| incoherent | 1.84% | 3.001 deg | 7.48 mm | 6.7 dB |
+
+**It is a clean monotonic trade, and nearest-1 sits at the wrong end of it.** More transmits per
+pixel = better resolution (2.05 -> 1.32 mm) and more ripple (7.41 -> 14.97%). Using one transmit
+per pixel halves the artefact; it does not remove it.
+
+**And nearest-1 is strictly dominated by REFoCUS adjoint** - 7.41% / 2.05 mm versus 1.54% /
+1.87 mm, worse on *both* axes. There is no operating point at which nearest-1 is the right choice.
+
+Note nearest-1 still peaks at the transmit pitch even though it has no cross-transmit interference
+by construction. So the residual is not purely an interference term between transmits: a single
+focused transmit reconstructing a 1.111 deg strip already imprints the pitch, because the strip
+samples the beam's own lateral profile off-axis. Compounding then *adds* to it rather than
+averaging it away - which is the opposite of the intuition that started this section.
+
+### Multiplying instead of dividing by the field
+
+With the period confirmed to match, the S5b anti-correlation (-0.68) raised an obvious question:
+if the map is anti-phase, does *multiplying* work where dividing failed? Tested: multiplying gives
+15.41% -> 12.21% at gamma 0.5 while lateral goes 1.40 -> 1.52 mm. Dividing gives 21.53% and
+1.14 mm. So the pair behaves as a mild blur/deconvolution, not as a scalloping correction in
+either direction. Still not a fix.
+
 ## 6. Reproducing
 
 | script | what |
@@ -520,6 +594,9 @@ the transmit lattice at all, which is a positive statement about what the mechan
 | `analysis/method_scorecard.py` (working folder) | all 8 reconstructions x both datasets on one consistent metric set (S5c) |
 | `analysis/center_transmit_vs_region.py` (working folder) | beam width vs region width from `CenterTransmit.mat` (S5d) |
 | `analysis/region_truncation_test.py` (working folder) | compounds the simulated beam over 73 angles, with/without region truncation (S5d) |
+| `analysis/apex_referenced_ripple.py` (working folder) | **the corrected ripple metric - use this one** |
+| `analysis/nearest_k_composite.py` / `nearest_k_apex.py` (working folder) | per-transmit stack + nearest-k ladder (S5e) |
+| `analysis/ripple_metric_control.py` (working folder) | synthetic-speckle control for the ripple metric |
 
 The per-transmit reconstruction, composite-rule comparison, region-coverage map and
 frame-averaged ripple metric were run as one-off analyses; the numbers above are the record. The
