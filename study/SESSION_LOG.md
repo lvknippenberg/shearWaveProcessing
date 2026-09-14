@@ -27,6 +27,9 @@ state; this is the history. Repo: `D:\Luuk van Knippenberg\Github\shearWaveProce
 | `cc44d33` | **CORRECTION: ripple measured about the wrong centre, understated ~10x; + nearest-k ladder** |
 | `320ea45` | two mechanisms separated: beam non-uniformity (minor here) vs interference (dominant) |
 | `f83305c` | REFoCUS +6% compute; only buffer 3 affected (buffer 1 clean, REFoCUS null test) |
+| `79ea567` | REFoCUS adjoint becomes the buffer-3 default; study/ moved into the repo |
+| `f6d6742` | `--buffers` flag for the batch script |
+| (fix) | **Refocus must run BEFORE Demodulate** — first version ran it on baseband IQ |
 
 ## What was done
 
@@ -102,6 +105,18 @@ measured in speckle, which follows the flat `sum|A|^2`.
 
 **Verdict: keep standard.** ~2% angular ripple on an orientation buffer is not worth 34% of
 lateral resolution.
+
+## The pipeline-order bug (2026-09-14)
+
+Worth recording because of how it passed review. `Refocus` declares `input_data_type=RAW_DATA` but
+does not enforce it, so placing it after `Demodulate` produced a plausible image instead of an
+error — and the verification I ran ("are the striations gone?") was satisfied by the wrong image,
+because the wrong image is also smooth. A 44-folder batch completed and was reported as verified
+before the equivalence check against the independent `scripts/refocus_bmode.py` caught it.
+
+**Lesson:** "the artefact is gone" is not a correctness check when the failure mode also removes
+the artefact. Compare against a known-good independent implementation. That check now reads
+log-correlation 1.00000 on all 44.
 
 ## Open items
 

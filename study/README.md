@@ -10,22 +10,41 @@ buffer-3 radial-striation investigation, and the reconstruction comparisons.
 * **This folder**: deliverables, figures, logs, one-off analysis scripts
 
 
-## 0. Buffer 3 default changed — REFoCUS adjoint (2026-09-14)
+## 0. Buffer 3 default changed — REFoCUS adjoint (2026-09-14) — **APPLIED to all 44**
 
-`BufferSpec(3).refocus = "adjoint"`. `run.py beamform` now writes the focused buffer with
-retrospective transmit beamforming instead of plain DAS.
+`BufferSpec(3).refocus = "adjoint"`. `run.py beamform` writes the focused buffer with
+retrospective transmit beamforming instead of plain DAS, and **all 44 folders have been
+re-run** (`study/logs/rerun_buffer3_refocus.log`, 44 ok / 0 failed, ~1.2 min each).
 
-| | ripple @ transmit pitch | lateral −6 dB | beamform time |
+| | ripple @ transmit pitch (C000000001) | lateral −6 dB (phantom) | beamform time |
 |---|---|---|---|
 | plain DAS (old default) | 15.55% | 1.40 mm | 47.9 s / 26 frames |
 | **REFoCUS adjoint (new)** | **3.82%** | 1.87 mm (+34%) | 50.8 s (**+6%**) |
 
-Only buffer 3 — buffer 1's widebeams show no reduction under the same test and buffers 2/4 feed
+Across the study, apex-referenced ripple at the 1.111° transmit pitch is now **median 5.72%
+(min 2.71%, max 15.42%)**. The spread is real and subject-dependent — REFoCUS helps a lot on some
+acquisitions and barely on others — so C000000001's 3.82% is better than typical, not
+representative. Anything quoted from C1 alone should be read that way.
+
+Every file records its reconstruction in the HDF5 root `description` attribute
+(`… [REFoCUS adjoint]`); all 44 verified. The filename does not carry it.
+
+Only buffer 3 — buffer 1's widebeams show no reduction under the same test, and buffers 2/4 feed
 the displacement estimators, whose phase must not be touched (§5g of the striations doc).
 
-**The 44 existing `*_buffer3_iq.hdf5` files were written with the OLD default** and the filename
-does not say which reconstruction produced it. New files record it in the HDF5 `description`
-(`[REFoCUS adjoint]` / `[delay-and-sum, pfield-weighted]`). Re-running the study is open item 1.
+### The first attempt was wrong — what to check if this pipeline changes again
+
+`Refocus` declares `input_data_type=RAW_DATA`: it inverts the transmit encoding from the transmit
+delays and must see **raw RF, before `Demodulate`**. The first implementation put it *after*
+`Demodulate`, so it ran on baseband IQ. That does **not** raise — it produces a plausible image
+(envelope scaled 15×, log-correlation 0.62 against the correct one), and it passed both a shape
+smoke test and a full 44-folder batch whose verification only asked "is the artefact gone". It
+was: the wrong image is also smooth.
+
+**The check that catches it** is equivalence against `scripts/refocus_bmode.py`, which is
+independent and known good. Correct pipeline vs reference, all 44 folders: log-correlation
+**1.00000** (min and median), envelope ratio 1.0000. Run that comparison after any change to
+`build_beamform_pipeline`.
 
 ## 1. Whole-study processing — DONE
 
@@ -255,11 +274,8 @@ during `run.py passive` and cannot be front-loaded. See `docs/passive_mlines.md`
 
 **For you to decide / do:**
 
-1. **Re-run buffer 3 for all 44 folders under the new default.** The existing files are plain DAS;
-   nothing downstream depends on buffer 3 (it is an orientation B-mode and never feeds the
-   estimators), so this is cosmetic and can wait — but until it is done the study is mixed.
-   Roughly 45 min of GPU time plus the network reads.
-   `python scripts/process_raw_data.py --root "Z:/raw_data" --buffers 3`
+1. ~~Re-run buffer 3 for all 44~~ **DONE (2026-09-14)** — 44 ok, 0 failed; all verified against
+   the independent reference implementation. See §0.
 2. **Passive processing for all 44** — the next stage. 1/44 general M-lines drawn; resume with
    `python scripts/draw_passive_mlines.py --root "Z:/raw_data"`, then `run.py passive` per folder,
    which prompts for up to 4 more M-lines each.
