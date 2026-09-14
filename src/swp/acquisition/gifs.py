@@ -208,10 +208,17 @@ def gif_for_file(iq_path: Path, stretch=REAL_TIME_STRETCH, curve=DEFAULT_CURVE,
 
 
 def run(iq_dir, stretch=REAL_TIME_STRETCH, curve=DEFAULT_CURVE,
-        gain_db=DEFAULT_GAIN_DB, adaptive=True):
-    """Make a GIF for every ``*_iq.hdf5`` file in ``iq_dir``."""
+        gain_db=DEFAULT_GAIN_DB, adaptive=True, buffers_matlab=None):
+    """Make a GIF for every ``*_iq.hdf5`` file in ``iq_dir``.
+
+    ``buffers_matlab`` restricts rendering to those buffer numbers, so reprocessing
+    one buffer does not re-render the whole folder (buffer 2 alone is 20 files).
+    """
     iq_dir = Path(iq_dir)
     files = sorted(iq_dir.glob("*_iq.hdf5"))
+    if buffers_matlab:
+        keep = tuple(f"_buffer{k}_" for k in buffers_matlab)
+        files = [f for f in files if any(k in f.name for k in keep)]
     if not files:
         print(f"No *_iq.hdf5 files found in {iq_dir}")
         return

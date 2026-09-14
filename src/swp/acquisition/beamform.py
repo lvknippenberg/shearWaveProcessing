@@ -656,7 +656,8 @@ def find_mat(folder: Path) -> Path:
 def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                    compression=DEFAULT_COMPRESSION, save_converted=True, converted_dir=None,
                    overwrite=False, sw_roi=None, append_params=True, gif_stretch=None,
-                   gif_curve=None, gif_gain_db=None, gif_legacy_display=False):
+                   gif_curve=None, gif_gain_db=None, gif_legacy_display=False,
+                   buffers_matlab=None):
     """End-to-end Stage A for one measurement folder: IQ (+ GIFs) into ``output/``.
 
     Args:
@@ -675,13 +676,17 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
         gif_curve / gif_gain_db: display tone curve and brightness for the GIFs
             (``None`` = module defaults). ``gif_legacy_display`` restores the old
             clip-max / fixed -50..0 dB rendering.
+        buffers_matlab: only process these MATLAB buffer numbers (e.g. ``[3]``).
+            ``None`` = every buffer present. GIF rendering is restricted to the
+            same set.
     """
     folder = Path(folder)
     mat_path = find_mat(folder)
     output_dir = Path(output_dir) if output_dir else folder / "output"
     init_device(verbose=True)
 
-    written = run(mat_path, output_dir=output_dir, pi_mode=pi_mode, compression=compression,
+    written = run(mat_path, output_dir=output_dir, buffers_matlab=buffers_matlab,
+                  pi_mode=pi_mode, compression=compression,
                   save_converted=save_converted, converted_dir=converted_dir,
                   overwrite=overwrite, sw_roi=sw_roi, append_params=append_params)
 
@@ -691,7 +696,7 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                 stretch=REAL_TIME_STRETCH if gif_stretch is None else gif_stretch,
                 curve=DEFAULT_CURVE if gif_curve is None else gif_curve,
                 gain_db=DEFAULT_GAIN_DB if gif_gain_db is None else gif_gain_db,
-                adaptive=not gif_legacy_display)
+                adaptive=not gif_legacy_display, buffers_matlab=buffers_matlab)
     return written
 
 

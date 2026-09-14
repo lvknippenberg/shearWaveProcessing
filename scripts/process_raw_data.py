@@ -110,10 +110,11 @@ def check_base_configs(folders):
 
 
 def process_one(folder, make_gifs=True, gif_stretch=None, overwrite=False,
-                save_converted=True):
+                save_converted=True, buffers_matlab=None):
     from swp.acquisition import process_folder
     return process_folder(folder, make_gifs=make_gifs, gif_stretch=gif_stretch,
-                          overwrite=overwrite, save_converted=save_converted)
+                          overwrite=overwrite, save_converted=save_converted,
+                          buffers_matlab=buffers_matlab)
 
 
 def main():
@@ -128,6 +129,10 @@ def main():
     p.add_argument("--base-config-dir", default=None,
                    help="directory of base config .mat files (default: $SWP_BASE_CONFIG_DIR, "
                         "else the packaged default). The config itself is auto-selected.")
+    p.add_argument("--buffers", default=None,
+                   help="only these MATLAB buffer numbers, comma-separated (e.g. 3). "
+                        "Default: every buffer present. Implies --redo, since the point of "
+                        "naming buffers is to redo them.")
     p.add_argument("--no-gifs", action="store_true", help="skip GIF rendering")
     p.add_argument("--no-converted", action="store_true",
                    help="skip writing the converted RF zea database copies")
@@ -159,7 +164,8 @@ def main():
     if a.check:
         return check_base_configs(folders)
 
-    redo = a.redo or a.overwrite
+    buffers = [int(x) for x in a.buffers.split(",")] if a.buffers else None
+    redo = a.redo or a.overwrite or bool(buffers)
     todo = [f for f in folders if redo or not is_processed(f)]
     skipped = [f for f in folders if f not in todo]
 
@@ -178,7 +184,8 @@ def main():
         t0 = time.time()
         try:
             process_one(folder, make_gifs=not a.no_gifs, gif_stretch=a.gif_stretch,
-                        overwrite=a.overwrite, save_converted=not a.no_converted)
+                        overwrite=a.overwrite, save_converted=not a.no_converted,
+                        buffers_matlab=buffers)
             results.append((folder, "ok", time.time() - t0, ""))
         except Exception as exc:                       # noqa: BLE001 - keep the batch going
             traceback.print_exc()

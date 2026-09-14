@@ -259,7 +259,7 @@ during `run.py passive` and cannot be front-loaded. See `docs/passive_mlines.md`
    nothing downstream depends on buffer 3 (it is an orientation B-mode and never feeds the
    estimators), so this is cosmetic and can wait — but until it is done the study is mixed.
    Roughly 45 min of GPU time plus the network reads.
-   `python scripts/process_raw_data.py --root "Z:/raw_data" --buffers 3 --overwrite`
+   `python scripts/process_raw_data.py --root "Z:/raw_data" --buffers 3`
 2. **Passive processing for all 44** — the next stage. 1/44 general M-lines drawn; resume with
    `python scripts/draw_passive_mlines.py --root "Z:/raw_data"`, then `run.py passive` per folder,
    which prompts for up to 4 more M-lines each.
