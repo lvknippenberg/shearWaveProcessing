@@ -571,13 +571,19 @@ class MLineSelector:
         xr = abs(np.diff(ax.get_xlim())[0]); zr = abs(np.diff(ax.get_ylim())[0])
         self._pick_r = 0.04 * max(xr, zr)             # grab/delete radius, mm
         self._done = False
+        self.closed = False                           # finished by closing the window (not Enter)
         self._cids = [
             self.fig.canvas.mpl_connect("button_press_event", self.on_press),
             self.fig.canvas.mpl_connect("motion_notify_event", self.on_motion),
             self.fig.canvas.mpl_connect("button_release_event", self.on_release),
             self.fig.canvas.mpl_connect("key_press_event", self.on_key),
-            self.fig.canvas.mpl_connect("close_event", lambda _e: self._finish()),
+            self.fig.canvas.mpl_connect("close_event", self._on_close),
         ]
+
+    def _on_close(self, _e):
+        if not self._done:
+            self.closed = True
+        self._finish()
 
     def _toolbar_active(self) -> bool:
         """True while a pan/zoom tool is engaged (so clicks don't add stray points)."""
@@ -706,8 +712,18 @@ def select_mline(bmode_u8, coords, min_points: int = 2, n_samples: int = 250,
     return fit_spline(ordered_m, n_samples=n_samples)
 
 
+def cine_u8_from_iq(iq_stack) -> np.ndarray:
+    """Complex ``(n, z, x)`` IQ stack (e.g. a slice of ``Acquisition.iq``) -> 8-bit cine.
+
+    Same display as :func:`load_bmode_cine` / the GIFs, but from IQ already in memory, so the
+    passive workflow can show a cine around any event without re-reading the file.
+    """
+    return _display_8bit(np.abs(np.asarray(iq_stack)).astype(np.float32))
+
+
 def select_mline_cine(frames_u8, coords, min_points: int = 2, n_samples: int = 250,
-                      title: str | None = None, fps: float = 20.0) -> MLine:
+                      title: str | None = None, fps: float = 20.0,
+                      reference_lines=None, frame_labels=None, allow_empty: bool = False):
     """Like :func:`select_mline`, but the B-mode **plays as a loop** while you click.
 
     Cardiac anatomy is far easier to identify in motion than in a single frame - a still frame
@@ -719,13 +735,18 @@ def select_mline_cine(frames_u8, coords, min_points: int = 2, n_samples: int = 2
     Args:
         frames_u8: ``(n_frames, z, x)`` uint8 B-mode stack to loop over.
         fps: playback rate of the loop (default 20).
+        reference_lines: optional ``[(label, x_m, z_m), ...]`` drawn dashed for orientation
+            (e.g. the general M-line while drawing a per-window one). Not selectable.
+        frame_labels: optional per-frame strings shown top-left (e.g. the frame time).
+        allow_empty: if True, pressing ENTER with no points returns ``None`` (e.g. "keep the
+            reference line"); closing the window without points still raises ``ValueError``.
     """
     _ensure_gui_backend()
     import matplotlib.pyplot as plt
 
     frames_u8 = np.asarray(frames_u8)
-    if frames_u8.ndim == 2:                      # a single frame: no animation to run
-        return select_mline(frames_u8, coords, min_points, n_samples, title)
+    if frames_u8.ndim == 2:                      # a single frame: shown still (overlays kept)
+        frames_u8 = frames_u8[None]
 
     xs, zs = _grid_axes(coords)
     extent = [xs[0] * 1e3, xs[-1] * 1e3, zs[-1] * 1e3, zs[0] * 1e3]
@@ -734,27 +755,49 @@ def select_mline_cine(frames_u8, coords, min_points: int = 2, n_samples: int = 2
     ax.set_xlabel("x (mm)"); ax.set_ylabel("z (mm)")
     if title:
         fig.suptitle(title)
+    for label, rx, rz in (reference_lines or []):
+        ax.plot(np.asarray(rx) * 1e3, np.asarray(rz) * 1e3, "--", color="magenta", lw=1.2,
+                alpha=0.8, label=label, zorder=3)
+    if reference_lines:
+        ax.legend(loc="lower right", fontsize=8)
+        ax.set_xlim(extent[0], extent[1]); ax.set_ylim(extent[2], extent[3])
+    txt = None
+    if frame_labels is not None:
+        txt = ax.text(0.02, 0.98, frame_labels[0], transform=ax.transAxes, va="top",
+                      color="yellow", fontsize=10, family="monospace",
+                      bbox=dict(facecolor="black", alpha=0.5, lw=0))
 
     state = {"k": 0}
 
     def _tick():
         state["k"] = (state["k"] + 1) % len(frames_u8)
         im.set_data(frames_u8[state["k"]])
+        if txt is not None:
+            txt.set_text(frame_labels[state["k"]])
         # draw_idle keeps the click/drag handlers responsive while the loop plays
         fig.canvas.draw_idle()
 
-    timer = fig.canvas.new_timer(interval=int(1000 / max(fps, 1)))
-    timer.add_callback(_tick)
-    timer.start()
+    timer = None
+    if len(frames_u8) > 1:
+        timer = fig.canvas.new_timer(interval=int(1000 / max(fps, 1)))
+        timer.add_callback(_tick)
+        timer.start()
 
-    print(f"\n>>> M-LINE (cine, {len(frames_u8)} frames looping at {fps:.0f} fps): left-click "
+    kind = (f"cine, {len(frames_u8)} frames looping at {fps:.0f} fps" if timer else "still frame")
+    print(f"\n>>> M-LINE ({kind}): left-click "
           "points along the anatomy\n>>> in ANY order; the cyan line updates live once you have "
           ">= 2 points. Drag a point to move it,\n>>> right-click to delete one. Press ENTER "
           "(figure focused) to finish.\n")
+    if allow_empty:
+        print(">>> ENTER without clicking = keep the dashed reference line; close window = skip.\n")
+    sel = MLineSelector(ax, min_points=min_points, n_samples=n_samples)
     try:
-        pts_mm = MLineSelector(ax, min_points=min_points, n_samples=n_samples).run()
+        pts_mm = sel.run()
     finally:
-        timer.stop()
+        if timer is not None:
+            timer.stop()
+    if allow_empty and not pts_mm and not sel.closed:
+        return None
     if len(pts_mm) < min_points:
         raise ValueError(
             f"Need at least {min_points} points, got {len(pts_mm)}. (Click on the image "
