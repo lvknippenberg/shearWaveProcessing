@@ -1,9 +1,37 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-08-14.
+for the full passive-SWE investigation record. Last updated 2026-09-17.
 
-## 0. LATEST (2026-08-14): S5-1 hydrophone safety — direct push & imaging measurements
+## 0. LATEST (2026-09-17): passive M-lines on buffer 1, ECG timing, Linux server
+
+Detail: `docs/passive_mlines.md`, `docs/ecg_timing.md`, `docs/linux_server.md`; history in
+`study/SESSION_LOG.md`.
+
+- **Only buffers 4, 2(+5) and 6 are R-peak gated** (`SeqControl(15)` = pause before them in
+  `CombinedData.mat`). Buffer 4 frame 0 is on an R-peak in 44/44 folders; buffers 1 and 3 are not
+  gated (frame 0 at an arbitrary phase). `src/swp/acquisition/triggerlog.py` reads the trigger log
+  (ms and µs formats) and places any buffer-1/3/4 frame on the cycle.
+- **Draw passive M-lines on buffer 1**: the single line on the frame nearest an R-peak (±5 ms in every
+  folder), per-event lines on the phase-matched buffer-1 frame (`passive_study.py draw` /
+  `draw-events`). Buffer-4 cine (septum moves), buffer-4 still (septum invisible) and buffer-3 frame 0
+  (wrong phase) were tried and rejected.
+- **Window labels** MVC / AVC / AK / other / `?` from the trigger log (`passive_study.py label`): 47 / 31
+  / 24 / 16 / 15 over 36 folders. **C000000005 and C000000012 have no real ECG** (a 240 ms periodic
+  trigger) and C000000007/14 spurious triggers - their gating and labels are meaningless.
+- **C000000001**: MVC propagates in the left half of the septum (2.6-3.5 m/s, all views agree); AVC
+  needs the full per-event line (2.2-3.6 m/s, opposite direction); the AK window is real motion
+  without a measurable wave; the second MVC is unresolved. Montages now start with the B-mode frame +
+  M-line per window.
+- **The 36 processed study folders still use buffer-3 frame-0 lines** (wrong phase) -> redraw on
+  buffer 1 and reprocess. Next: automate M-line selection (drawn lines = reference set).
+- **Linux server**: container `zea-swp` (image from zea `8c2699fd`) validated on C000000001 - torch
+  bit-identical, JAX within float precision (displacement proxy p99 0.06°), 6.1 vs 10.0 min. The first
+  server run used zea `44208e0b` and was badly off (displacement corr 0.21): **the zea commit, not the
+  backend, caused it**. Set `KERAS_BACKEND` explicitly on the server (`.env` defines it empty).
+  `CombinedData.mat` must still be built on Windows (MATLAB).
+
+## 0a. (2026-08-14): S5-1 hydrophone safety — direct push & imaging measurements
 
 Direct hydrophone characterisation of the S5-1 shear-wave sequences (NI PCI-5112 + Scope-SFP `.hws`),
 with the 2026-08-10 calibration correction applied. Code + data in

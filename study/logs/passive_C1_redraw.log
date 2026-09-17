@@ -1,0 +1,43 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+=== passive M-lines (focused B-mode, frame 0): 1 of 1 to draw ===
+Left-click points along the septum (any order), drag to adjust, right-click to delete,
+ENTER to accept. Close the window without clicking to SKIP the folder. Ctrl-C stops;
+everything drawn so far is kept and the next run resumes.
+
+
+[1/1] C000000001/SWE_01_SW_data_21-April-2026_12-12-54
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.3 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (21.2 mm) -> passive_general_mline.npz (+ .png)
+
+0.2 min
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+
+=== process C000000001/SWE_01_SW_data_21-April-2026_12-12-54 (1 ready, 0 still to draw) ===
+  [M-line] 4 stale window-line file(s) archived -> archive_20260917_133516/
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 54 ms, window [4, 104] ms
+    #1: peak 441 ms, window [391, 491] ms
+    #2: peak 651 ms, window [601, 701] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (115, 250) c=2.70 sem=0.942
+    window #0 [disp bp5-150 median NO-temporal]: space-time (115, 250) c=1.81 sem=0.925
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (114, 250) c=3.96 sem=0.877
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.27 sem=0.896
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=10.79 sem=0.943
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.27 sem=0.771
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.96 sem=0.696
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.807
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.01 sem=0.628
+done -> Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\swp_passive\passive_windows_montage.png
+  138 s
+
+processed 1/1, no bursts 0, skipped 0; failed this run: 0
+EXIT=0

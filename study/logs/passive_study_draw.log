@@ -1,0 +1,363 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+=== passive M-lines (focused B-mode, frame 0): 44 of 51 to draw ===
+Left-click points along the septum (any order), drag to adjust, right-click to delete,
+ENTER to accept. Close the window without clicking to SKIP the folder. Ctrl-C stops;
+everything drawn so far is kept and the next run resumes.
+
+
+[1/44] C000000001/SWE_01_SW_data_21-April-2026_12-12-54
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.3 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (59.3 mm) -> passive_general_mline.npz (+ .png)
+
+[2/44] C000000002/SWE02_SW_data_28-April-2026_10-09-45
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (56.7 mm) -> passive_general_mline.npz (+ .png)
+
+[3/44] C000000003/VIS_03_SW_data_16-June-2026_10-09-42
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (61.2 mm) -> passive_general_mline.npz (+ .png)
+
+[4/44] C000000004/VIS_4_SW_data_16-June-2026_10-58-59
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (34.5 mm) -> passive_general_mline.npz (+ .png)
+
+[5/44] C000000005/VIS-005_SW_data_19-June-2026_09-12-20
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (53.0 mm) -> passive_general_mline.npz (+ .png)
+
+[6/44] C000000007/VIS-007_SW_data_30-June-2026_11-45-50
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (62.5 mm) -> passive_general_mline.npz (+ .png)
+
+[7/44] C000000008/VIS-010_SW_data_03-July-2026_10-36-33
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (49.7 mm) -> passive_general_mline.npz (+ .png)
+
+[8/44] C000000009/VIS-009_SW_data_03-July-2026_09-43-33
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (51.6 mm) -> passive_general_mline.npz (+ .png)
+
+[9/44] C000000010/vis-006_SW_data_30-June-2026_09-43-28
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (56.2 mm) -> passive_general_mline.npz (+ .png)
+
+[10/44] C000000011/VIS-11_SW_data_07-July-2026_08-40-05
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (31.9 mm) -> passive_general_mline.npz (+ .png)
+
+[11/44] C000000012/VIS-014_SW_data_07-July-2026_11-41-37
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (47.8 mm) -> passive_general_mline.npz (+ .png)
+
+[12/44] C000000013/VIS-016_SW_data_10-July-2026_10-11-11
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (37.0 mm) -> passive_general_mline.npz (+ .png)
+
+[13/44] C000000014/VIS-008_SW_data_10-July-2026_08-36-06
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (23.4 mm) -> passive_general_mline.npz (+ .png)
+
+[14/44] C000000015/VIS-017_SW_data_10-July-2026_10-53-28
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (36.8 mm) -> passive_general_mline.npz (+ .png)
+
+[15/44] C000000016/VIS-015_SW_data_10-July-2026_09-24-32
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (55.3 mm) -> passive_general_mline.npz (+ .png)
+
+[16/44] C000000017/VIS-013_SW_data_07-July-2026_10-52-55
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[17/44] C000000018/VIS-012_SW_data_07-July-2026_09-21-31
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (30.5 mm) -> passive_general_mline.npz (+ .png)
+
+[18/44] C000000019/VIS-027_SW_data_21-July-2026_11-19-20
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (27.0 mm) -> passive_general_mline.npz (+ .png)
+
+[19/44] C000000020/VIS-026_SW_data_21-July-2026_10-42-10
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (41.5 mm) -> passive_general_mline.npz (+ .png)
+
+[20/44] C000000021/VIS-024_SW_data_17-July-2026_09-35-47
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (37.1 mm) -> passive_general_mline.npz (+ .png)
+
+[21/44] C000000022/VIS-023_SW_data_17-July-2026_08-48-06
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (58.0 mm) -> passive_general_mline.npz (+ .png)
+
+[22/44] C000000023/VIS-022_SW_data_14-July-2026_11-41-10
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (38.6 mm) -> passive_general_mline.npz (+ .png)
+
+[23/44] C000000024/VIS-021_SW_data_14-July-2026_10-55-16
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[24/44] C000000025/VIS-025_SW_data_21-July-2026_09-53-09
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (31.4 mm) -> passive_general_mline.npz (+ .png)
+
+[25/44] C000000026/VIS-020_SW_data_14-July-2026_10-03-40
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[26/44] C000000027/VIS-019_SW_data_14-July-2026_09-20-26
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (31.4 mm) -> passive_general_mline.npz (+ .png)
+
+[27/44] C000000028/VIS-018_SW_data_14-July-2026_08-30-41
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (18.5 mm) -> passive_general_mline.npz (+ .png)
+
+[28/44] C000000029/VIS-031_SW_data_24-July-2026_11-11-50
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (29.3 mm) -> passive_general_mline.npz (+ .png)
+
+[29/44] C000000030/VIS-029_SW_data_24-July-2026_09-36-27
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (27.7 mm) -> passive_general_mline.npz (+ .png)
+
+[30/44] C000000031/VIS-032_SW_data_24-July-2026_11-57-06
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[31/44] C000000032/VIS-030_SW_data_24-July-2026_10-24-32
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (26.8 mm) -> passive_general_mline.npz (+ .png)
+
+[32/44] C000000033/VIS-028_SW_data_24-July-2026_08-43-33
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (28.4 mm) -> passive_general_mline.npz (+ .png)
+
+[33/44] C000000034/VIS-045_SW_data_07-August-2026_11-42-13
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (29.5 mm) -> passive_general_mline.npz (+ .png)
+
+[34/44] C000000035/VIS-044_SW_data_07-August-2026_10-54-57
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (35.3 mm) -> passive_general_mline.npz (+ .png)
+
+[35/44] C000000036/VIS-043_SW_data_07-August-2026_10-03-38
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[36/44] C000000037/VIS-042_SW_data_07-August-2026_08-39-39
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (25.9 mm) -> passive_general_mline.npz (+ .png)
+
+[37/44] C000000038/VIS-041_SW_data_04-August-2026_12-28-28
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (38.8 mm) -> passive_general_mline.npz (+ .png)
+
+[38/44] C000000039/VIS-040_SW_data_04-August-2026_11-46-05
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[39/44] C000000040/VIS-039_SW_data_04-August-2026_10-57-58
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[40/44] C000000041/VIS-038_SW_data_31-July-2026_09-01-39
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (27.3 mm) -> passive_general_mline.npz (+ .png)
+
+[41/44] C000000042/VIS-036_SW_data_28-July-2026_14-07-08
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (39.5 mm) -> passive_general_mline.npz (+ .png)
+
+[42/44] C000000043/VIS-035_SW_data_28-July-2026_12-24-19
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  M-line SKIPPED -> folder marked skipped
+
+[43/44] C000000044/VIS-034_SW_data_28-July-2026_11-02-22
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (33.1 mm) -> passive_general_mline.npz (+ .png)
+
+[44/44] C000000045/VIS-033_SW_data_28-July-2026_09-25-55
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+  [M-line] drawn (26.6 mm) -> passive_general_mline.npz (+ .png)
+
+87.4 min
+EXIT=0

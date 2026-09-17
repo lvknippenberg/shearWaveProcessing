@@ -398,6 +398,36 @@ def draw_passive_mlines(folder, config="configs/passive.yaml", acq=None, window_
     return st
 
 
+def _row_bmode(p, st, i, w, ml, acq):
+    """B-mode frame the window's M-line was drawn on (for the montage), or None.
+
+    Per-event lines record their frame (``window_mlines``); a single line records its source in
+    ``passive_general_mline.json``; otherwise the buffer-4 frame at the window start is shown.
+    """
+    from .mline.select import _grid_axes, load_bmode_frame
+
+    try:
+        info = (st.get("window_mlines") or {}).get(str(i))
+        src_json = os.path.join(p["mlines"], MLINE_SOURCE_JSON)
+        if info is None and os.path.exists(src_json):
+            with open(src_json) as f:
+                info = json.load(f)
+        if info is not None and "buffer" in info:
+            buf, k = int(info["buffer"]), int(info["frame"])
+            img, coords, _ = load_bmode_frame(os.path.join(p["output"], bmode_file(buf)), k)
+            label = f"buffer {buf} frame {k}"
+        else:
+            k = _frame_at_time(acq.t, w.t0)
+            img, coords, label = cine_u8_from_iq(acq.iq[k:k + 1])[0], acq.coords, f"buffer 4 frame {k}"
+        xs, zs = _grid_axes(coords)
+        return dict(img=img, extent=[xs[0] * 1e3, xs[-1] * 1e3, zs[-1] * 1e3, zs[0] * 1e3],
+                    x=ml.x * 1e3, z=ml.z * 1e3,
+                    title=f"win{i} {w.t_peak * 1e3:.0f} ms: {label}\nM-line {ml.r[-1] * 1e3:.0f} mm")
+    except Exception as exc:                              # noqa: BLE001 - a figure extra only
+        print(f"    (no B-mode panel for window {i}: {exc})")
+        return None
+
+
 def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad_ms=20.0):
     """Unattended phase: process every drawn window with every view -> montage path (or None)."""
     cfg, p = _paths(folder, config)
@@ -419,9 +449,10 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
     views = _build_views(cfg, acq)
     print(f"  {len(views)} view(s) per window: " + " | ".join(n for n, _ in views))
     pad_s = pad_ms * 1e-3
-    results, titles, speeds = [], [], []
+    results, titles, speeds, row_bmodes = [], [], [], []
     for i, w in todo:
         ml = _load_line(_window_npz(p["mlines"], i), n_samples)
+        row_bmodes.append(_row_bmode(p, st, i, w, ml, acq))
         i0 = _frame_at_time(acq.t, w.t0 - pad_s)
         i1 = _frame_at_time(acq.t, w.t1 + pad_s) + 1
         acq_w = dataclasses.replace(acq, iq=acq.iq[i0:i1], t=acq.t[i0:i1])
@@ -441,58 +472,97 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
             sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=SPEED_CMAX,
                                        remove_flat=False)
             results.append(res)
-            titles.append(f"win{i} {w.t_peak*1e3:.0f} ms  [{vname}]\n"
+            tag = f" {w.label}" if w.label else ""
+            titles.append(f"win{i}{tag} {w.t_peak*1e3:.0f} ms  [{vname}]\n"
                           f"c={abs(c):.1f} m/s (semblance {sem:.2f})")
-            speeds.append(dict(window=i, t_peak_ms=w.t_peak * 1e3, view=vname,
+            speeds.append(dict(window=i, label=w.label, t_peak_ms=w.t_peak * 1e3, view=vname,
                                speed_m_s=float(c), semblance=float(sem),
                                mline_length_mm=float(ml.r[-1] * 1e3)))
             print(f"    window #{i} [{vname}]: space-time {res.st.data.shape} c={c:.2f} sem={sem:.3f}")
 
     # --- montage: rows = windows, cols = views ---
+    for row, k in zip(row_bmodes, range(0, len(results), len(views))):
+        if row is not None:
+            row["r0_mm"] = results[k].r0 * 1e3
     spacetime_montage(results, p["montage"], ncols=len(views), panel_titles=titles, transpose=True,
+                      row_bmodes=row_bmodes,
                       suptitle=f"Passive SWE -- {len(todo)} window(s) x {len(views)} views "
-                               f"(M-mode: x=time, y=along-line; columns = recipes)")
+                               f"(M-mode: x=time, y=along-line; columns = recipes; "
+                               f"left: B-mode + M-line, yellow = r 0, + = r0)")
     with open(os.path.join(p["outdir"], "passive_speeds.json"), "w") as f:
         json.dump(speeds, f, indent=1)
     print(f"done -> {p['montage']}")
     return p["montage"]
 
 
-# ------------------------------------------------------------------ single-line (focused B-mode)
-# Most buffer-4 frames do not show the septum clearly, so the study draws ONE line per folder on
-# the first frame of the focused B-mode (buffer 3) and uses it for detection and every window.
-# The acquisitions are R-peak gated, so frame 0 of buffer 3 and of buffer 4 sit at the same
-# cardiac phase; both grids carry per-pixel coordinates in metres, so the line maps across as is.
-FOCUSED_BMODE = "CombinedData_buffer3_iq.hdf5"
-SINGLE_LINE_SOURCE = "buffer3_frame0"
+# ------------------------------------------------------------------ single-line (B-mode at the R-peak)
+# Most buffer-4 frames do not show the septum clearly, so the study draws ONE line per folder on a
+# B-mode frame and uses it for detection and every window. Buffer 4 is R-peak triggered (its frame
+# 0 sits on an R-peak in every folder of the study), but the B-mode buffers are not - buffer 1's
+# frame 0 falls anywhere in the cycle. So the line is drawn on the B-mode frame nearest an R-peak,
+# found from the trigger log (swp.acquisition.triggerlog): same cardiac phase as buffer-4 frame 0.
+# All grids carry per-pixel coordinates in metres, so the line maps across as is.
+BMODE_BUFFER = 1
+MLINE_SOURCE_JSON = "passive_general_mline.json"
 
 
-def draw_focused_mline(folder, config="configs/passive.yaml", bmode_file=FOCUSED_BMODE, frame=0,
-                       label=""):
-    """Prompt for the single passive M-line on frame ``frame`` of the focused B-mode.
+def bmode_file(buffer):
+    return f"CombinedData_buffer{buffer}_iq.hdf5"
 
-    Saved as the general line (``mlines/passive_general_mline.npz`` + ``.png``). Only one frame
-    is read, so prompts for many folders come back to back. Closing the window without drawing
-    marks the folder skipped (``swp_passive/passive_windows.json``). Returns True if drawn.
+
+def draw_bmode_mline(folder, config="configs/passive.yaml", buffer=BMODE_BUFFER, frame="rpeak",
+                     label=""):
+    """Prompt for the single passive M-line on one frame of a B-mode buffer (default buffer 1).
+
+    ``frame="rpeak"`` picks the frame nearest an R-peak from the trigger log (falls back to 0 with
+    a warning when the log cannot place the buffer); an int uses that frame. The line is saved as
+    the general line (``mlines/passive_general_mline.npz`` + ``.png``) with its source recorded in
+    ``passive_general_mline.json``. Closing the window without drawing marks the folder skipped.
+    Returns True if drawn.
     """
     from .mline.select import load_bmode_frame
 
     cfg, p = _paths(folder, config)
     n_samples = cfg["mline"].get("n_samples", 250)
-    bmode_u8, coords, n = load_bmode_frame(os.path.join(p["output"], bmode_file), frame)
+    source = dict(buffer=int(buffer), frame_request=str(frame))
+    if frame == "rpeak":
+        from .acquisition.triggerlog import buffer_timing
+        bt = buffer_timing(folder, buffer)
+        if bt is None:
+            print(f"  WARNING: buffer {buffer} not found in the trigger log - using frame 0")
+            frame, note = 0, "R-peak unknown"
+        else:
+            frame, off = bt.nearest_rpeak_frame()
+            source.update(rpeak_offset_ms=round(off, 1), frame0_phase_ms=float(bt.phase_ms()[0]))
+            note = f"{off:+.0f} ms from R-peak"
+    else:
+        frame, note = int(frame), "fixed frame"
+    source["frame"] = int(frame)
+    bmode_u8, coords, n = load_bmode_frame(os.path.join(p["output"], bmode_file(buffer)), frame)
     head = f"{label}{os.path.basename(os.path.dirname(folder))}/{os.path.basename(folder)}"
-    title = (f"{head}\npassive M-line on focused B-mode (buffer 3), frame {frame}/{n}  |  "
+    title = (f"{head}\npassive M-line on buffer {buffer}, frame {frame}/{n} ({note})  |  "
              f"close window = skip folder")
     try:
         _draw_line(p["general"], bmode_u8[None], coords, title, n_samples, 1.0,
-                   labels=[f"buffer 3, frame {frame}"])
+                   labels=[f"buffer {buffer}, frame {frame} ({note})"])
     except SkipLine:
         _write_windows(p["windows_json"], dict(skipped_general=True))
         print("  M-line SKIPPED -> folder marked skipped")
         return False
+    with open(os.path.join(p["mlines"], MLINE_SOURCE_JSON), "w") as f:
+        json.dump(source, f, indent=1)
     if os.path.exists(p["windows_json"]):             # a stale skip / detection from an old line
         os.remove(p["windows_json"])
     return True
+
+
+def _mline_source(p):
+    path = os.path.join(p["mlines"], MLINE_SOURCE_JSON)
+    if not os.path.exists(path):
+        return "buffer3_frame0"                       # lines drawn before the source was recorded
+    with open(path) as f:
+        s = json.load(f)
+    return f"buffer{s['buffer']}_frame{s['frame']}"
 
 
 def process_single_line(folder, config="configs/passive.yaml", acq=None, window_ms=100.0,
@@ -504,23 +574,130 @@ def process_single_line(folder, config="configs/passive.yaml", acq=None, window_
     if acq is None:
         acq = load_acq(folder, config)
     key = dict(_detect_key(gen, cfg, window_ms, max_events, overview_stride),
-               mline_source=SINGLE_LINE_SOURCE)
+               mline_source=_mline_source(p))
     st, windows = _cached_windows(p, gen, cfg, key)
     if st is None:
         _archive_window_lines(p["mlines"])
         windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events, overview_stride)
         st = dict(key=key, windows=[dataclasses.asdict(w) for w in windows])
-    # Every window uses the single line: write it under each window name so the per-window
-    # machinery (and anyone reading mlines/) sees exactly what was processed.
-    for i in range(len(windows)):
-        npz = _window_npz(p["mlines"], i)
-        np.savez(npz, points=np.asarray(gen.points, float), n_samples=n_samples)
-    st.update(drawn=list(range(len(windows))), skipped=[], from_general=list(range(len(windows))))
-    _write_windows(p["windows_json"], st)
+    if label_windows(folder, st):
+        _write_windows(p["windows_json"], st)
+        windows = [BurstWindow(**w) for w in st["windows"]]
+    if st.get("window_mlines"):
+        # Per-event lines were drawn for this detection (draw_event_mlines): keep them.
+        print(f"  [M-line] using {len(st['window_mlines'])} per-event line(s)")
+    else:
+        # Every window uses the single line: write it under each window name so the per-window
+        # machinery (and anyone reading mlines/) sees exactly what was processed.
+        for i in range(len(windows)):
+            npz = _window_npz(p["mlines"], i)
+            np.savez(npz, points=np.asarray(gen.points, float), n_samples=n_samples)
+        st.update(drawn=list(range(len(windows))), skipped=[], from_general=list(range(len(windows))))
+        _write_windows(p["windows_json"], st)
     if not windows:
         print("  no bursts detected along the line")
         return None
     return process_passive_windows(folder, config, acq=acq, pad_ms=pad_ms)
+
+
+def label_windows(folder, st):
+    """Label each window of a windows-state dict (MVC / AVC / AK / other) from the trigger log.
+
+    Sets ``windows[i]["label"]`` and stores the timing behind it under ``window_phases``
+    (see :func:`swp.acquisition.triggerlog.label_event`). Returns True if anything changed.
+    """
+    from .acquisition.triggerlog import label_buffer4_events
+
+    wins = st.get("windows") or []
+    if not wins:
+        return False
+    labels = label_buffer4_events(folder, [w["t_peak"] for w in wins])
+    if labels is None:
+        return False
+    changed = False
+    for w, lab in zip(wins, labels):
+        if w.get("label") != lab["label"]:
+            w["label"] = lab["label"]
+            changed = True
+    if st.get("window_phases") != labels:
+        st["window_phases"] = labels
+        changed = True
+    return changed
+
+
+def event_bmode_frames(folder, windows, buffer=BMODE_BUFFER, at="t_peak"):
+    """For each burst window: the B-mode frame at the same cardiac phase as the event.
+
+    The event time in buffer 4 (``at``: ``"t_peak"`` or ``"t0"``) is placed on the trigger-log
+    clock via buffer 4's frame-0 trigger, turned into a phase (ms since the preceding R-peak), and
+    matched to the B-mode frame with the closest phase since *its* preceding R-peak. Returns a list
+    of dicts (frame, event_phase_ms, frame_phase_ms), or None when the log cannot place a buffer.
+    """
+    from .acquisition.triggerlog import buffer_timing
+
+    b4, bb = buffer_timing(folder, 4), buffer_timing(folder, buffer)
+    if b4 is None or bb is None:
+        return None
+    ph_b = bb.phase_ms()
+    out = []
+    for w in windows:
+        t_abs = b4.t0_ms + getattr(w, at) * 1e3
+        prev = b4.r_peaks_ms[b4.r_peaks_ms <= t_abs + 0.5]
+        phase = t_abs - prev.max() if prev.size else getattr(w, at) * 1e3
+        k = int(np.nanargmin(np.abs(ph_b - phase)))
+        out.append(dict(frame=k, event_phase_ms=round(float(phase), 1),
+                        frame_phase_ms=round(float(ph_b[k]), 1)))
+    return out
+
+
+def draw_event_mlines(folder, config="configs/passive.yaml", buffer=BMODE_BUFFER, at="t_peak",
+                      label=""):
+    """Prompt for one M-line per detected window, each on the phase-matched B-mode frame.
+
+    Needs the detection of the current general line (run :func:`process_single_line` first).
+    The general line is overlaid dashed; ENTER without clicking reuses it for that window, closing
+    the window skips that window. Lines go to ``mlines/passive_win<i>_mline.npz``; the frame
+    choice is recorded under ``window_mlines`` in ``passive_windows.json``, which also stops
+    :func:`process_single_line` from overwriting them. Returns the state dict.
+    """
+    from .mline.select import load_bmode_frame
+
+    cfg, p = _paths(folder, config)
+    n_samples = cfg["mline"].get("n_samples", 250)
+    st, windows = read_windows(p["windows_json"])
+    if st is None or not windows:
+        raise SystemExit("no detected windows - run process (single line) first")
+    gen = _load_line(p["general"], n_samples)
+    frames = event_bmode_frames(folder, windows, buffer, at)
+    if frames is None:
+        raise SystemExit(f"trigger log cannot place buffer {buffer} / 4 for {folder}")
+    head = f"{label}{os.path.basename(os.path.dirname(folder))}/{os.path.basename(folder)}"
+    ref = [("general M-line", gen.x, gen.z)]
+    wm = {}
+    for i, (w, fr) in enumerate(zip(windows, frames)):
+        k = fr["frame"]
+        bmode_u8, coords, n = load_bmode_frame(os.path.join(p["output"], bmode_file(buffer)), k)
+        note = (f"event @ {w.t_peak * 1e3:.0f} ms = R+{fr['event_phase_ms']:.0f} ms; "
+                f"frame R+{fr['frame_phase_ms']:.0f} ms")
+        title = (f"{head}\nwindow {i + 1}/{len(windows)}: buffer {buffer} frame {k}/{n} ({note})\n"
+                 f"ENTER without clicking = use general line  |  close = skip window")
+        npz = _window_npz(p["mlines"], i)
+        try:
+            _, reused = _draw_line(npz, bmode_u8[None], coords, title, n_samples, 1.0,
+                                   reference=ref, labels=[f"buffer {buffer}, frame {k}"],
+                                   fallback_points=gen.points)
+            wm[str(i)] = dict(buffer=buffer, **fr, from_general=bool(reused))
+        except SkipLine:
+            if os.path.exists(npz):
+                os.remove(npz)
+            wm[str(i)] = dict(buffer=buffer, **fr, skipped=True)
+            print(f"  [M-line] window {i}: SKIPPED")
+    st.update(window_mlines=wm,
+              drawn=[int(i) for i, v in wm.items() if not v.get("skipped")],
+              skipped=[int(i) for i, v in wm.items() if v.get("skipped")],
+              from_general=[int(i) for i, v in wm.items() if v.get("from_general")])
+    _write_windows(p["windows_json"], st)
+    return st
 
 
 def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_events=4,

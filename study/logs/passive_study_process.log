@@ -1,0 +1,824 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+
+=== process C000000001/SWE_01_SW_data_21-April-2026_12-12-54 (1 ready, 43 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 52 ms, window [2, 102] ms
+    #1: peak 442 ms, window [392, 492] ms
+    #2: peak 605 ms, window [555, 655] ms
+    #3: peak 786 ms, window [736, 836] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (113, 250) c=1.31 sem=0.609
+    window #0 [disp bp5-150 median NO-temporal]: space-time (113, 250) c=1.36 sem=0.686
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (112, 250) c=3.38 sem=0.468
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=12.19 sem=0.483
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.05 sem=0.579
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.38 sem=0.427
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.451
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.01 sem=0.643
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.19 sem=0.455
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.38 sem=0.504
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=5.30 sem=0.567
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.510
+done -> Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\swp_passive\passive_windows_montage.png
+  152 s
+
+=== process C000000002/SWE02_SW_data_28-April-2026_10-09-45 (6 ready, 37 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 64 ms, window [14, 114] ms
+    #1: peak 505 ms, window [455, 555] ms
+    #2: peak 683 ms, window [633, 733] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (124, 250) c=-20.00 sem=0.576
+    window #0 [disp bp5-150 median NO-temporal]: space-time (124, 250) c=-2.19 sem=0.418
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (123, 250) c=-20.00 sem=0.515
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.11 sem=0.512
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.15 sem=0.710
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-4.32 sem=0.493
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=8.77 sem=0.531
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.80 sem=0.713
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.31 sem=0.281
+done -> Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45\output\swp_passive\passive_windows_montage.png
+  123 s
+
+=== process C000000003/VIS_03_SW_data_16-June-2026_10-09-42 (15 ready, 26 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 76 ms, window [26, 126] ms
+    #1: peak 413 ms, window [363, 463] ms
+    #2: peak 585 ms, window [535, 635] ms
+    #3: peak 894 ms, window [844, 944] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.76 sem=0.238
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.285
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.62 sem=0.604
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=14.02 sem=0.739
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.51 sem=0.759
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.425
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-3.96 sem=0.612
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-4.53 sem=0.743
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.00 sem=0.205
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-4.53 sem=0.511
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-4.13 sem=0.613
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.89 sem=0.333
+done -> Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42\output\swp_passive\passive_windows_montage.png
+  155 s
+
+=== process C000000004/VIS_4_SW_data_16-June-2026_10-58-59 (21 ready, 17 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 35 ms, window [1, 85] ms
+    #1: peak 405 ms, window [355, 455] ms
+    #2: peak 742 ms, window [692, 792] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (97, 250) c=1.00 sem=0.630
+    window #0 [disp bp5-150 median NO-temporal]: space-time (97, 250) c=1.00 sem=0.628
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (96, 250) c=8.77 sem=0.472
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.96 sem=0.852
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.16 sem=0.813
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.14 sem=0.608
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.707
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.715
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.00 sem=0.485
+done -> Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59\output\swp_passive\passive_windows_montage.png
+  117 s
+
+=== process C000000005/VIS-005_SW_data_19-June-2026_09-12-20 (30 ready, 2 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 159 ms, window [109, 209] ms
+    #1: peak 334 ms, window [284, 384] ms
+    #2: peak 577 ms, window [527, 627] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.96 sem=0.744
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.92 sem=0.750
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.85 sem=0.711
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.00 sem=0.326
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.321
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.54 sem=0.167
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-2.70 sem=0.532
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.62 sem=0.558
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-4.32 sem=0.458
+done -> Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20\output\swp_passive\passive_windows_montage.png
+  126 s
+
+=== process C000000007/VIS-007_SW_data_30-June-2026_11-45-50 (31 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 41 ms, window [1, 91] ms
+    #1: peak 372 ms, window [322, 422] ms
+    #2: peak 523 ms, window [473, 573] ms
+    #3: peak 861 ms, window [811, 911] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (103, 250) c=6.38 sem=0.452
+    window #0 [disp bp5-150 median NO-temporal]: space-time (103, 250) c=1.03 sem=0.497
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (102, 250) c=1.54 sem=0.304
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-5.62 sem=0.784
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-5.62 sem=0.859
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.87 sem=0.495
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=5.30 sem=0.614
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.16 sem=0.603
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.62 sem=0.607
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=20.00 sem=0.565
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=16.48 sem=0.595
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.581
+done -> Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50\output\swp_passive\passive_windows_montage.png
+  147 s
+
+=== process C000000008/VIS-010_SW_data_03-July-2026_10-36-33 (30 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 70 ms, window [20, 120] ms
+    #1: peak 475 ms, window [425, 525] ms
+    #2: peak 864 ms, window [814, 914] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=5.01 sem=0.707
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-12.19 sem=0.821
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.55 sem=0.495
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.63 sem=0.607
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.36 sem=0.860
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.62 sem=0.305
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.27 sem=0.506
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-2.96 sem=0.858
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=10.79 sem=0.523
+done -> Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33\output\swp_passive\passive_windows_montage.png
+  123 s
+
+=== process C000000009/VIS-009_SW_data_03-July-2026_09-43-33 (29 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 138 ms, window [88, 188] ms
+    #1: peak 409 ms, window [359, 459] ms
+    #2: peak 917 ms, window [867, 967] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-2.63 sem=0.527
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-3.05 sem=0.720
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=12.19 sem=0.634
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.49 sem=0.569
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=4.32 sem=0.625
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.38 sem=0.533
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-20.00 sem=0.444
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.33 sem=0.435
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.96 sem=0.418
+done -> Z:\raw_data\C000000009\VIS-009_SW_data_03-July-2026_09-43-33\output\swp_passive\passive_windows_montage.png
+  123 s
+
+=== process C000000010/vis-006_SW_data_30-June-2026_09-43-28 (28 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 68 ms, window [18, 118] ms
+    #1: peak 340 ms, window [290, 390] ms
+    #2: peak 642 ms, window [592, 692] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (128, 250) c=3.05 sem=0.293
+    window #0 [disp bp5-150 median NO-temporal]: space-time (128, 250) c=1.00 sem=0.362
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (127, 250) c=3.96 sem=0.544
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.70 sem=0.641
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.89 sem=0.621
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.01 sem=0.581
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.18 sem=0.309
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.12 sem=0.354
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.00 sem=0.267
+done -> Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28\output\swp_passive\passive_windows_montage.png
+  118 s
+
+=== process C000000011/VIS-11_SW_data_07-July-2026_08-40-05 (27 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 33 ms, window [1, 83] ms
+    #1: peak 341 ms, window [291, 391] ms
+    #2: peak 524 ms, window [474, 574] ms
+    #3: peak 756 ms, window [706, 806] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (96, 250) c=1.04 sem=0.782
+    window #0 [disp bp5-150 median NO-temporal]: space-time (96, 250) c=1.00 sem=0.658
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (95, 250) c=2.10 sem=0.822
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.65 sem=0.965
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.51 sem=0.982
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=8.02 sem=0.919
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-20.00 sem=0.842
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=12.19 sem=0.964
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.55 sem=0.456
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-5.62 sem=0.712
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=6.85 sem=0.572
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-5.97 sem=0.817
+done -> Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05\output\swp_passive\passive_windows_montage.png
+  152 s
+
+=== process C000000012/VIS-014_SW_data_07-July-2026_11-41-37 (26 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 62 ms, window [12, 112] ms
+    #1: peak 538 ms, window [488, 588] ms
+    #2: peak 765 ms, window [715, 815] ms
+    #3: peak 970 ms, window [920, 1020] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (122, 250) c=4.76 sem=0.770
+    window #0 [disp bp5-150 median NO-temporal]: space-time (122, 250) c=2.19 sem=0.709
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (121, 250) c=5.62 sem=0.817
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-4.32 sem=0.383
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.68 sem=0.498
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.11 sem=0.394
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.81 sem=0.575
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.24 sem=0.639
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.57 sem=0.831
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.32 sem=0.825
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.57 sem=0.834
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=4.32 sem=0.876
+done -> Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000013/VIS-016_SW_data_10-July-2026_10-11-11 (25 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 2 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 43 ms, window [1, 93] ms
+    #1: peak 487 ms, window [437, 537] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (105, 250) c=-1.00 sem=0.480
+    window #0 [disp bp5-150 median NO-temporal]: space-time (105, 250) c=-1.00 sem=0.509
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (104, 250) c=6.38 sem=0.709
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.00 sem=0.708
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.669
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.31 sem=0.664
+done -> Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11\output\swp_passive\passive_windows_montage.png
+  94 s
+
+=== process C000000014/VIS-008_SW_data_10-July-2026_08-36-06 (24 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 54 ms, window [4, 104] ms
+    #1: peak 426 ms, window [376, 476] ms
+    #2: peak 618 ms, window [568, 668] ms
+    #3: peak 944 ms, window [894, 994] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (115, 250) c=12.19 sem=0.878
+    window #0 [disp bp5-150 median NO-temporal]: space-time (115, 250) c=20.00 sem=0.913
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (114, 250) c=4.76 sem=0.906
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.65 sem=0.873
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.63 sem=0.662
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.80 sem=0.941
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.00 sem=0.607
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.696
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-3.51 sem=0.664
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.96 sem=0.830
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-2.42 sem=0.885
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.68 sem=0.817
+done -> Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000015/VIS-017_SW_data_10-July-2026_10-53-28 (23 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 49 ms, window [1, 99] ms
+    #1: peak 512 ms, window [462, 562] ms
+    #2: peak 691 ms, window [641, 741] ms
+    #3: peak 1144 ms, window [1094, 1194] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (110, 250) c=2.10 sem=0.687
+    window #0 [disp bp5-150 median NO-temporal]: space-time (110, 250) c=1.07 sem=0.602
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (109, 250) c=3.80 sem=0.709
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.75 sem=0.647
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=20.00 sem=0.623
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.06 sem=0.645
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.15 sem=0.635
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.393
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.14 sem=0.700
+    window #3 [disp bp10-150 gauss mean3]: space-time (117, 250) c=-1.54 sem=0.731
+    window #3 [disp bp5-150 median NO-temporal]: space-time (117, 250) c=-2.42 sem=0.640
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (116, 250) c=-1.07 sem=0.687
+done -> Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28\output\swp_passive\passive_windows_montage.png
+  153 s
+
+=== process C000000016/VIS-015_SW_data_10-July-2026_09-24-32 (22 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 112 ms, window [62, 162] ms
+    #1: peak 389 ms, window [339, 439] ms
+    #2: peak 597 ms, window [547, 647] ms
+    #3: peak 876 ms, window [826, 926] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.21 sem=0.569
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.700
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.30 sem=0.568
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.78 sem=0.652
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.21 sem=0.778
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.594
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.80 sem=0.473
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=5.01 sem=0.713
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.63 sem=0.304
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.43 sem=0.491
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.642
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.63 sem=0.559
+done -> Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32\output\swp_passive\passive_windows_montage.png
+  159 s
+
+=== process C000000018/VIS-012_SW_data_07-July-2026_09-21-31 (21 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 346 ms, window [296, 396] ms
+    #1: peak 609 ms, window [559, 659] ms
+    #2: peak 764 ms, window [714, 814] ms
+    #3: peak 1057 ms, window [1007, 1107] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.54 sem=0.680
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.690
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.38 sem=0.802
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-2.01 sem=0.802
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.08 sem=0.891
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.40 sem=0.865
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-16.48 sem=0.571
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.653
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.661
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.75 sem=0.692
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.757
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.51 sem=0.816
+done -> Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000019/VIS-027_SW_data_21-July-2026_11-19-20 (20 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 94 ms, window [44, 144] ms
+    #1: peak 449 ms, window [399, 499] ms
+    #2: peak 627 ms, window [577, 677] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=5.30 sem=0.887
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=12.19 sem=0.806
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.97 sem=0.939
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.16 sem=0.620
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.55 sem=0.488
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.691
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.24 sem=0.666
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.757
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.16 sem=0.639
+done -> Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20\output\swp_passive\passive_windows_montage.png
+  129 s
+
+=== process C000000020/VIS-026_SW_data_21-July-2026_10-42-10 (19 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 94 ms, window [44, 144] ms
+    #1: peak 417 ms, window [367, 467] ms
+    #2: peak 637 ms, window [587, 687] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.38 sem=0.737
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.78 sem=0.748
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=4.76 sem=0.867
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.32 sem=0.941
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.70 sem=0.914
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.38 sem=0.931
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.65 sem=0.885
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.34 sem=0.883
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.10 sem=0.599
+done -> Z:\raw_data\C000000020\VIS-026_SW_data_21-July-2026_10-42-10\output\swp_passive\passive_windows_montage.png
+  130 s
+
+=== process C000000021/VIS-024_SW_data_17-July-2026_09-35-47 (18 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 75 ms, window [25, 125] ms
+    #1: peak 392 ms, window [342, 442] ms
+    #2: peak 541 ms, window [491, 591] ms
+    #3: peak 908 ms, window [858, 958] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.92 sem=0.420
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.353
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.65 sem=0.655
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.78 sem=0.888
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.14 sem=0.739
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.27 sem=0.890
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.831
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.910
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-3.38 sem=0.401
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.05 sem=0.519
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.449
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.38 sem=0.697
+done -> Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47\output\swp_passive\passive_windows_montage.png
+  163 s
+
+=== process C000000022/VIS-023_SW_data_17-July-2026_08-48-06 (17 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 350 ms, window [300, 400] ms
+    #1: peak 501 ms, window [451, 551] ms
+    #2: peak 799 ms, window [749, 849] ms
+    #3: peak 961 ms, window [911, 1011] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.89 sem=0.599
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.689
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.51 sem=0.751
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-6.38 sem=0.434
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.02 sem=0.580
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.364
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.63 sem=0.517
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.647
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.96 sem=0.674
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=7.39 sem=0.512
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.671
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=12.19 sem=0.692
+done -> Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06\output\swp_passive\passive_windows_montage.png
+  163 s
+
+=== process C000000023/VIS-022_SW_data_14-July-2026_11-41-10 (16 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 75 ms, window [25, 125] ms
+    #1: peak 451 ms, window [401, 501] ms
+    #2: peak 657 ms, window [607, 707] ms
+    #3: peak 854 ms, window [804, 904] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.51 sem=0.880
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-4.32 sem=0.639
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.87 sem=0.929
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.32 sem=0.925
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.60 sem=0.748
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.85 sem=0.937
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-3.51 sem=0.905
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-2.96 sem=0.782
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=8.77 sem=0.720
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.13 sem=0.851
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=4.32 sem=0.545
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.27 sem=0.939
+done -> Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10\output\swp_passive\passive_windows_montage.png
+  164 s
+
+=== process C000000025/VIS-025_SW_data_21-July-2026_09-53-09 (15 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 39 ms, window [1, 89] ms
+    #1: peak 455 ms, window [405, 505] ms
+    #2: peak 774 ms, window [724, 824] ms
+    #3: peak 942 ms, window [892, 992] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (101, 250) c=12.19 sem=0.894
+    window #0 [disp bp5-150 median NO-temporal]: space-time (101, 250) c=-3.51 sem=0.912
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (100, 250) c=3.51 sem=0.853
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.85 sem=0.634
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.04 sem=0.670
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=6.85 sem=0.603
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-2.36 sem=0.775
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.21 sem=0.754
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-4.13 sem=0.721
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.85 sem=0.805
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-6.85 sem=0.891
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.01 sem=0.757
+done -> Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09\output\swp_passive\passive_windows_montage.png
+  155 s
+
+=== process C000000027/VIS-019_SW_data_14-July-2026_09-20-26 (14 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 57 ms, window [7, 107] ms
+    #1: peak 383 ms, window [333, 433] ms
+    #2: peak 555 ms, window [505, 605] ms
+    #3: peak 950 ms, window [900, 1000] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (118, 250) c=2.49 sem=0.920
+    window #0 [disp bp5-150 median NO-temporal]: space-time (118, 250) c=1.45 sem=0.847
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (117, 250) c=2.70 sem=0.941
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.78 sem=0.906
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.01 sem=0.936
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.65 sem=0.925
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=4.76 sem=0.636
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.562
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.36 sem=0.728
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.25 sem=0.896
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.45 sem=0.828
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.70 sem=0.945
+done -> Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000028/VIS-018_SW_data_14-July-2026_08-30-41 (13 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 49 ms, window [1, 99] ms
+    #1: peak 360 ms, window [310, 410] ms
+    #2: peak 578 ms, window [528, 628] ms
+    #3: peak 1158 ms, window [1108, 1200] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (110, 250) c=8.77 sem=0.985
+    window #0 [disp bp5-150 median NO-temporal]: space-time (110, 250) c=5.30 sem=0.972
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (109, 250) c=20.00 sem=0.964
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.85 sem=0.978
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=4.13 sem=0.967
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.62 sem=0.985
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.40 sem=0.908
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.00 sem=0.920
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.10 sem=0.893
+    window #3 [disp bp10-150 gauss mean3]: space-time (104, 250) c=4.76 sem=0.977
+    window #3 [disp bp5-150 median NO-temporal]: space-time (104, 250) c=4.13 sem=0.976
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (103, 250) c=7.39 sem=0.959
+done -> Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41\output\swp_passive\passive_windows_montage.png
+  149 s
+
+=== process C000000029/VIS-031_SW_data_24-July-2026_11-11-50 (12 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 44 ms, window [1, 94] ms
+    #1: peak 350 ms, window [300, 400] ms
+    #2: peak 826 ms, window [776, 876] ms
+    #3: peak 983 ms, window [933, 1033] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (106, 250) c=1.00 sem=0.701
+    window #0 [disp bp5-150 median NO-temporal]: space-time (106, 250) c=1.00 sem=0.376
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (105, 250) c=4.53 sem=0.610
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=3.96 sem=0.942
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.87 sem=0.953
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=8.77 sem=0.890
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.68 sem=0.825
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.791
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.19 sem=0.696
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.38 sem=0.748
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-3.38 sem=0.639
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.846
+done -> Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50\output\swp_passive\passive_windows_montage.png
+  158 s
+
+=== process C000000030/VIS-029_SW_data_24-July-2026_09-36-27 (11 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 46 ms, window [1, 96] ms
+    #1: peak 423 ms, window [373, 473] ms
+    #2: peak 634 ms, window [584, 684] ms
+    #3: peak 874 ms, window [824, 924] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (108, 250) c=-20.00 sem=0.890
+    window #0 [disp bp5-150 median NO-temporal]: space-time (108, 250) c=12.19 sem=0.745
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (107, 250) c=-8.77 sem=0.925
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.54 sem=0.703
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.16 sem=0.592
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.62 sem=0.841
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-3.16 sem=0.782
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.81 sem=0.638
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.60 sem=0.380
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.38 sem=0.572
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-4.32 sem=0.447
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-7.39 sem=0.877
+done -> Z:\raw_data\C000000030\VIS-029_SW_data_24-July-2026_09-36-27\output\swp_passive\passive_windows_montage.png
+  159 s
+
+=== process C000000032/VIS-030_SW_data_24-July-2026_10-24-32 (10 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 33 ms, window [1, 83] ms
+    #1: peak 360 ms, window [310, 410] ms
+    #2: peak 635 ms, window [585, 685] ms
+    #3: peak 847 ms, window [797, 897] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (96, 250) c=14.02 sem=0.935
+    window #0 [disp bp5-150 median NO-temporal]: space-time (96, 250) c=20.00 sem=0.959
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (95, 250) c=20.00 sem=0.790
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.417
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.466
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.00 sem=0.291
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.36 sem=0.775
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.12 sem=0.848
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.54 sem=0.267
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-12.19 sem=0.928
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-5.01 sem=0.954
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.820
+done -> Z:\raw_data\C000000032\VIS-030_SW_data_24-July-2026_10-24-32\output\swp_passive\passive_windows_montage.png
+  151 s
+
+=== process C000000033/VIS-028_SW_data_24-July-2026_08-43-33 (9 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 89 ms, window [39, 139] ms
+    #1: peak 414 ms, window [364, 464] ms
+    #2: peak 594 ms, window [544, 644] ms
+    #3: peak 1068 ms, window [1018, 1118] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-20.00 sem=0.906
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=6.38 sem=0.912
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.849
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.38 sem=0.978
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=5.30 sem=0.960
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=9.67 sem=0.928
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.584
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.331
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.29 sem=0.494
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.31 sem=0.772
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.01 sem=0.575
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=12.19 sem=0.856
+done -> Z:\raw_data\C000000033\VIS-028_SW_data_24-July-2026_08-43-33\output\swp_passive\passive_windows_montage.png
+  160 s
+
+=== process C000000034/VIS-045_SW_data_07-August-2026_11-42-13 (8 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 53 ms, window [3, 103] ms
+    #1: peak 530 ms, window [480, 580] ms
+    #2: peak 922 ms, window [872, 972] ms
+    #3: peak 1118 ms, window [1068, 1168] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (114, 250) c=4.32 sem=0.804
+    window #0 [disp bp5-150 median NO-temporal]: space-time (114, 250) c=6.85 sem=0.918
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (113, 250) c=9.67 sem=0.822
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-20.00 sem=0.675
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=6.38 sem=0.759
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.38 sem=0.774
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.70 sem=0.932
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=4.32 sem=0.940
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=2.25 sem=0.770
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=6.38 sem=0.837
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=12.19 sem=0.948
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=10.79 sem=0.832
+done -> Z:\raw_data\C000000034\VIS-045_SW_data_07-August-2026_11-42-13\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000035/VIS-044_SW_data_07-August-2026_10-54-57 (7 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 63 ms, window [13, 113] ms
+    #1: peak 413 ms, window [363, 463] ms
+    #2: peak 970 ms, window [920, 1020] ms
+    #3: peak 1136 ms, window [1086, 1186] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (123, 250) c=-1.81 sem=0.517
+    window #0 [disp bp5-150 median NO-temporal]: space-time (123, 250) c=-1.16 sem=0.757
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (122, 250) c=-14.02 sem=0.507
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=7.39 sem=0.945
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.27 sem=0.920
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=14.02 sem=0.836
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.09 sem=0.333
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.468
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.60 sem=0.447
+    window #3 [disp bp10-150 gauss mean3]: space-time (124, 250) c=-5.62 sem=0.628
+    window #3 [disp bp5-150 median NO-temporal]: space-time (124, 250) c=-2.36 sem=0.884
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (123, 250) c=-20.00 sem=0.492
+done -> Z:\raw_data\C000000035\VIS-044_SW_data_07-August-2026_10-54-57\output\swp_passive\passive_windows_montage.png
+  166 s
+
+=== process C000000037/VIS-042_SW_data_07-August-2026_08-39-39 (6 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 33 ms, window [1, 83] ms
+    #1: peak 583 ms, window [533, 633] ms
+    #2: peak 1147 ms, window [1097, 1197] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (96, 250) c=5.30 sem=0.955
+    window #0 [disp bp5-150 median NO-temporal]: space-time (96, 250) c=3.65 sem=0.959
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (95, 250) c=8.77 sem=0.941
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.70 sem=0.938
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=4.76 sem=0.985
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.96 sem=0.487
+    window #2 [disp bp10-150 gauss mean3]: space-time (114, 250) c=3.80 sem=0.924
+    window #2 [disp bp5-150 median NO-temporal]: space-time (114, 250) c=2.96 sem=0.932
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (113, 250) c=5.97 sem=0.946
+done -> Z:\raw_data\C000000037\VIS-042_SW_data_07-August-2026_08-39-39\output\swp_passive\passive_windows_montage.png
+  120 s
+
+=== process C000000038/VIS-041_SW_data_04-August-2026_12-28-28 (5 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 143 ms, window [93, 193] ms
+    #1: peak 411 ms, window [361, 461] ms
+    #2: peak 611 ms, window [561, 661] ms
+    #3: peak 920 ms, window [870, 970] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.96 sem=0.726
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.62 sem=0.785
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.97 sem=0.309
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-8.02 sem=0.713
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-3.05 sem=0.687
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=16.48 sem=0.670
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.12 sem=0.637
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.669
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.96 sem=0.278
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.19 sem=0.744
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.19 sem=0.739
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.62 sem=0.342
+done -> Z:\raw_data\C000000038\VIS-041_SW_data_04-August-2026_12-28-28\output\swp_passive\passive_windows_montage.png
+  176 s
+
+=== process C000000041/VIS-038_SW_data_31-July-2026_09-01-39 (4 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 55 ms, window [5, 105] ms
+    #1: peak 415 ms, window [365, 465] ms
+    #2: peak 927 ms, window [877, 977] ms
+    #3: peak 1094 ms, window [1044, 1144] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (116, 250) c=1.78 sem=0.677
+    window #0 [disp bp5-150 median NO-temporal]: space-time (116, 250) c=1.15 sem=0.636
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (115, 250) c=3.16 sem=0.700
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.49 sem=0.843
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.25 sem=0.811
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.80 sem=0.742
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.40 sem=0.662
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.27 sem=0.742
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.15 sem=0.402
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=8.02 sem=0.608
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.16 sem=0.475
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=5.97 sem=0.720
+done -> Z:\raw_data\C000000041\VIS-038_SW_data_31-July-2026_09-01-39\output\swp_passive\passive_windows_montage.png
+  156 s
+
+=== process C000000042/VIS-036_SW_data_28-July-2026_14-07-08 (3 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 57 ms, window [7, 107] ms
+    #1: peak 465 ms, window [415, 515] ms
+    #2: peak 816 ms, window [766, 866] ms
+    #3: peak 982 ms, window [932, 1032] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (118, 250) c=1.65 sem=0.864
+    window #0 [disp bp5-150 median NO-temporal]: space-time (118, 250) c=1.00 sem=0.914
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (117, 250) c=-16.48 sem=0.588
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.25 sem=0.775
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.860
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=4.53 sem=0.547
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.00 sem=0.258
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.366
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.05 sem=0.406
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.40 sem=0.884
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.934
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=8.77 sem=0.583
+done -> Z:\raw_data\C000000042\VIS-036_SW_data_28-July-2026_14-07-08\output\swp_passive\passive_windows_montage.png
+  159 s
+
+=== process C000000044/VIS-034_SW_data_28-July-2026_11-02-22 (2 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 46 ms, window [1, 96] ms
+    #1: peak 509 ms, window [459, 559] ms
+    #2: peak 702 ms, window [652, 752] ms
+    #3: peak 1050 ms, window [1000, 1100] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (108, 250) c=7.39 sem=0.793
+    window #0 [disp bp5-150 median NO-temporal]: space-time (108, 250) c=7.39 sem=0.820
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (107, 250) c=3.80 sem=0.636
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.29 sem=0.433
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.11 sem=0.658
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.09 sem=0.217
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-1.54 sem=0.333
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-1.03 sem=0.278
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-1.00 sem=0.217
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=2.55 sem=0.621
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=2.14 sem=0.558
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=3.80 sem=0.675
+done -> Z:\raw_data\C000000044\VIS-034_SW_data_28-July-2026_11-02-22\output\swp_passive\passive_windows_montage.png
+  158 s
+
+=== process C000000045/VIS-033_SW_data_28-July-2026_09-25-55 (1 ready, 0 still to draw) ===
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 80 ms, window [30, 130] ms
+    #1: peak 259 ms, window [209, 309] ms
+    #2: peak 409 ms, window [359, 459] ms
+    #3: peak 1165 ms, window [1115, 1200] ms
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+    window #0 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-12.19 sem=0.844
+    window #0 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-2.87 sem=0.821
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=12.19 sem=0.797
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-16.48 sem=0.693
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-3.05 sem=0.639
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-20.00 sem=0.363
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=20.00 sem=0.628
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.00 sem=0.813
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.757
+    window #3 [disp bp10-150 gauss mean3]: space-time (97, 250) c=-1.02 sem=0.790
+    window #3 [disp bp5-150 median NO-temporal]: space-time (97, 250) c=-1.00 sem=0.727
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (96, 250) c=1.02 sem=0.469
+done -> Z:\raw_data\C000000045\VIS-033_SW_data_28-July-2026_09-25-55\output\swp_passive\passive_windows_montage.png
+  161 s
+
+processed 36/51, no bursts 0, skipped 8; failed this run: 0
+EXIT=0

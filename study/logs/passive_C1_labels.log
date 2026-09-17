@@ -1,0 +1,20 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  [windows] reuse passive_windows.json (4 window(s))
+  [M-line] using 4 per-event line(s)
+  3 view(s) per window: disp bp10-150 gauss mean3 | disp bp5-150 median NO-temporal | velocity bp15-90 gauss1.0 mean5
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/values, 133.5 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+    window #0 [disp bp10-150 gauss mean3]: space-time (111, 250) c=3.65 sem=0.811
+    window #0 [disp bp5-150 median NO-temporal]: space-time (111, 250) c=2.14 sem=0.888
+    window #0 [velocity bp15-90 gauss1.0 mean5]: space-time (110, 250) c=5.01 sem=0.592
+    window #1 [disp bp10-150 gauss mean3]: space-time (130, 250) c=-3.65 sem=0.562
+    window #1 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=-2.25 sem=0.647
+    window #1 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=-2.63 sem=0.485
+    window #2 [disp bp10-150 gauss mean3]: space-time (130, 250) c=1.12 sem=0.506
+    window #2 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=1.02 sem=0.561
+    window #2 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=1.16 sem=0.608
+    window #3 [disp bp10-150 gauss mean3]: space-time (130, 250) c=8.02 sem=0.877
+    window #3 [disp bp5-150 median NO-temporal]: space-time (130, 250) c=3.16 sem=0.863
+    window #3 [velocity bp15-90 gauss1.0 mean5]: space-time (129, 250) c=20.00 sem=0.722
+done -> Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-12-54\output\swp_passive\passive_windows_montage.png
+EXIT=0

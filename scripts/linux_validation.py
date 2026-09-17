@@ -170,8 +170,11 @@ def cmd_compare(a):
     if a.pattern:
         ref_files = [p for p in ref_files if a.pattern in str(p)]
     rows, bad = [], 0
+    has_converted = (new / "converted").is_dir()
     for rel in ref_files:
         if rel not in new_files:
+            if rel.parts[0] == "converted" and not has_converted:
+                continue                                 # run with --no-converted
             if new_files:                                # only report files the new run should have
                 rows.append((str(rel), "-", "MISSING", "not in new output"))
             continue
@@ -181,7 +184,11 @@ def cmd_compare(a):
                 rows.append((str(rel), extra, "EXTRA", "only in new"))
             desc_a, desc_b = fa.attrs.get("description"), fb.attrs.get("description")
             if desc_a != desc_b:
-                rows.append((str(rel), "@description", "DIFFERENT", f"{desc_a!r} vs {desc_b!r}"))
+                # Newer runs append the reconstruction as " [delay-and-sum]" etc.; that alone is
+                # a label change, not a data difference.
+                strip = lambda s: re.sub(r"\s*\[[^\]]*\]$", "", str(s))  # noqa: E731
+                verdict = "note" if strip(desc_a) == strip(desc_b) else "DIFFERENT"
+                rows.append((str(rel), "@description", verdict, f"{desc_a!r} vs {desc_b!r}"))
             for name in sorted(A):
                 if name not in B:
                     rows.append((str(rel), name, "MISSING", "dataset not in new"))
@@ -203,7 +210,7 @@ def cmd_compare(a):
     counts = {}
     for r in rows:
         counts[r[2]] = counts.get(r[2], 0) + 1
-    bad = sum(v for k, v in counts.items() if k not in ("exact", "close"))
+    bad = sum(v for k, v in counts.items() if k not in ("exact", "close", "note"))
     report += ["", "summary: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())),
                "PASS" if bad == 0 else f"FAIL ({bad} item(s) differ)"]
     text = "\n".join(report)

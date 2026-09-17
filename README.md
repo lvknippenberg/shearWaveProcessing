@@ -98,6 +98,12 @@ python scripts/process_raw_data.py --folder "<folder>" --overwrite         # for
 Finds every measurement folder under `<root>/<subject>/`, skips those already carrying IQ + GIFs,
 and reports per-folder success/failure in a closing summary — one failure never stops the batch.
 
+**On the Linux GPU server** (Docker container `zea-swp`, JAX ~40 % faster than this Windows machine,
+validated against it): setup from scratch, validation and batch commands in
+**[docs/linux_server.md](docs/linux_server.md)**. `CombinedData.mat` still has to be built on Windows
+(MATLAB). `scripts/linux_validation.py` re-runs one folder into `output_linux` and compares it
+dataset by dataset.
+
 ### B-mode GIFs
 
 `beamform` renders one GIF per IQ file into `<folder>/output/`. B-mode buffers play **in real
@@ -193,7 +199,14 @@ The septal M-line is drawn interactively (ported from `SWI/Zea/swi_mline.py`): c
 B-mode in any order, drag to adjust, Enter to finish. It is saved as `output/mlines/*.npz`
 (`points` (k,2)=(x,z) m + `n_samples`) and **reused automatically** on later runs, so batch
 processing is unattended once the lines exist. Active lines are drawn on the buffer-5 frame for each
-push; passive lines on the buffer-4 stream itself.
+push.
+
+Passive lines are drawn on the **widebeam B-mode (buffer 1) at the matching cardiac phase**: only
+buffers 4, 2(+5) and 6 are R-peak gated, so the frame is picked from the trigger log (the R-peak frame
+for the general line, a phase-matched frame per detected event). Detected windows are labelled
+MVC / AVC / AK from the ECG. Study workflow: `scripts/passive_study.py draw | process | label |
+draw-events | status` — see **[docs/passive_mlines.md](docs/passive_mlines.md)** and
+**[docs/ecg_timing.md](docs/ecg_timing.md)**.
 
 ## Visualization recipe
 
@@ -216,18 +229,24 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        verify_outputs.py (check/repair a processed tree),
                        incoherent_bmode.py (envelope-compounded focused B-mode, for comparison),
                        refocus_bmode.py (REFoCUS retrospective transmit beamforming),
-                       draw_passive_mlines.py (front-load the general passive M-lines),
+                       passive_study.py (passive M-lines + processing + event labels over a study),
+                       linux_validation.py (re-run one folder elsewhere and compare to output/),
+                       draw_passive_mlines.py (legacy: buffer-4 cine general M-lines),
                        gif_montage.py (synchronised montage of several GIFs),
                        phantom_voltage_montage.py (cross-folder voltage-sweep montage),
                        check_push_voltage.py (delivered push-voltage sweep check)
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
-                       passive_mlines.md (drawing + resuming the passive M-lines),
+                       passive_mlines.md (where/how to draw passive M-lines, study workflow, C1 results),
+                       ecg_timing.md (what is gated, trigger log, buffer phases, MVC/AVC/AK labels),
+                       linux_server.md (Docker setup, validation and batch runs on the GPU server),
                        phantom_voltage_sweep.md (phantom sweep runbook)
 src/swp/
   acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);
                        combined.py + matlab/make_combined_data.m build CombinedData.mat from the runtime .mat;
-                       pushvoltage.py reads the delivered ARF push voltage (TPC profile) from a folder
+                       pushvoltage.py reads the delivered ARF push voltage (TPC profile) from a folder;
+                       triggerlog.py places buffer frames on the ECG and labels cardiac events
+  passive.py           passive burst-window workflow (detect / draw / process, montages, labels)
   mline/               interactive M-line selection, ported from SWI/Zea/swi_mline.py
   viz/                 stage 3 core, ported from iq2sws (io/core/estimators/filters/speed/viz/metrics/pipeline/runconfig)
 ```

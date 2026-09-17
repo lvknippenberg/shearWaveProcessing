@@ -52,19 +52,54 @@ def draw_spacetime_panel(ax, st: SpaceTime, speed: Optional[SpeedResult] = None,
     ax.tick_params(labelsize=7)
 
 
+def draw_bmode_mline_panel(ax, row):
+    """B-mode frame with the M-line used for that row of a montage.
+
+    ``row``: dict with ``img`` (z, x) uint8, ``extent`` [x0, x1, z1, z0] in mm, ``x``/``z`` line
+    samples in mm, optional ``r0_mm`` (marker at that arc length), ``title`` and ``margin_mm``
+    (zoom around the line; default 25, None = whole frame). r = 0 is marked with a yellow dot.
+    """
+    ax.imshow(row["img"], cmap="gray", extent=row["extent"], aspect="equal", vmin=0, vmax=255)
+    x, z = np.asarray(row["x"]), np.asarray(row["z"])
+    ax.plot(x, z, "-", color="cyan", lw=1.6)
+    ax.plot(x[0], z[0], "o", color="yellow", ms=5, mec="k", mew=0.5)
+    if row.get("r0_mm") is not None and len(x) > 1:
+        s = np.concatenate([[0.0], np.cumsum(np.hypot(np.diff(x), np.diff(z)))])
+        k = int(np.argmin(np.abs(s - row["r0_mm"])))
+        ax.plot(x[k], z[k], "+", color="0.9", ms=9, mew=1.5)
+    margin = row.get("margin_mm", 25.0)
+    if margin is not None:
+        ax.set_xlim(x.min() - margin, x.max() + margin)
+        ax.set_ylim(z.max() + margin, z.min() - margin)
+    ax.set_title(row.get("title", ""), fontsize=8)
+    ax.set_xlabel("x [mm]", fontsize=7); ax.set_ylabel("z [mm]", fontsize=7)
+    ax.tick_params(labelsize=7)
+
+
 def spacetime_montage(results, out_path: str, ncols: int = 4,
                       suptitle: str = "", panel_titles: Optional[List[str]] = None,
-                      transpose: bool = False):
+                      transpose: bool = False, row_bmodes: Optional[list] = None):
     """Grid of space-time panels from a list of PipelineResult-like objects.
 
     Each item must expose ``.st`` (SpaceTime), ``.speed`` (SpeedResult), ``.r0`` (m),
     and ``.config.label()``. ``transpose=True`` -> M-mode orientation (x=time, y=position).
+    ``row_bmodes`` (one dict per row, see :func:`draw_bmode_mline_panel`; None entries allowed)
+    adds a leading column with the B-mode frame and the M-line of that row.
     """
     n = len(results)
     ncols = min(ncols, n)
     nrows = math.ceil(n / ncols)
-    fig, axs = plt.subplots(nrows, ncols, figsize=(3.4 * ncols, 3.1 * nrows),
+    lead = 1 if row_bmodes else 0
+    fig, axs = plt.subplots(nrows, ncols + lead, figsize=(3.4 * (ncols + lead), 3.1 * nrows),
                             squeeze=False)
+    if lead:
+        for k in range(nrows):
+            row = row_bmodes[k] if k < len(row_bmodes) else None
+            if row is None:
+                axs[k][0].axis("off")
+            else:
+                draw_bmode_mline_panel(axs[k][0], row)
+        axs = [r[1:] for r in axs]
     xlab, ylab = ("t [ms]", "r [mm]") if transpose else ("r [mm]", "t [ms]")
     for i, r in enumerate(results):
         ax = axs[i // ncols][i % ncols]

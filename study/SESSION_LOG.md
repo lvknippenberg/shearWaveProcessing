@@ -122,10 +122,68 @@ log-correlation 1.00000 on all 44.
 
 1. ~~Resolution phantom~~ **DONE (2026-09-14)** — both questions answered; see the section above
    and README §4a. The striation investigation is closed.
-2. **Passive processing for all 44** — 1/44 general M-lines drawn; see README §5 to resume.
+2. **Passive processing for all 44** — superseded by the 2026-09-17 session below: 36 folders
+   processed with buffer-3 frame-0 lines, which turned out to be at the wrong cardiac phase; redraw
+   on buffer 1 (`docs/passive_mlines.md`).
 3. ~~GIF re-render~~ **DONE** — 44/44, exit 0.
 4. **Buffer-1 REFoCUS** — dropped; the phantom shows REFoCUS costs 34% of lateral resolution even
    where it is well conditioned.
 5. ~~Deconvolution lead~~ **CLOSED (same day)** — on the phantom it improved PSF
    1.40 → 1.07 mm and CNR 13.8 → 18.2 dB, but in vivo on C000000001 it imprints the map’s own
    1.260° texture (ripple 2.69 → 14.67%). Not adopted; see README §4a.
+
+# Session log — 2026-09-17: passive M-lines, ECG timing, Linux server
+
+Docs: `docs/passive_mlines.md`, `docs/ecg_timing.md`, `docs/linux_server.md`.
+
+## What was done
+
+1. **Passive study run, three times over.** Buffer-4 cine general lines (aborted: the septum moves too
+   much for one line) -> buffer-4 stills (aborted: septum not visible in most folders) -> one line per
+   folder on **buffer 3 frame 0**: 36 drawn, 8 skipped, all 36 processed unattended
+   (`scripts/passive_study.py`, logs `passive_study_draw.log` / `passive_study_process.log`).
+2. **Buffer 3 frame 0 is the wrong phase.** The user's valve frames (MVC 7/21, AVC 12) were 552 ms
+   apart against an ECG RR of 675-740 ms. The trigger log showed buffer 3 is the tail of the live
+   focused run (C000000001 frame 0 ~+200 ms after an R-peak) while buffer 4 starts exactly on an
+   R-peak. Confirmed in `CombinedData.mat`: `SeqControl(15)` (pause for the ECG trigger) precedes only
+   buffers 4, 2 and 6. `src/swp/acquisition/triggerlog.py`; buffer 4 at the R-peak in 44/44, buffer-1
+   frame 0 anywhere (+10 to +1134 ms), an R-peak buffer-1 frame within ±5 ms in every folder.
+3. **C000000001 redone on buffer 1**: R-peak-frame single line, then per-event lines on
+   phase-matched frames (`draw-events`), then full/left/right halves
+   (`study/analysis/passive_mline_split.py`). Montages gained a B-mode + M-line column.
+4. **Automatic labels** MVC/AVC/AK/other/? for all windows (`passive_study.py label`,
+   `study/logs/passive_window_labels.csv`), with an ECG plausibility check after finding logs that are
+   not an ECG (C000000005/12: 240 ms periodic trigger) or have spurious triggers (C000000007/14).
+5. **Linux server.** `scripts/linux_validation.py` (run one folder into `output_linux`, compare
+   dataset by dataset). First server run: FAIL (buffer-4 displacement proxy corr 0.21). A Windows
+   rerun on the same commit was bit-identical to the reference, so the server environment was the
+   cause: its dev container mounted zea `44208e0b` (older fork `main`, lacking ~20 upstream commits incl.
+   curved-probe support #516). New image + container from zea `8c2699fd`: torch bit-identical, JAX
+   relRMS 4-7e-5, PASS. Runbook `docs/linux_server.md`; phase check `study/analysis/iq_phase_check.py`.
+
+## Decisions, and why
+
+* **One line per event, drawn on buffer 1 at the event's phase.** The image is good enough to see the
+  septum, and phase matching keeps the anatomy consistent with the buffer-4 data being sampled.
+* **Label rather than drop the AK window.** Its burst energy equals an MVC's, so it is real motion; it
+  just has no measurable wave on any segment.
+* **Rebuild the image rather than patch the container.** The Dockerfile installs from zea's `uv.lock`, so
+  the image at `8c2699fd` gets exactly that commit's dependencies (it also needs `hdf5plugin`,
+  `numcodecs`, `fsspec[http]`, `tyro>=1`). A standalone `docker run` container is not stopped by VS Code
+  (`shutdownAction: stopContainer` in the dev container).
+
+## Mistakes made, and what fixed them
+
+1. **"The acquisition is R-peak gated, so frame 0 of every buffer matches"** — wrong for buffers 1 and
+   3. Caught by the user's valve frames not fitting the ECG RR; settled from the trigger log and the
+   `SeqControl` table rather than assumed.
+2. **Blaming JAX for the server mismatch** was the first hypothesis; the Windows same-commit control
+   run is what showed the environment (zea version) was the cause. Control runs before conclusions.
+3. **The comparison report said FAIL on a passing run** — a description tag (`[delay-and-sum]`) and
+   intentionally skipped converted files were counted as differences. Fixed in `linux_validation.py`
+   (`note`, skip converted when not written).
+4. **Heredocs with backslashes, again** (three times): `\n` in f-strings became real newlines and broke
+   `passive.py` / `passive_study.py` until caught by `py_compile`. Edit/Write tools only for code with
+   escapes.
+5. **Speed search bounds read as results**: 20 % of the automatic study speeds sit at 1.0 or 20 m/s.
+   They mean "no front found", not a measurement.
