@@ -139,22 +139,63 @@ def cmd_process(folders, a):
 
 
 def cmd_draw_events(folders, a):
-    """Per-event M-lines on the phase-matched B-mode frames, then reprocess with them."""
+    """Per-event M-lines on the phase-matched B-mode frames, then reprocess with them.
+
+    ``--defer-process`` skips the reprocessing so a whole study can be drawn in one sitting - a
+    folder takes ~2.5 min to reprocess, which otherwise stalls the prompts between folders. Run
+    the ``reprocess`` phase afterwards.
+    """
     from swp.passive import draw_event_mlines, process_single_line
 
     todo = [f for f in folders if status(f, a.config) == "processed"]
     print(f"=== per-event M-lines (buffer {a.buffer}): {len(todo)} processed folder(s) ===")
+    if a.defer_process:
+        print("  --defer-process: run `passive_study.py reprocess` when the drawing is done.")
     for k, f in enumerate(todo):
         label = f"[{k + 1}/{len(todo)}] "
         print(f"\n{label}{_name(f)}", flush=True)
         try:
             draw_event_mlines(str(f), a.config, buffer=a.buffer, label=label)
-            process_single_line(str(f), a.config)
+            if not a.defer_process:
+                process_single_line(str(f), a.config)
         except KeyboardInterrupt:
             print("\ninterrupted - rerun to continue.")
             break
         except Exception:                                 # noqa: BLE001
             print(f"  FAILED:\n{traceback.format_exc()}")
+
+
+def cmd_reprocess(folders, a):
+    """Reprocess folders regardless of status - for per-event lines drawn with --defer-process.
+
+    ``status()`` compares the montage against the *general* line, so it cannot see that
+    ``draw-events`` has replaced the per-window lines; this forces the run.
+    """
+    from swp.passive import _paths, process_single_line, read_windows
+
+    todo = []
+    for f in folders:
+        if status(f, a.config) not in ("processed", "drawn"):
+            continue
+        st, _ = read_windows(_paths(str(f), a.config)[1]["windows_json"])
+        if a.only_event_lines and not (st or {}).get("window_mlines"):
+            continue
+        todo.append(f)
+    print(f"=== reprocess {len(todo)} folder(s) ===")
+    failed, t_start = [], time.perf_counter()
+    for k, f in enumerate(todo):
+        print(f"\n[{k + 1}/{len(todo)}] {_name(f)}", flush=True)
+        t0 = time.perf_counter()
+        try:
+            process_single_line(str(f), a.config)
+            print(f"  {time.perf_counter() - t0:.0f} s", flush=True)
+        except Exception:                                 # noqa: BLE001
+            failed.append(f)
+            print(f"  FAILED:\n{traceback.format_exc()}", flush=True)
+    print(f"\nreprocessed {len(todo) - len(failed)}/{len(todo)} in "
+          f"{(time.perf_counter() - t_start) / 60:.1f} min")
+    for f in failed:
+        print(f"  FAILED {_name(f)}")
 
 
 def cmd_label(folders, a):
@@ -207,7 +248,8 @@ def cmd_label(folders, a):
 def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("phase", choices=["draw", "process", "status", "draw-events", "label"])
+    p.add_argument("phase",
+                   choices=["draw", "process", "status", "draw-events", "reprocess", "label"])
     p.add_argument("--root", default=None)
     p.add_argument("--folder", action="append", default=[])
     p.add_argument("--subject", default=None)
@@ -219,6 +261,10 @@ def main():
     p.add_argument("--retry-skipped", action="store_true", help="draw: ask again for skipped folders")
     p.add_argument("--watch", action="store_true",
                    help="process: keep polling for folders that finish drawing")
+    p.add_argument("--defer-process", action="store_true",
+                   help="draw-events: do not reprocess between folders (run `reprocess` after)")
+    p.add_argument("--only-event-lines", action="store_true",
+                   help="reprocess: only folders that have per-event M-lines")
     a = p.parse_args()
     if not a.root and not a.folder:
         p.error("give --root and/or --folder")
@@ -226,7 +272,8 @@ def main():
     from process_raw_data import find_measurement_folders
     folders = find_measurement_folders(a.root, a.folder, a.subject)
     {"draw": cmd_draw, "process": cmd_process, "status": cmd_status,
-     "draw-events": cmd_draw_events, "label": cmd_label}[a.phase](folders, a)
+     "draw-events": cmd_draw_events, "reprocess": cmd_reprocess,
+     "label": cmd_label}[a.phase](folders, a)
 
 
 if __name__ == "__main__":

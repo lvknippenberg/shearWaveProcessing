@@ -428,6 +428,21 @@ def _row_bmode(p, st, i, w, ml, acq):
         return None
 
 
+def _single_wave_speed(st, sem, c, line):
+    """A one-directional :class:`SpeedResult` carrying the signed slant-stack moveout.
+
+    Passive waves are one-sided (see :func:`swp.viz.metrics.passive_coherence`), so the whole line
+    is one fit: ``t_pred_pos`` is the fitted wavefront over every sample and ``t_pred_neg`` is empty.
+    The panel then draws one straight moveout instead of a symmetric pair about r0.
+    """
+    from .viz.speed.tof import SpeedResult
+
+    r = st.r
+    t_line = line[1] if line is not None else np.full(r.size, np.nan)
+    return SpeedResult("radon-signed", float(c), float("nan"), float(sem), 0.0,
+                       r, np.asarray(t_line, float), np.full(r.size, np.nan))
+
+
 def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad_ms=20.0):
     """Unattended phase: process every drawn window with every view -> montage path (or None)."""
     cfg, p = _paths(folder, config)
@@ -469,8 +484,14 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
             # uniform along it. Subtracting the per-time spatial mean therefore removes the
             # signal along with the bulk motion. (Corollary: this line length is marginal for
             # these speeds; the slant-stack is fitting a fraction of a cycle.)
-            sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=SPEED_CMAX,
-                                       remove_flat=False)
+            sem, c, line = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=SPEED_CMAX,
+                                             remove_flat=False, return_line=True)
+            # Overlay the SINGLE fitted moveout across the whole line, replacing the pipeline's
+            # default two-sided ttp_ransac fit. That estimator splits the line at r0 and fits each
+            # side separately, which is the ARF picture: a push radiates outward from a focus. A
+            # valve-closure wave enters at one end and crosses in one direction, so the two-lobed
+            # fit is wrong here - and it is only ever computed over 2-14 mm either side of r0.
+            res = dataclasses.replace(res, speed=_single_wave_speed(res.st, sem, c, line))
             results.append(res)
             tag = f" {w.label}" if w.label else ""
             titles.append(f"win{i}{tag} {w.t_peak*1e3:.0f} ms  [{vname}]\n"
@@ -485,10 +506,11 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
         if row is not None:
             row["r0_mm"] = results[k].r0 * 1e3
     spacetime_montage(results, p["montage"], ncols=len(views), panel_titles=titles, transpose=True,
-                      row_bmodes=row_bmodes,
+                      row_bmodes=row_bmodes, show_r0=False,
                       suptitle=f"Passive SWE -- {len(todo)} window(s) x {len(views)} views "
                                f"(M-mode: x=time, y=along-line; columns = recipes; "
-                               f"left: B-mode + M-line, yellow = r 0, + = r0)")
+                               f"black = fitted wavefront, one direction across the whole line; "
+                               f"left: B-mode + M-line, yellow = r 0)")
     with open(os.path.join(p["outdir"], "passive_speeds.json"), "w") as f:
         json.dump(speeds, f, indent=1)
     print(f"done -> {p['montage']}")

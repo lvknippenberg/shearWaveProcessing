@@ -78,13 +78,18 @@ def draw_bmode_mline_panel(ax, row):
 
 def spacetime_montage(results, out_path: str, ncols: int = 4,
                       suptitle: str = "", panel_titles: Optional[List[str]] = None,
-                      transpose: bool = False, row_bmodes: Optional[list] = None):
+                      transpose: bool = False, row_bmodes: Optional[list] = None,
+                      show_r0: bool = True):
     """Grid of space-time panels from a list of PipelineResult-like objects.
 
     Each item must expose ``.st`` (SpaceTime), ``.speed`` (SpeedResult), ``.r0`` (m),
     and ``.config.label()``. ``transpose=True`` -> M-mode orientation (x=time, y=position).
     ``row_bmodes`` (one dict per row, see :func:`draw_bmode_mline_panel`; None entries allowed)
     adds a leading column with the B-mode frame and the M-line of that row.
+
+    ``show_r0=False`` drops the dashed origin marker. Set it for **passive** SWE: r0 is the point an
+    ARF push radiates outward from, and a natural wave has no such origin on the line - it enters at
+    one end and crosses in a single direction.
     """
     n = len(results)
     ncols = min(ncols, n)
@@ -105,7 +110,8 @@ def spacetime_montage(results, out_path: str, ncols: int = 4,
         ax = axs[i // ncols][i % ncols]
         title = panel_titles[i] if panel_titles else r.config.label()
         title = f"{title}\n{r.speed.label()}"
-        draw_spacetime_panel(ax, r.st, r.speed, r0_mm=r.r0 * 1e3, title=title, transpose=transpose)
+        draw_spacetime_panel(ax, r.st, r.speed, r0_mm=r.r0 * 1e3 if show_r0 else None,
+                             title=title, transpose=transpose)
         if i % ncols == 0:
             ax.set_ylabel(ylab, fontsize=7)
         if i // ncols == nrows - 1:
