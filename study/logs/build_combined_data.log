@@ -1,0 +1,7 @@
+=== CombinedData.mat: 724 folder(s), 57 already built, 667 to build, 4 job(s) ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  [667/667] ok      4.8 min  Z:\raw_data\C000000049\VIS-046_SW_data_28-August-2026_08-58-00
+        (1163 min elapsed, 1.74 min/folder, ~0 min left)
+
+=== 667 ok, 0 failed, 57 skipped, 1163.3 min ===
+EXIT=0
