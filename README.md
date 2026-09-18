@@ -205,8 +205,15 @@ Passive lines are drawn on the **widebeam B-mode (buffer 1) at the matching card
 buffers 4, 2(+5) and 6 are R-peak gated, so the frame is picked from the trigger log (the R-peak frame
 for the general line, a phase-matched frame per detected event). Detected windows are labelled
 MVC / AVC / AK from the ECG. Study workflow: `scripts/passive_study.py draw | process | label |
-draw-events | status` — see **[docs/passive_mlines.md](docs/passive_mlines.md)** and
-**[docs/ecg_timing.md](docs/ecg_timing.md)**.
+draw-events | reprocess | status` — see **[docs/passive_mlines.md](docs/passive_mlines.md)** and
+**[docs/ecg_timing.md](docs/ecg_timing.md)**. Over a whole study, draw the per-event lines with
+`draw-events --defer-process` (so 2.5 min of processing does not stall every prompt) and then run
+`reprocess`.
+
+**Reading the speed.** The automatic slant-stack fit is biased high (+11–76 % against hand-drawn
+wavefronts) and on average places its line where a line through noise would sit — use it to rank
+and triage, not as the reported number, and read the speed off `study/analysis/manual_slope.py`.
+Full benchmark and the recommended fix: **[docs/passive_speed_estimation.md](docs/passive_speed_estimation.md)**.
 
 ## Visualization recipe
 
@@ -217,8 +224,10 @@ band-pass bands side by side (a line present in all three is real). The wave ori
 on the **stored push location** (`focus.mode: stored`), not a hard-coded assumption.
 
 **Passive SWE is an experimental framework**: same core, `frame_to_frame` displacement (no reference),
-a starting band-pass recipe in `configs/passive.yaml` that still needs tuning against real passive
-data, and origin handling left as a TODO.
+and a band-pass recipe in `configs/passive.yaml` tuned by `scripts/search_passive2.py`. Unlike the
+active path it has **no symmetric origin** — a valve-closure wave enters the M-line at one end and
+crosses in one direction — so the passive montage draws a single fitted wavefront and no `r0`
+marker (`spacetime_montage(..., show_r0=False)`).
 
 ## Layout
 
@@ -229,7 +238,8 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        verify_outputs.py (check/repair a processed tree),
                        incoherent_bmode.py (envelope-compounded focused B-mode, for comparison),
                        refocus_bmode.py (REFoCUS retrospective transmit beamforming),
-                       passive_study.py (passive M-lines + processing + event labels over a study),
+                       passive_study.py (passive M-lines + processing + event labels over a study;
+                         draw | process | draw-events | reprocess | label | status),
                        linux_validation.py (re-run one folder elsewhere and compare to output/),
                        draw_passive_mlines.py (legacy: buffer-4 cine general M-lines),
                        gif_montage.py (synchronised montage of several GIFs),
@@ -237,10 +247,15 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        check_push_voltage.py (delivered push-voltage sweep check)
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
-                       passive_mlines.md (where/how to draw passive M-lines, study workflow, C1 results),
+                       passive_mlines.md (where/how to draw passive M-lines, study workflow, results),
+                       passive_speed_estimation.md (automatic vs hand-drawn slopes, tracking score,
+                         why the slant stack misses the wave and what to change),
                        ecg_timing.md (what is gated, trigger log, buffer phases, MVC/AVC/AK labels),
                        linux_server.md (Docker setup, validation and batch runs on the GPU server),
                        phantom_voltage_sweep.md (phantom sweep runbook)
+study/analysis/        passive_split_study.py (full/left/right split over a whole tree, --jobs N),
+                       manual_slope.py (draw the wavefront by hand, read off the speed),
+                       collect_passive_montages.py (flatten every folder's montages for review)
 src/swp/
   acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);
                        combined.py + matlab/make_combined_data.m build CombinedData.mat from the runtime .mat;

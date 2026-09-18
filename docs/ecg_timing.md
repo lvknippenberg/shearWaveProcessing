@@ -32,7 +32,11 @@ another. Two formats occur:
 | C000000005 onward | `Time_us`, `Signal_V`, `ECG_trigger_us`, `Vera_trigger_us` | µs |
 
 `ECG_trigger` = R-peak times; `Vera_trigger` = one timestamp per Verasonics frame (a circular log,
-unsorted). Consecutive frame triggers at a buffer's frame period form that buffer's block:
+unsorted). **`ECG_trigger` is the hardware R-peak detection the acquisition itself triggers on.**
+The pipeline reads it directly and never re-detects R-peaks, so event phases are measured against
+exactly the timing the sequence used. Before trying to improve on it, read *Do not re-detect
+R-peaks from the `Signal` trace* below. Consecutive frame triggers at a buffer's frame period form
+that buffer's block:
 buffer 4 = 926 triggers ~1.08 ms apart; buffer 1 = 90 triggers ~11.34 ms apart; buffer 3 = the last
 26 of a long ~39.4 ms run (live imaging). `buffer_timing(folder, buffer)` finds the block and gives
 every frame's time and phase (ms since the preceding R-peak).
@@ -51,6 +55,26 @@ Frame periods check out against the sequence: buffer 3 = 73 transmits x 2 (pulse
 Consequence: an M-line drawn on buffer 3 or buffer 1 **frame 0** shows the anatomy at a different
 cardiac phase than buffer-4 frame 0. Use the R-peak frame (single line) or a phase-matched frame per
 event (see `docs/passive_mlines.md`).
+
+## Do not re-detect R-peaks from the `Signal` trace
+
+The logged `Signal` waveform is a **secondary, lossy display stream** and is not a reference for
+timing. In C000000023 it is sampled at 100 Hz, takes only 51 distinct values, and **61 % of its
+samples are exactly zero**.
+
+Checked against it (2026-09-18), of the 12 `ECG_trigger` R-peaks that fall inside the logged trace,
+10 land on a clear deflection (amplitude 0.21-0.48) and **2 land on a sample of exactly zero with
+no deflection at all within ±30 ms** - one of which is a beat that plays no part in triggering. The
+gaps therefore belong to the trace, not to the detector.
+
+This matters because the trace can appear to contradict the trigger by tens of milliseconds. In
+C000000023 the nearest tall deflection to buffer-4 frame 0 is 83 ms later, which looks like an
+early trigger and is not: the same thing happens on a non-triggering beat. **A "correction" derived
+this way would shift every event phase in the recording and turn an MVC into an atrial kick.** It
+was proposed and then withdrawn during the 2026-09-18 session; see `study/SESSION_LOG.md`.
+
+Use `ECG_trigger`. If better timing is genuinely needed, record a higher-quality ECG rather than
+post-processing this trace.
 
 ## ECG quality problems
 
@@ -92,6 +116,12 @@ behind each), in every row of `passive_speeds.json`, and in the montage titles.
 
 ## Caveats
 
+- **Detection is an energy ranking, not a physiological search.** `detect_line_bursts` keeps the
+  four largest bursts along the M-line and only then labels them. Nothing prevents a large
+  non-valvular event (rapid filling, respiratory motion) from displacing a genuine valve closure
+  out of the list, and nothing guarantees that both MVC and AVC are among the four. C000000023
+  happens to catch both; that is not by construction. Making the detector phase-aware - searching
+  the expected MVC / AVC windows rather than ranking on energy - would remove the risk.
 - `Vera_trigger` is interpreted as one pulse per stored frame and buffer 3 as the **last** 26 frames
   of its live run; both fit every folder (block lengths match `RF_frames`) but are inferences.
 - Timestamps are whole ms (early format), so frame times carry ~±1 ms.

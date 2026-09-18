@@ -187,3 +187,88 @@ Docs: `docs/passive_mlines.md`, `docs/ecg_timing.md`, `docs/linux_server.md`.
    escapes.
 5. **Speed search bounds read as results**: 20 % of the automatic study speeds sit at 1.0 or 20 m/s.
    They mean "no front found", not a measurement.
+
+# Session log — 2026-09-18: per-event M-lines, part-wise analysis, manual slopes
+
+Docs: `docs/passive_mlines.md`, `docs/passive_speed_estimation.md`, `docs/ecg_timing.md`.
+Deliverable: a processing report (`D:\Luuk van Knippenberg\Claude\SWE_report_20260918`).
+
+## What was done
+
+1. **The whole study redrawn on buffer 1.** All 44 beamformed folders were offered for a general
+   M-line at the R-peak frame; **37 drawn** (18-65 mm, median 34), **7 skipped** for image quality
+   (C000000009, 17, 24, 34, 38, 41, 43). One 26-minute interactive pass.
+2. **Per-event M-lines everywhere.** All **134 detected events** prompted on their phase-matched
+   buffer-1 frame: 79 drawn fresh, 37 kept the general line, 18 skipped. C000000036 had all four
+   events skipped and is excluded (its general-line split archived).
+3. **Part-wise (full / left / right) analysis over the study.** New
+   `study/analysis/passive_split_study.py` drives the existing single-folder split over a tree
+   (`--jobs N`, `--watch`, `--collect-only`) into `study/logs/passive_split_speeds.csv` —
+   36 folders x 116 windows x 3 views x 3 parts = **1044 fits**.
+4. **Passive montages lost their symmetric origin overlay** (`swp.passive._single_wave_speed`,
+   `spacetime_montage(show_r0=False)`), and `scripts/passive_study.py` gained `reprocess` and
+   `draw-events --defer-process`.
+5. **`study/analysis/manual_slope.py`**: draw the wavefront by hand on the space-time panel, read
+   the speed off it, store the picks. Used for the report's measured speeds.
+6. **`study/analysis/collect_passive_montages.py`**: flatten every folder's montages into one tree
+   for scrolling.
+
+## Findings
+
+- **Splitting the M-line does not help.** Windows where all three views agree on direction and
+  speed within 25 %: full 6, left 1, right 2 (general lines, 134 windows); full 2, left 2, right 1
+  (per-event, 116). The C000000001 "left half is better" result does not generalise.
+- **Half-lines carry higher semblance (0.87/0.88 vs 0.74) and fewer usable fits.** They are ~19 mm
+  against ~38 mm: a short segment spans a small fraction of a wavelength, so almost any slope fits.
+  Semblance alone must never pick a window.
+- **The automatic speed fit is biased high by 11-76 %** against hand-drawn wavefronts and its mean
+  *tracking score* is 1.02 — averaged over the four benchmarked panels the fitted line is
+  indistinguishable from a line drawn through noise (manual: 1.95). A correct slope does not imply
+  a correct line: in one panel the slope is within 14 % while the line sits in a trough (0.23).
+  See `docs/passive_speed_estimation.md` for the recommended objective change.
+- **Per-event lines did not raise automatic agreement** (usable full-line windows 6/134 -> 2/116),
+  but that is not like-for-like (18 events dropped). Per window it is mixed: C000000014 win2
+  improved sharply, C000000023 win3 unchanged, C000000033 win3 and C000000021 win1 got worse. The
+  point of per-event lines is anatomical correctness at each phase, not a higher score.
+- **Buffer 1 has the worst lateral clutter of the three imaged buffers** (0.212 vs 0.158 for
+  buffer 3 and 0.152 for buffer 4) and the weakest septum-to-cavity contrast — yet it is the buffer
+  the M-lines are drawn on. Valve leaflets are better delineated in the ultrafast diverging-wave
+  image than in the widebeam one.
+- **MVC and AVC give different speeds, as expected** (C000000023: 2.67 vs 3.58 m/s in displacement,
+  AVC stiffer at end-systole). Events must not be pooled.
+
+## Mistakes made, and what fixed them
+
+1. **Claimed the buffer-4 R-peak trigger fired 83 ms early — wrong, and retracted.** The claim came
+   from detecting R-waves in the logged `Signal` trace and finding no deflection at the trigger.
+   That trace is 100 Hz, 51 distinct values and **61 % exact zeros**; checking all 12 triggers in
+   the window showed **2 land on a zero sample, including a beat that does not trigger anything**.
+   The gaps are the trace's, not the detector's. Cost: a figure, a report section and an event
+   relabelling, all reverted. Lesson — establish the reliability of a reference *before* using it
+   to overturn a hardware signal, and treat "one anomalous beat" as a measurement of the instrument
+   until proven otherwise. The user asking "did you not use the detected R-peaks?" is what prompted
+   the recheck; the pipeline had been reading `ECG_trigger` correctly all along.
+2. **Two R-wave detectors, opposite conclusions.** A threshold change flipped C000000023's trigger
+   offset from -83 ms to -17 ms because the looser threshold latched onto a 0.112 noise bump. Ad-hoc
+   peak detection on a coarse trace is not evidence; printing the actual samples settled it.
+3. **A legend hid the thing the figure was about.** Fixing an overlap moved the legend onto the
+   buffer-4 bar in the timing figure. Buffer bars now have their own lane.
+4. **Heredocs with backslashes, again** — `\t` and `\r` in a LaTeX caption became literal TAB and CR,
+   silently producing `extbf` and `ef{...}` in the PDF. Found by grep, repaired with a script.
+   Write/Edit tools only for text with escapes; this is the fifth occurrence in this project.
+5. **`while IFS= read -r` dropped the last line** of a folder list with no trailing newline, silently
+   cutting 4 of 37 folders from a parallel batch. Caught by comparing the batch's own count against
+   the file.
+6. **Split the wrong folders.** The first split gate accepted any folder with a montage, including
+   ones skipped at drawing whose window lines had been archived — they could only crash. The gate is
+   now `passive_study.status() == "processed"` plus a check that not every event was skipped.
+
+## Open items
+
+- Give the speed estimator an objective that follows the wave (maximise amplitude along the fitted
+  line), rather than global semblance. Highest-value change to the passive path.
+- Make event detection phase-aware instead of an energy ranking.
+- C000000044 win3 — the cleanest wavefront of the general-line round (MVC, 2.8 m/s, zero spread) —
+  was skipped during per-event drawing and is absent from the current table. Redraw if wanted.
+- C000000023 MVC velocity pick (0.94 m/s vs 2.67 displacement) follows a different feature of the
+  panel; redraw before quoting.

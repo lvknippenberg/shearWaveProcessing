@@ -23,7 +23,8 @@ buffer 1 maps onto the buffer-4 grid unchanged.
 python scripts/passive_study.py draw    --root "Z:/raw_data"             # 1 prompt per folder: buffer 1 R-peak frame
 python scripts/passive_study.py process --root "Z:/raw_data" [--watch]   # detect bursts along it, process all windows
 python scripts/passive_study.py label   --root "Z:/raw_data"             # MVC / AVC / AK per window from the trigger log
-python scripts/passive_study.py draw-events --folder "<folder>"          # 1 prompt per detected event, then reprocess
+python scripts/passive_study.py draw-events --root "Z:/raw_data" [--defer-process]   # 1 prompt per detected event
+python scripts/passive_study.py reprocess   --root "Z:/raw_data" [--only-event-lines] # after --defer-process
 python scripts/passive_study.py status  --root "Z:/raw_data"
 ```
 
@@ -37,6 +38,11 @@ python scripts/passive_study.py status  --root "Z:/raw_data"
 - `draw-events`: for each detected window, a still of the phase-matched buffer-1 frame with the general
   line overlaid dashed. **Enter without clicking reuses the general line; closing skips that window.**
   Then reprocesses with the per-event lines (they are not overwritten by later `process` runs).
+  Over a whole study use **`--defer-process`**: reprocessing a folder takes ~2.5 min and otherwise
+  stalls the prompts between folders (134 events over 37 folders were drawn in one sitting this way).
+- `reprocess`: forces processing regardless of status - needed after `--defer-process`, because
+  `status()` compares the montage against the *general* line and cannot see that the per-window lines
+  changed. `--only-event-lines` restricts it to folders that have per-event lines.
 - `label`: see `docs/ecg_timing.md`; windows whose ECG log is unusable get `?`.
 
 `run.py passive <folder>` still runs the older all-in-one path (lines drawn on buffer 4; `cine=True`
@@ -100,13 +106,123 @@ python study/analysis/passive_mline_split.py --folder "<folder>"
 
 Figures: `study/montages/c1_passive_per_event_montage.png`, `study/montages/c1_passive_split_lines.png`.
 
-## Study status (2026-09-17)
+## Part-wise analysis over the whole study
 
-- 36/44 folders processed with the **buffer 3 frame 0** lines (8 skipped at drawing: C000000017, 24,
-  26, 31, 36, 39, 40, 43). These lines are at the wrong cardiac phase - redraw with
-  `draw --root Z:/raw_data --redraw` (buffer 1 R-peak frame) and reprocess.
-- Only C000000001 has buffer-1 and per-event lines.
-- Automatic speeds across the 36 (399 fits): median |c| 3.05 m/s, 50 % in 1.5-6 m/s, 20 % at the search
-  bounds - a screening number, not a measurement; read the montages.
-- Next: automate M-line selection (the drawn lines are the reference set), possibly several lines over
-  the cycle.
+`passive_mline_split.py` does one folder. `passive_split_study.py` drives it over a tree and gathers
+every fit of every part into one table:
+
+```
+python study/analysis/passive_split_study.py --root "Z:/raw_data" --jobs 4 [--watch]
+python study/analysis/passive_split_study.py --root "Z:/raw_data" --collect-only   # rebuild the table
+```
+
+- Each folder runs as its own subprocess (the split script monkey-patches `swp.passive._paths` while
+  it works) and writes `output/swp_passive/split_run.log`; one failure never stops the study.
+- `--jobs N` splits N folders at once. The work is single-threaded numpy and a worker holds ~1 GB of
+  buffer-4 IQ, so on the 40-core machine `--jobs 4` runs ~4x faster than serial (~5 min/folder wall
+  clock instead of ~1.3 min/folder of CPU).
+- `--watch` polls for folders that `passive_study.py process` has not finished yet, so it can run
+  next to `process` the way `process` runs next to `draw`. It waits only on folders that have a line
+  drawn — the hundreds of never-beamformed folders in the tree do not hold it open.
+- Resumable: a folder is skipped when its `split_speeds.txt` is newer than its montage (the marker
+  that `process` finished). Staleness is deliberately **not** judged against `passive_windows.json`,
+  which the `label` pass rewrites without changing any window.
+
+Output: `study/logs/passive_split_speeds.csv` — one row per folder x window x view x part, with the
+signed speed, semblance, part length, cardiac label, whether the fit sits on a search bound, and
+whether the folder used per-event or general lines. The script also prints medians per part, per
+part x cardiac event, and how often the three views agree on a part (a real front gives the same
+speed and sign in all three recipes; the agreement counts are the useful column).
+
+## Study status (2026-09-18): redrawn on buffer 1, per-event lines, all parts analysed
+
+The buffer-3 frame-0 lines are gone. Every measurement folder under `Z:/raw_data` that carries an
+`output/` folder (44; C000000046-49 are not beamformed) was offered for redrawing on the **buffer-1
+R-peak frame**, processed, then redrawn **per detected event** and reprocessed, then split into
+full / left / right.
+
+- **37 folders have a general line** (36 drawn in one 26-minute pass, plus C000000001's). 18-65 mm,
+  median 34 mm. **7 skipped at drawing** - no usable septum on the buffer-1 R-peak frame:
+  C000000009, 17, 24, 34, 38, 41, 43.
+- **Per-event lines: all 134 detected events prompted** on their phase-matched buffer-1 frame -
+  **79 drawn fresh**, 37 kept the general line, **18 skipped**. C000000036 had all 4 events skipped,
+  so nothing was reprocessed for it and it is excluded (its general-line split is archived under
+  `swp_passive/archive_general_line_20260918/`).
+- Final table: **36 folders x 116 windows x 3 views x 3 parts = 1044 fits** in
+  `study/logs/passive_split_speeds.csv`.
+
+| part | n | median \|c\| | IQR | at bound | med semblance | median length |
+|---|---|---|---|---|---|---|
+| full | 348 | 3.38 | 1.9-6.3 | 18 % | 0.74 | 38 mm |
+| left | 348 | 3.38 | 2.0-6.4 | 25 % | 0.87 | 19 mm |
+| right | 348 | 3.72 | 2.1-6.1 | 23 % | 0.88 | 19 mm |
+
+| part | all 3 views off the bounds | same direction | spread < 25 % | **usable** |
+|---|---|---|---|---|
+| full | 69 | 44 | 3 | **2** |
+| left | 56 | 41 | 2 | **2** |
+| right | 59 | 39 | 3 | **1** |
+
+Reading:
+
+- **Splitting the line still does not help.** Same verdict as the general-line round, and the halves
+  still carry the higher semblance (0.87/0.88 vs 0.74) purely because they are ~19 mm against ~38 mm:
+  a short segment spans a small fraction of a wavelength, so almost any slope fits it. Semblance
+  must never be used on its own to pick a window.
+- **Per-event lines did not raise the automatic agreement** - strictly usable windows went from 6 to
+  2 on the full line. This is **not** a like-for-like comparison: 18 events were skipped and one
+  folder dropped out, so the per-event set is 116 windows against 134. Per window the effect is
+  mixed: C000000014 win2 improved sharply (spread 28 % -> 7 %, and off the 1.0 m/s floor: 1.1-1.5 ->
+  2.1-2.2 m/s on a line that grew 34 -> 46 mm), C000000023 win3 was unchanged, C000000033 win3 and
+  C000000021 win1 got worse.
+- The point of per-event lines is **anatomical correctness** at each event's cardiac phase, not a
+  higher score. A general line that does not follow the septum at that phase can still produce a
+  tidy-looking fit; some of the general-line agreement was of that kind.
+- ~20 % of fits still rail at the 1.0/20.0 m/s bounds. The table screens; the montages measure.
+
+Usable windows now: full C000000014 w2 (2.15 m/s, 7 % spread) and C000000023 w3 AK (2.78, 17 %);
+left C000000003 w3 AK (1.52) and C000000012 w0 (10.8, non-physical); right C000000025 w0 MVC (3.05,
+a 13 mm segment - vertical bands, the length artefact).
+
+**Note.** `C000000044` win3, the cleanest wavefront of the general-line round (MVC, 2.8 m/s in all
+three views, zero spread), had its event **skipped** during per-event drawing and is no longer in the
+table. Redraw it with `draw-events --folder <that folder>` if it should be kept.
+
+### Reading the speed by hand
+
+The automatic slope fit is biased high and frequently does not sit on the wave at all;
+`study/analysis/manual_slope.py` draws the wavefront by hand on the space-time panel instead.
+The benchmark against the automatic estimator, the tracking score it is judged with, and the
+recommended change to the estimator are in **[docs/passive_speed_estimation.md](passive_speed_estimation.md)**.
+
+```
+python study/analysis/manual_slope.py --folder "<folder>" --window 1 --part left
+```
+
+### Where the origin marker went
+
+Passive panels no longer draw the dashed `r0` line or the two-sided fit. `r0` is where an ARF push
+radiates outward from; a valve-closure wave enters the line at one end and crosses in one direction.
+The old overlay came from `ttp_ransac_speed`, which splits the line at `r0` and fits each side
+separately over only 2-14 mm either side. The reported speed was never affected - it comes from
+`metrics.slant_stack_speed`, a signed slant stack over the whole line whose docstring already says
+`r0` is unused and the direction is inferred from the data. The panel now overlays that estimator's
+own moveout as **one continuous wavefront** (`swp.passive._single_wave_speed`, montage `show_r0=False`)
+and labels it `radon-signed: <c>/-- m/s`. The active path is unchanged, where the symmetric V is real.
+
+### Scrolling through the results
+
+```
+python study/analysis/collect_passive_montages.py --root "Z:/raw_data" --out "<folder>"
+```
+
+Copies every folder's montages into one flat tree - `main/`, `split_full/`, `split_left/`,
+`split_right/`, `split_lines/`, `bursts/` - named by subject, so each set pages through in order in
+an image viewer. Folders whose montage is stale (skipped at drawing, so the montage predates the
+current line) are left out, and the `main/` file name records what the montage was built from
+(`per-event`, `per-event-3of4`, `general-line`).
+
+**Concurrency note.** Running `process` and `passive_split_study.py --watch` together is supported,
+but on the network share one folder (C000000018) hit `PermissionError` on the `os.replace` of
+`passive_windows.json` while the split was copying that same file. It was re-run on its own and is
+correct in the table. If it recurs, run the split without `--watch` after `process` finishes.
