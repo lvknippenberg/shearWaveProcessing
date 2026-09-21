@@ -121,9 +121,40 @@ Better resolution and +4.5 dB dynamic range, but it **introduces** an 8.00° art
 exactly 2× the transmit step, the signature of a poorly-conditioned decode — at **10× runtime**.
 **Not recommended for buffer 1.** If revisited, tuned `tikhonov` regularisation is the lever.
 
+### But it was not clean of CLUTTER — and that is now fixed (2026-09-21)
+
+"Clean" above means *free of transmit-lattice artefacts*, and that still holds. It says nothing
+about off-axis clutter, which is what buffer 1 actually suffers from. Each of the 21 widebeams
+opens only ~9.3–11.6° from a virtual source 123 mm behind the array, so at 100 mm depth about
+**5 of the 21 transmits insonify a given pixel** — and the beamformer compounded all 21. In vivo
+the other 16 contribute as much amplitude as the 5 that did reach it; on the resolution phantom,
+identical geometry but no reverberating chest wall, they are 18 dB down.
+
+`BufferSpec.tx_window = ("rect", 1.0)` now restricts each transmit to its own cone:
+**+2.6 to +5.9 dB dynamic range, +0.4 to +1.4 dB dark-region contrast**, for +0.49 % lateral
+−6 dB width and +12 % beamforming time. Applied to **buffers 1 and 5** — both use the
+`Bmode_WB` widebeam transmit, and all 44 buffer-5 files were scanned and confirmed identical
+(21 tx, ±40°, −123.2 mm) before adoption. All 44 folders re-run for both buffers.
+
+Note this is the *opposite* conclusion to buffer 3, where all 73 focused beams do overlap each
+pixel and using fewer blurs the image — which is why it is a per-buffer field, not a global
+switch. Full investigation, including the two metric bugs that nearly reversed the answer:
+`docs/widebeam_bmode_reconstruction.md`.
+
 ## 4. Montages — `study/montages/`
 
 Four families, each answering a different question. **Use `*_best.gif` for looking at data.**
+
+> **Buffer-1 montages come in two reconstructions now (2026-09-21).**
+> `all_buffer1_txwin_best.gif` is the **current** one — the 44 folders rebuilt with
+> `BufferSpec.tx_window = ("rect", 1.0)`. It is deliberately the **same 1360x876 geometry and
+> 60 frames** as the all-21 montages (same `--title` strip), so the two can be flipped or
+> overlaid directly. Every `all_buffer1*` file WITHOUT `txwin` is the
+> older all-21-transmit compound, kept deliberately as the reference for what changed. They are
+> the same 44 subjects in the same 8x6 order, so the two play tile-for-tile against each other.
+> Do **not** put the two on a shared-reference montage: the cone sums ~5 transmits instead of 21,
+> so its absolute level is legitimately lower and a shared scale would read that as a quality
+> difference (the same trap as REFoCUS, flagged in `shared_norm_montage.py`).
 
 | family | normalisation | use for |
 |---|---|---|

@@ -246,7 +246,8 @@ def plan_patches_and_chunk(params, n_tx, n_el):
 
 def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
                             enable_pfield: bool = False,
-                            refocus: str | None = None) -> zea.Pipeline:
+                            refocus: str | None = None,
+                            tx_window: bool = False) -> zea.Pipeline:
     """RF/IQ -> complex-IQ beamforming pipeline (delay-and-sum), ``(n_frames, z, x, 2)``.
 
     Baseband buffers (Verasonics BS100BW/BS50BW, e.g. the active shear-wave
@@ -267,6 +268,12 @@ def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
         refocus (str | None): retrospective transmit beamforming method
             (``"adjoint"`` by default for the focused buffer, see
             ``BufferSpec.refocus``). ``None`` runs plain delay-and-sum.
+        tx_window (bool): enable the per-pixel, per-transmit inclusion window
+            (``AlignedApodization``). The weight map itself is passed at call time as
+            ``flat_aligned_apodization``, because ``Parameters`` computes that key and
+            will not accept an assignment. Set per buffer via ``BufferSpec.tx_window``;
+            mutually exclusive with ``enable_pfield`` in zea (both weight the transmit
+            axis), and meaningless under ``refocus``, which rewrites the transmits.
 
     Returns:
         zea.Pipeline: The beamforming pipeline.
@@ -280,11 +287,15 @@ def build_beamform_pipeline(num_patches: int, is_baseband: bool = False,
             raise ValueError("refocus needs raw RF; this buffer is already baseband IQ")
         operations.append(Refocus(method=refocus))
         enable_pfield = False
+        tx_window = False      # Refocus rewrites the transmits; a per-transmit cone is moot
+    if tx_window and enable_pfield:
+        raise ValueError("tx_window and pfield both weight the transmit axis; pick one")
     if not is_baseband:
         operations.append(Demodulate())
     operations.append(
         Beamform(beamformer="delay_and_sum", num_patches=num_patches,
-                 enable_pfield=enable_pfield)
+                 enable_pfield=enable_pfield,
+                 enable_aligned_apodization=bool(tx_window))
     )
     # Refocus's SVD-based methods are not XLA-jittable; adjoint is, but the pipeline
     # is built once per buffer so the safe choice costs nothing measurable.
@@ -335,13 +346,18 @@ def _is_oom_error(exc) -> bool:
                                   "resource exhausted", "cuda error: out of memory"))
 
 
-def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False, refocus=None):
+def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False, refocus=None,
+                    tx_window=None):
     """Beamform ``(n_frames, n_tx, n_ax, n_el, 1)`` -> IQ ``(n_frames, z, x, 2)``.
 
     ``num_patches``/``chunk`` come from the GPU-scaled memory budget. If a call
     still runs out of memory (a wrong estimate, fragmentation, or another process
     sharing the GPU), the patch count is doubled (and the chunk halved) and the
     block is retried - so this completes on any GPU regardless of the budget guess.
+
+    ``tx_window`` is a ``(window, scale)`` pair (see ``BufferSpec.tx_window``) restricting
+    each transmit to the pixels inside its own transmit cone; ``None`` compounds every
+    transmit into every pixel.
     """
     n_tx, n_el = raw.shape[1], raw.shape[3]
     # Refocus expands the transmit axis from n_tx to n_el VIRTUAL transmits, so the
@@ -353,9 +369,17 @@ def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False, refocus
     is_baseband = raw.shape[-1] == 2
     _ensure_cpu_t_peak(params)   # zea torch-GPU t_peak workaround (see helper docstring)
     num_patches, chunk = plan_patches_and_chunk(params, n_tx_effective, n_el)
+    use_window = bool(tx_window) and not refocus
     pipe = build_beamform_pipeline(num_patches, is_baseband=is_baseband,
-                                   enable_pfield=enable_pfield, refocus=refocus)
+                                   enable_pfield=enable_pfield, refocus=refocus,
+                                   tx_window=use_window)
     bf_in = pipe.prepare_parameters(params)
+    if use_window:
+        from .txwindow import flat_window
+        # ``flat_aligned_apodization`` is a computed Parameters property (it exists only for
+        # scanline imaging), so it cannot be assigned - inject it into the prepared dict.
+        bf_in["flat_aligned_apodization"] = flat_window(
+            params, _grid_coordinates(params), *tx_window)
 
     n_frames = raw.shape[0]
     out = []
@@ -374,8 +398,13 @@ def beamform_frames(raw, params, max_oom_retries=5, enable_pfield=False, refocus
                 num_patches *= 2
                 chunk = max(1, chunk // 2)
                 pipe = build_beamform_pipeline(num_patches, is_baseband=is_baseband,
-                                               enable_pfield=enable_pfield, refocus=refocus)
+                                               enable_pfield=enable_pfield, refocus=refocus,
+                                               tx_window=use_window)
                 bf_in = pipe.prepare_parameters(params)
+                if use_window:
+                    from .txwindow import flat_window
+                    bf_in["flat_aligned_apodization"] = flat_window(
+                        params, _grid_coordinates(params), *tx_window)
                 print(f"    OOM - retrying with num_patches={num_patches}, chunk={chunk}")
                 continue
             raise
@@ -431,15 +460,18 @@ def process_bmode_buffer(vf, spec, out_dir, grid, fps, stem, compression,
 
     apply_grid(params, grid)
     iq, num_patches = beamform_frames(raw, params, enable_pfield=spec.pfield,
-                                      refocus=spec.refocus)
+                                      refocus=spec.refocus, tx_window=spec.tx_window)
     coords = _grid_coordinates(params)
 
     out_path = out_dir / f"{stem}_buffer{spec.matlab}_iq.hdf5"
     # Record WHICH reconstruction produced the file. The default for buffer 3 changed
-    # from plain DAS to REFoCUS adjoint, and the filename does not carry that - so
-    # files written before the change are only distinguishable by this string.
+    # from plain DAS to REFoCUS adjoint, and for buffer 1 from all-transmit compounding
+    # to a per-transmit cone - the filename carries neither, so files written before a
+    # change are only distinguishable by this string.
     recon = f"REFoCUS {spec.refocus}" if spec.refocus else (
         "delay-and-sum, pfield-weighted" if spec.pfield else "delay-and-sum")
+    if spec.tx_window and not spec.refocus:
+        recon += f", tx-window {spec.tx_window[0]} x{spec.tx_window[1]:g}"
     _save_beamformed(out_path, iq, coords, fps=fps,
                      description=f"{spec.name}: {spec.role} [{recon}]", compression=compression)
     print(f"  buffer {spec.matlab} ({spec.name}): {raw.shape[0]} frames n_tx={raw.shape[1]} "

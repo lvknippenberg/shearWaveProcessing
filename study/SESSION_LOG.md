@@ -1,3 +1,69 @@
+# Session 2026-09-21 — buffer 1: which pixels each transmit reconstructs
+
+## What was done
+
+1. **The widebeam reconstruction changed, and the whole study re-run — buffers 1 AND 5.**
+   `BufferSpec.tx_window = ("rect", 1.0)` restricts each of the 21 widebeams to the pixels
+   inside its own transmit cone (zea `AlignedApodization`). Buffer 1: 44/44 rebuilt, 0 failed,
+   46 min on 2 GPUs. Buffer 5 adopted after scanning all 44 of its files and confirming
+   identical transmit geometry (21 tx, ±40°, −123.2 mm; frame counts 20/22/24), then re-run
+   over the same 44. All verified to carry `[delay-and-sum, tx-window rect x1]`.
+   Montage: `study/montages/all_buffer1_txwin_best.gif`, rebuilt at the **same 1360x876
+   geometry** as the all-21 montages so they overlay; the all-21 set is kept beside it.
+2. **The mechanism was identified, not just the metric.** A widebeam opens only ~9.3-11.6 deg
+   from a virtual source 123 mm behind the array, so ~5 of 21 transmits insonify a pixel at
+   100 mm and the beamformer compounded all 21. Two independent measurements agree on what the
+   other 16 were adding: an echo-free chamber draws its energy almost uniformly across all
+   transmits, PEAKING at the ones aimed at a bright arc on the opposite side; and over the
+   cardiac cycle the part the cone removes tracks that arc (r = +0.88) while what it keeps tracks
+   the static near field (r = +0.74).
+3. **Gain:** +2.6 to +5.9 dB dynamic range, +0.4 to +1.4 dB dark-region contrast, on every
+   subject and frame tested. **Cost:** +0.49% lateral -6 dB width (CI [+0.19, +1.26], 66 wire
+   targets paired per target) and +12% beamforming time.
+4. Full record, including everything rejected: `docs/widebeam_bmode_reconstruction.md`.
+
+## Decisions, and why
+
+* **The cone, and nothing else.** It is the only free lever, because the transmits it discards
+  carry no focused signal for that pixel. Receive-aperture tapering (+12.4% lateral for +2.5 dB),
+  receive f-number restriction (f/2 zeroes 38% of the sector), nearest-k, pfield and
+  transmit-domain CF all remove or distort data that DOES carry signal, and were rejected on
+  measurement.
+* **x1.0, not x1.5.** x1.5 is the provably-zero-resolution-change width, but clutter is what this
+  buffer was losing and x1.0 is better on it. Decided on the cine.
+* **GCF rejected by eye.** It beats the cone on every clutter metric and on phantom point targets
+  (-0.9% lateral, +2.6 dB wire CNR) but drops in-vivo speckle SNR 1.06 -> 0.72 without improving
+  gCNR. User's read of the cine: over-smooth. Left as an opt-in flag on the script.
+* **Buffer 5 included.** Same `Bmode_WB` transmit; geometry confirmed identical across all 44
+  files before adoption, and the cone is derived per file, so the change cannot silently apply a
+  wrong window if a campaign differs. Buffer 6 is not converted in this study, so it is untouched.
+
+## Mistakes made, and what fixed them
+
+1. **The evaluation mask contained exactly-zero pixels.** `sector_mask` (|angle| <= 40 deg) spans
+   a region the sector does not fill, and `dynamic_range_db` drops zeros before taking
+   percentiles - so a transmit window, which creates MORE zeros and creates them exactly where
+   the image is darkest, was scored against a different population of pixels. Never returned
+   `inf`, so it was invisible. Fixed with a common-support mask verified to contain no zeros;
+   the headline moved from "+2.8 to +6.0 dB" to "+2.6 to +5.9 dB" - the conclusion survived, but
+   only by luck.
+2. **The same bug nearly sold receive apodization.** On the bad mask, receive Hann looked like
+   +4.4 dB dark contrast and +13.4 dB dynamic range - better than the transmit cone itself. All
+   of it was rim nulls: the Hann taper zeroes the outer elements, and at the sector rim the
+   f-number mask has already removed most of the aperture. On a clean mask it is slightly WORSE
+   than the cone alone, and the phantom says it costs 12.4% of lateral resolution.
+3. **Comparing medians hid the resolution answer.** Median lateral width said the cone cost +7%;
+   pairing per wire target said -0.01%, CI [-0.16, +0.15]. The difference was target-set
+   mismatch, not resolution.
+4. **"Overlap = 2*phi_max/pitch"** gave 2.6 transmits per pixel. Wrong: phi_max is an angle about
+   the virtual source, the pitch an angle about the array, and at 100 mm they differ by ~2.2x.
+   Count the cones.
+5. **A hypothesis killed in two minutes, correctly.** `zea.ops.Demodulate` applies no band-pass,
+   so a surviving 1.953 MHz fundamental would beamform with the wrong phase rotation and land as
+   haze. Measured the spectrum: the fundamental is already ~34 dB down. Nothing to fix.
+
+---
+
 # Session log — 2026-09-11/14
 
 Chronological record of what was done, decided, and got wrong. `README.md` in this folder is the

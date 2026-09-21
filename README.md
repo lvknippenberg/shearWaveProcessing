@@ -138,6 +138,46 @@ Note buffer 5's frame rate is `SW.ActualFPS` (~18 Hz — one frame per shear-wav
 the widebeam cine rate `Bmode_WB.ActualFPS` (~88 Hz); using the latter made its timestamps, and so
 its real-time playback, ~5× too fast.
 
+### Which pixels each transmit reconstructs (widebeam buffers 1 and 5)
+
+Buffer 1's 21 widebeams come from a virtual source 123 mm behind the array, so one beam opens only
+~9.3-11.6 deg: at 100 mm depth **5 of the 21 transmits insonify a given pixel**, and the beamformer
+sums all 21 into it anyway. In vivo the 16 that did not reach it contribute as much amplitude there
+as the 5 that did (on the resolution phantom, same geometry but no reverberating chest wall, they
+are 18 dB down) - so most of it is clutter, and it lands in the echo-free regions.
+
+Restricting each transmit to its own cone (zea's `AlignedApodization`, built by
+`swp.acquisition.txwindow`) gives **+2.6 to +5.9 dB dynamic range and +0.4 to +1.4 dB dark-region
+contrast** on every subject and frame tested, at **no measurable resolution cost** (-0.01% lateral
+-6 dB width, 95% CI [-0.16, +0.15], paired over 66 wire targets) for +12% beamforming time. This
+is the opposite of the buffer-3 result, where all 73 focused beams do overlap each pixel and using
+fewer blurs the image.
+
+It removes real clutter, not just noise: in the standard reconstruction a structure can appear to
+run continuously across the sector where the cone shows it does not. The per-transmit stack says
+why - an echo-free chamber receives its energy almost uniformly from all 21 transmits, peaking at
+the ones aimed at a bright specular arc **on the opposite side**, which deposit ~4 dB more there
+than the transmits actually aimed at it.
+
+Receive-aperture tapering (+12.4% lateral for +2.5 dB) and receive f-number restriction (f/2
+zeroes 38% of the sector) were both measured and rejected; `generalized_coherence_factor` goes
+much further on clutter and is better on phantom point targets, but changes the speckle statistics
+in vivo and is left as an open visual question.
+
+**This is the pipeline default for both widebeam buffers, 1 and 5**, since 2026-09-21
+(`BufferSpec.tx_window = ("rect", 1.0)`); the whole 44-folder study was re-run under it for both.
+Buffer 5 was confirmed to have identical transmit geometry in all 44 folders before adoption. To
+reproduce the old all-transmit compound, set that field to `None`. `scripts/widebeam_bmode.py`
+still writes alternatives **beside** the normal output for comparison:
+
+```
+python scripts/widebeam_bmode.py <folder> --buffer 1 --scale 1.5                      # wider cone
+python scripts/widebeam_bmode.py <folder> --buffer 1 --beamformer generalized_coherence_factor
+```
+
+Full measurements, what was rejected and why, and the two metric bugs that nearly changed the
+answer - [docs/widebeam_bmode_reconstruction.md](docs/widebeam_bmode_reconstruction.md).
+
 ## Phantom measurements
 
 `--phantom` (on `viz` / `all`) adapts the **active** recipe for a phantom: there is no anatomical
@@ -238,6 +278,8 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        verify_outputs.py (check/repair a processed tree),
                        incoherent_bmode.py (envelope-compounded focused B-mode, for comparison),
                        refocus_bmode.py (REFoCUS retrospective transmit beamforming),
+                       widebeam_bmode.py (per-transmit pixel-inclusion window for the
+                         widebeam buffers - each transmit reconstructs only where it insonified),
                        passive_study.py (passive M-lines + processing + event labels over a study;
                          draw | process | draw-events | reprocess | label | status),
                        linux_validation.py (re-run one folder elsewhere and compare to output/),
@@ -247,6 +289,8 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        check_push_voltage.py (delivered push-voltage sweep check)
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
+                       widebeam_bmode_reconstruction.md (buffer-1: which pixels each transmit
+                         should reconstruct; +5 dB dynamic range at no resolution cost),
                        passive_mlines.md (where/how to draw passive M-lines, study workflow, results),
                        passive_speed_estimation.md (automatic vs hand-drawn slopes, tracking score,
                          why the slant stack misses the wave and what to change),
@@ -258,6 +302,7 @@ study/analysis/        passive_split_study.py (full/left/right split over a whol
                        collect_passive_montages.py (flatten every folder's montages for review)
 src/swp/
   acquisition/         stages 1-2, ported from SWI/Zea (beamform, sequence, gifs, txsettings, scanparams);
+                       txwindow.py builds the per-transmit pixel-inclusion cone for the widebeam buffers;
                        combined.py + matlab/make_combined_data.m build CombinedData.mat from the runtime .mat;
                        pushvoltage.py reads the delivered ARF push voltage (TPC profile) from a folder;
                        triggerlog.py places buffer frames on the ECG and labels cardiac events

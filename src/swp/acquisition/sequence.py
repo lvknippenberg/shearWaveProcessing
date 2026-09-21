@@ -69,6 +69,35 @@ class BufferSpec:
     # Refocus rewrites the transmit parameters, so the per-transmit weights no
     # longer correspond to anything.
     refocus: str | None = None
+    # Per-pixel, per-transmit inclusion window (zea ``AlignedApodization``, built by
+    # :mod:`swp.acquisition.txwindow`): each transmit contributes only to the pixels inside
+    # its own transmit cone. ``None`` = every transmit into every pixel (plain compounding).
+    #
+    # Default ``("rect", 1.0)`` for the WIDEBEAM buffers (1 and 5). Their 21 widebeams come
+    # from a virtual source 123 mm BEHIND the array, so one beam opens only ~9.3-11.6 deg:
+    # at 100 mm depth about
+    # **5 of the 21 transmits** insonify a given pixel, and compounding all 21 adds the other
+    # 16 as clutter. In vivo those 16 contribute as much amplitude as the 5 that did reach
+    # the pixel; on the resolution phantom, same geometry but no reverberating chest wall,
+    # they are 18 dB down - the difference is clutter, and it lands in the echo-free regions.
+    #
+    # Measured over three subjects x every frame + the phantom
+    # (docs/widebeam_bmode_reconstruction.md): **+4.5 to +5.9 dB** dynamic range and +0.4 to
+    # +1.4 dB dark-region contrast, for **+0.49%** lateral -6 dB width (95% CI [+0.19, +1.26],
+    # 66 wire targets paired per target) and +12% beamforming time.
+    #
+    # This is the OPPOSITE of the focused buffer, where all 73 beams do overlap each pixel and
+    # using fewer blurs the image - hence a per-buffer field, not a global switch.
+    #
+    # Buffers 1 AND 5 both use the ``Bmode_WB`` widebeam transmit and were verified to have
+    # byte-identical transmit geometry across all 44 study folders (21 tx, -40..+40 deg,
+    # focus -123.2 mm), so the same window applies to both. The cone is derived from each
+    # file's OWN stored geometry, so it stays correct even if a future campaign changes the
+    # sequence.
+    #
+    # Buffers 2 and 4 must never get this: they feed the displacement estimators and any
+    # per-transmit reweighting changes their phase.
+    tx_window: tuple[str, float] | None = None
 
     @property
     def index(self) -> int:
@@ -78,7 +107,7 @@ class BufferSpec:
 
 SEQUENCE: list[BufferSpec] = [
     BufferSpec(1, "bmode_widebeam", "bmode", "Bmode_WB",
-               role="widebeam B-mode (orientation), ~88 FPS"),
+               role="widebeam B-mode (orientation), ~88 FPS", tx_window=("rect", 1.0)),
     BufferSpec(2, "active_sw", "active_track", "SW",
                role="active shear-wave: reference + ARF push + tracking",
                pi_mode="sliding"),
@@ -88,7 +117,7 @@ SEQUENCE: list[BufferSpec] = [
                role="ultrafast diverging-wave B-mode, ~925 FPS (passive elastography source)",
                passive_source=True),
     BufferSpec(5, "bmode_during_sw", "bmode", "Bmode_WB",
-               role="widebeam B-mode, one frame per SW measurement"),
+               role="widebeam B-mode, one frame per SW measurement", tx_window=("rect", 1.0)),
     BufferSpec(6, "bmode_strain", "bmode", "Bmode_strain",
                role="widebeam B-mode, long recording (~3 beats) for strain"),
 ]
