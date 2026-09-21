@@ -722,6 +722,31 @@ def draw_event_mlines(folder, config="configs/passive.yaml", buffer=BMODE_BUFFER
     return st
 
 
+def check_ecg_quality(folder, write=True):
+    """Assess the R-peak record and warn if cardiac phases cannot be trusted -> :class:`RRCheck`.
+
+    Called automatically at the start of the passive workflow whenever ECG data is present. A
+    single spurious trigger is corrected silently by ``clean_r_peaks``; anything that leaves the
+    R-peaks in doubt prints a WARNING, because a wrong phase relabels MVC as AK and falsifies the
+    speed analysis downstream. The result is also written to ``<outdir>/ecg_rr_check.json`` so a
+    batch run can be audited afterwards.
+    """
+    from .acquisition.rrcheck import assess_rr
+
+    chk = assess_rr(folder)
+    for line in chk.report():
+        print(line)
+    if write:
+        try:
+            _, p = _paths(folder, "configs/passive.yaml")
+            os.makedirs(p["outdir"], exist_ok=True)
+            with open(os.path.join(p["outdir"], "ecg_rr_check.json"), "w") as f:
+                json.dump(chk.as_row(), f, indent=1)
+        except Exception:                                            # noqa: BLE001
+            pass          # the check is advisory; never let logging it break a run
+    return chk
+
+
 def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_events=4,
                     pad_ms=20.0, overview_stride=2, redraw=False, cine=False):
     """Run the whole passive burst-window workflow on one folder (draw, then process).
@@ -737,6 +762,7 @@ def process_passive(folder, config="configs/passive.yaml", window_ms=100.0, max_
     """
     acq = load_acq(folder, config)
     print(f"passive workflow on {folder}\n  {acq.summary()}")
+    check_ecg_quality(folder)
     st = draw_passive_mlines(folder, config, acq=acq, window_ms=window_ms, max_events=max_events,
                              overview_stride=overview_stride, redraw=redraw, cine=cine)
     if not st.get("skipped_general") and not st.get("windows"):

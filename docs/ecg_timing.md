@@ -58,9 +58,41 @@ event (see `docs/passive_mlines.md`).
 
 ## Do not re-detect R-peaks from the `Signal` trace
 
+**Proposed, tested and withdrawn twice - 2026-09-18 and again 2026-09-21. Read this section before
+touching the `Signal` trace again.**
+
 The logged `Signal` waveform is a **secondary, lossy display stream** and is not a reference for
 timing. In C000000023 it is sampled at 100 Hz, takes only 51 distinct values, and **61 % of its
 samples are exactly zero**.
+
+### Why, from the acquisition hardware
+
+`SWI/Arduino/ArduinoReadECG_request_micros.ino` records the two channels by completely different
+routes, and only one of them is a timing instrument:
+
+| | `ECG_trigger` | `Signal` |
+|---|---|---|
+| source | hardware interrupt, pin 2 (`ISR_ECG`, RISING) | `analogRead(A0)` inside `loop()` |
+| rate | every R-peak, as it happens | **100 Hz** (`sampling_frequency`), 10 ms per sample |
+| signal path | the monitor's **trigger output** | the monitor's **analog output** |
+
+The analog output carries the monitor's own display filtering, so it lags the trigger output by an
+unknown, device- and setting-dependent amount, and it is quantised to 10 ms on top of that.
+Comparing the two measures **monitor latency**, not trigger accuracy.
+
+### What the second attempt found, and why it was wrong
+
+On 2026-09-21 the waveform was re-detected across all 44 folders and appeared to show a cleanly
+bimodal trigger offset: 15 folders on the R-peak, 20 folders about 55 ms early, with an *empty gap*
+between the groups. This was reported as "only 10 of 44 acquisitions have a trustworthy trigger".
+**It is an artefact** - the bimodality is consistent with two monitor or filter settings in use
+across the study, i.e. two analog-path delays, not a good and a bad detector. Two further mistakes
+compounded it: the delay was quoted against the *previous* R-peak (797 ms in C000000023) when the
+*next* one was 83 ms away, which makes correct gating look broken; and buffer-4's start was called
+"83 ms early" when it simply sits on whichever fiducial that monitor emitted.
+
+Measured on the triggers alone, **the passive block starts within 6 microseconds of a recorded
+R-peak in every folder of the study**. There is no gating problem.
 
 Checked against it (2026-09-18), of the 12 `ECG_trigger` R-peaks that fall inside the logged trace,
 10 land on a clear deflection (amplitude 0.21-0.48) and **2 land on a sample of exactly zero with
@@ -83,12 +115,40 @@ Checked around buffer 4 (±5 s):
 | folder | problem | effect |
 |---|---|---|
 | C000000005, C000000012 | "R-peaks" every 240 ms (250 bpm), perfectly regular - a periodic trigger, not an ECG | gating of buffers 2/4/6 is arbitrary; labels `?` |
-| C000000007, C000000014 | spurious extra triggers (230-260 ms intervals among normal beats) inside the buffer-4 beat | labels `?` |
+| C000000007, C000000014, C000000017 | a fixed-rate pulse train mixed with real beats (17-39 of 49 intervals at 246-280 ms) | labels `?`; `rrcheck` status `unusable` |
 | C000000010, C000000017, C000000021, C000000030, C000000039, C000000041 | a missed or extra trigger elsewhere in the log | filtered out; labels usable |
 
 `clean_r_peaks()` takes the median of plausible intervals (400-1600 ms) as reference RR (none if fewer
 than 3 or less than half the intervals are plausible) and drops triggers arriving < 0.6 x RR after
 the last kept one.
+
+## Automatic RR assessment (runs on every passive workflow)
+
+`swp.acquisition.rrcheck.assess_rr` assesses the trigger record whenever ECG data is present.
+`swp.passive.check_ecg_quality` calls it at the start of `process_passive`, prints the result, and
+writes it to `<outdir>/ecg_rr_check.json` so a batch run can be audited afterwards. The batch view
+over a whole tree is `python study/analysis/ecg_check_study.py` -> `study/logs/ecg_check.csv`.
+
+The principle: **a single wrong R-peak is correctable, uncertainty about the R-peaks is not.**
+Dropping one spurious trigger out of ~50 leaves the reference RR and every event phase intact, so
+that is reported and not warned about. Anything that leaves the R-peaks themselves in doubt warns,
+because a phase error relabels an MVC as an AK and silently falsifies the speed analysis.
+
+| status | meaning | `trustworthy` |
+|---|---|---|
+| `ok` | no short/long intervals, CV <= 0.15, no outliers | yes |
+| `corrected` | exactly one spurious trigger discarded by `clean_r_peaks` | yes |
+| `warn` | >1 trigger discarded, a missed beat, CV > 0.15, or an RR >30 % off the median | **no** |
+| `unusable` | fixed-rate pulse train (>30 % of intervals < 400 ms) or < 3 plausible intervals | **no** |
+| `no-ecg` | no trigger log at all | **no** |
+
+Conditions are evaluated independently and the worst one sets the status - a record whose single
+spurious trigger was correctable can still warn on high variability.
+
+Across the 44 beamformed folders (2026-09-21): **24 `ok`, 15 `warn`, 5 `unusable`**; cardiac
+phases are trustworthy in 24/44. Gating is exact everywhere (max 6 us). The `unusable` five are
+C000000005, C000000007, C000000012, C000000014, C000000017 - all fixed-rate or near-empty trigger
+records.
 
 ## Event labels
 
