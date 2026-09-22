@@ -14,7 +14,8 @@ onto the beamformed 2-D field. Written 2026-09-21, after the 34-panel hand-label
 | 1b - speckle added to the synthetic harness | **reproduces the real failure exactly**: tensor 3.01 -> 0.32 m/s, theta 0 -> -72 deg |
 | 1c - synthetic validation of the **phase-gradient** estimator | **PASSES under full speckle** at 6 dB SNR (4.8 % / 2.4 deg p90); fails under moving axial clutter |
 | 3b - phase gradient on real data | plausible speeds and a wall-aligned direction at AVC; reproduces the independently measured dispersion |
-| next | Stage 4 - project onto the 34 hand-drawn panels and test V3 |
+| 4 - phase gradient vs the 34 hand-drawn panels | **FAILED** - V2 and V3 both miss by a wide margin |
+| **verdict** | **the field approach does not work on this data**; see section 4e |
 
 Read [Stage 1 results](#stage-1-results-2026-09-21) and Stage 3 before the method sections: the
 structure tensor described in section 3 is **superseded** for this data, and section 3b says why
@@ -451,6 +452,99 @@ Three things changed for the better against the structure tensor:
 value of 3.56 (-23 %) and MVC 5.17 against 2.89 (+79 %) - one of two within the V3 tolerance, on
 n = 2. MVC's direction (+59 deg) is not wall-aligned and the direction spread is 22-50 deg
 throughout. Stage 4 over the 34 hand-drawn panels is what decides this, and it has not run.
+
+## 4e. Stage 4 verdict (2026-09-22): the field approach fails, and why
+
+15 windows x 2 views x 4 frequencies, `study/logs/field_stage4.csv`. Nothing was tuned on it -
+every parameter was fixed on synthetic data beforehand.
+
+### V2 fails, and it is the decisive one
+
+Displacement and velocity are the same field times `i*omega`, so `grad U / U` is **mathematically
+required to be identical** at a fixed frequency. Over 43 window/frequency pairs:
+
+| | median | p90 | within tolerance |
+|---|---|---|---|
+| speed ratio | **1.25x** | 2.29x | 53 % within 25 % |
+| direction difference | **12.4 deg** | 32.4 deg | 42 % within 10 deg |
+
+Two quantities that must agree exactly disagree by 25 % typically. That is the estimator's noise
+floor on real data, and it is far too large for the measurement. (Part of it is the two views'
+different bands and smoothing, but not a 2.3x tail.)
+
+### V3 fails at every frequency
+
+Criterion: median projected error < 25 %.
+
+| f | n | median | p90 | within 25 % |
+|---|---|---|---|---|
+| 13 Hz | 15 | 39 % | 163 % | 33 % |
+| 16 Hz | 15 | 59 % | 394 % | 20 % |
+| 20 Hz | 14 | 98 % | 623 % | 21 % |
+
+### The direction is not along the wall
+
+| | median &#124;dtheta&#124; from the M-line | within 30 deg |
+|---|---|---|
+| AVC | 38.9 deg | 29 % |
+| MVC | 72.6 deg | 14 % |
+
+Median speeds are 1.29-1.76 m/s against hand picks of 2-5 and a literature range of 1.6-4.8.
+C000000023's wall-aligned AVC direction, reported as encouraging, was not representative - the
+**fourth** conclusion from that dataset alone not to survive the labelled set. It was selected as
+the best case, so it is systematically unrepresentative by construction.
+
+### It is not the ROI
+
+Sweeping the band width from 20 mm down to 2 mm on four windows leaves the estimated speed low
+(0.6-2.0 m/s) and the direction 30-75 deg off the wall at every width. The apparent improvement at
+2 mm comes from the `1/cos(dtheta)` factor, not from a better `c`.
+
+### What actually explains it
+
+The synthetic sweep **predicted this failure**. The one contaminant the phase estimator cannot
+handle is moving axial clutter, and its signature there - speed collapsing, direction swinging
+towards +/-90 deg - is exactly what the real data shows:
+
+| | speed error | direction error |
+|---|---|---|
+| synthetic, speckle + clutter x0.5 | 29 % median | 19 deg median |
+| synthetic, speckle + clutter x1.0 | 49 % median | 27 deg median |
+| **real data** | **39-98 % median** | **39-73 deg median** |
+
+So the diagnosis is not "unknown": these fields contain substantial moving axial clutter, and
+**there is no filter for it that preserves the wave**. The lateral-demean filter removes it
+perfectly and destroys the wave with it, because over a 40 mm ROI a 187 mm wave is itself nearly
+laterally uniform.
+
+### The unifying fact
+
+That last point is the whole project in one sentence. **The shear wavelength is 5-10x the
+imageable region** (150-290 mm against 19-43 mm of M-line or ~40 mm of ROI). That single geometric
+fact defeats, for the same reason each time:
+
+* the **slant stack** - a wave nearly uniform across the aperture has a poorly constrained slope
+  (+24 % bias, 20 % of fits unusable);
+* `remove_flat` and every other **bulk-motion filter** - what is uniform in space is the wave too;
+* the **structure tensor** - the spatial gradient it needs is smaller than the speckle gradient;
+* the **phase gradient** - the phase advance across the ROI is a small fraction of a cycle, so
+  clutter of comparable magnitude dominates it;
+* the **lateral-demean clutter filter** - same argument as `remove_flat`.
+
+It is not an algorithmic problem and no estimator fixes it. What would: a longer imaging aperture
+(a wider sector or a stitched view), a higher-frequency wave where the wavelength is shorter, or
+an acquisition that suppresses the clutter at source.
+
+### Recommendation
+
+**Stop the field-estimator work here.** The code, the synthetic harness and both negative results
+are kept - `structure.py` and `phase.py` are correct implementations that pass their synthetic
+gates, and the harness is now realistic enough to predict real failures, which is worth having.
+What should not happen is a fourth estimator on the same geometry.
+
+The defensible measurement for this data remains a hand-drawn slope with a stated +/-25 %
+uncertainty, cross-checked between displacement and velocity, on windows whose R-peak record
+passes `swp.acquisition.rrcheck`.
 
 ## 5. What this does *not* fix
 
