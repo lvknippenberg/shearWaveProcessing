@@ -56,7 +56,7 @@ pipeline:
   # light Gaussian spatial smoothing; light slow-time smoothing. NO directional filter (see below).
   # Sampling rate ~925 Hz (buffer 4). bp5-150 and bp10-150 both work; median 1 mm ~= gauss 0.6 mm.
   field_filters:
-    - {name: temporal_bandpass, params: {f_lo: 8, f_hi: 45}}
+    - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
     - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}   # light Gaussian (~= median 1 mm)
     - {name: temporal_moving_mean, params: {window: 3}}
 
@@ -71,11 +71,9 @@ pipeline:
 # Burst detection uses a FIXED band, independent of pipeline.field_filters, so tuning the
 # processing band does not move the detected windows (index-based M-lines stay valid).
 detect:
-  # NARROWED 2026-09-22 from [5, 150]. Measured over 30 hand-drawn panels: the wave's peak is at
-  # 14.6 Hz, f50 18.8 Hz, f90 29.7 Hz - 73 % of the energy is in 10-40 Hz and only 5 % above
-  # 40 Hz. The old band passed ~110 Hz of essentially noise bandwidth to collect that 5 %, which
-  # set the SNR of the burst detection that places every window.
-  band: [5, 45]                             # Hz, for the along-line energy used to place windows
+  # [5, 150]. A narrowing to [5, 45] was applied on 2026-09-22 and REVERTED the same day - see
+  # the note on the view band below before proposing it again.
+  band: [5, 150]                            # Hz, for the along-line energy used to place windows
 
   # Event SELECTION. "energy" keeps the max_events largest bursts and labels them afterwards;
   # "phase" searches the windows label_event labels with (MVC within 150 ms of an R-peak, AVC
@@ -113,13 +111,23 @@ run:
       offsets: 5
       offset_step_mm: 0.5
       field_filters:
-        # 8-45 Hz (was 10-150). Validated on the 30 cached panels: the lag-ramp residual - the
-        # scatter about a linear arrival-time ramp, which is what a speed actually is - improves
-        # from 0.89 to 0.67 ms overall and 0.54 to 0.43 ms on panels with a clearly visible
-        # wavefront. Visual contrast drops slightly (on-wave 2.21 -> 1.96) because a narrower
-        # band lengthens the packet; that is cosmetic, the timing is the measurement. 12-32 Hz
-        # was also tried and is too narrow (residual worsens to 0.78 ms).
-        - {name: temporal_bandpass, params: {f_lo: 8, f_hi: 45}}
+        # 10-150 Hz. A narrowing to 8-45 was tried on 2026-09-22 and REVERTED. Do not repeat it
+        # without reading this:
+        #
+        #   * It was justified on the MEDIAN spectrum (f90 29.7 Hz, "only 5 % above 40 Hz"). The
+        #     spread is what matters: across the 30 hand-drawn panels f90 reaches 54 and 65 Hz
+        #     and f99 reaches 93 Hz. At a 45 Hz cutoff the worst panel loses 30 % of its energy.
+        #   * Side by side (D:/Luuk van Knippenberg/Claude/BandComparison/band_panels.png) the
+        #     high-f90 panels visibly lose their wavefront: a crisp band at 10-150 becomes a
+        #     smeared blob at 8-45, merging with its neighbouring fringes.
+        #   * The metric used to justify it - the cross-correlation lag-ramp residual - is biased
+        #     TOWARDS narrowing by construction. A narrower band smooths the traces in time, which
+        #     mechanically makes the lags smoother and more linear whether or not the arrival time
+        #     is better determined. It was not valid evidence for a cutoff.
+        #
+        # What does hold: 80-150 Hz carries almost nothing (median 0.3 %, worst panel 2.3 %), so
+        # a cutoff at 80 Hz would be a safe, small improvement if one is ever wanted.
+        - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
         - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
         - {name: temporal_moving_mean, params: {window: 3}}
 
@@ -130,9 +138,7 @@ run:
       offsets: 9
       offset_step_mm: 0.5
       field_filters:
-        # still the WIDEST of the three (the views must stay independent for their agreement to
-        # mean anything), but without the dead 60-150 Hz bandwidth.
-        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 60}}
+        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
         - {name: spatial_median, params: {size_z_mm: 1.0, size_x_mm: 2.0}}
 
     # C -- different QUANTITY (velocity), narrower shear band, stronger Gaussian + longer temporal mean.
@@ -142,8 +148,6 @@ run:
       offsets: 9
       offset_step_mm: 0.8
       field_filters:
-        # velocity emphasises the higher part of the band; 12-45 keeps that character while
-        # dropping the 45-90 Hz region that carries ~5 % of the energy.
-        - {name: temporal_bandpass, params: {f_lo: 12, f_hi: 45}}
+        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 90}}
         - {name: spatial_smooth, params: {sigma_z_mm: 1.0, sigma_x_mm: 2.0}}
         - {name: temporal_moving_mean, params: {window: 5}}
