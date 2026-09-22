@@ -221,7 +221,40 @@ def window_cine(acq: Acquisition, w: BurstWindow):
 
 
 # ------------------------------------------------------------------ detection
-def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, overview_stride=2):
+def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None):
+    """Phase-aware burst search -> windows, or None when there is no usable R-peak record.
+
+    Bridges the trigger log into :func:`swp.mline.select.detect_phase_windows`: the R-peaks are
+    read from ``ECG_trigger`` and expressed relative to buffer-4 frame 0, which is the clock
+    ``t_s`` is on. Returns None (so the caller falls back to energy ranking) when the ECG is a
+    fixed-rate pulse train or too sparse, since searching a cardiac phase that does not exist
+    would be worse than not searching at all.
+    """
+    from .acquisition.triggerlog import buffer_timing, clean_r_peaks
+    from .mline.select import detect_phase_windows
+
+    if folder is None:
+        folder = getattr(acq, "meta", {}).get("folder")
+    if not folder:
+        return None
+    bt = buffer_timing(folder, 4)
+    if bt is None:
+        return None
+    kept, rr_ms = clean_r_peaks(bt.r_peaks_ms)
+    if kept is None or not np.isfinite(rr_ms or np.nan):
+        return None
+    r_rel = (np.asarray(kept, float) - bt.t0_ms) * 1e-3          # -> buffer-4 clock, seconds
+    span = (float(t_s[0]) - 1.5, float(t_s[-1]) + 1.5)
+    r_rel = r_rel[(r_rel >= span[0]) & (r_rel <= span[1])]
+    if r_rel.size < 1:
+        return None
+    windows, _ = detect_phase_windows(D_st, t_s, r_rel, rr_ms * 1e-3,
+                                      window_ms=window_ms, max_events=max_events)
+    return windows or None
+
+
+def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, overview_stride=2,
+                   folder=None):
     """Along-line displacement over the whole recording -> burst windows (+ overview figures)."""
     base = rc.build_pipeline_config(cfg, acq=acq)
     # Burst detection runs on a FIXED band (detect.band), independent of the processing band, so
@@ -235,7 +268,28 @@ def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, o
     ov = run_pipeline(_stride_acq(acq, overview_stride), gen_mline, ov_cfg, focus=None)
     D_st = np.asarray(ov.st.data).T                    # (n_s, n_t) as the burst detector expects
     t_s = np.asarray(ov.st.t)
-    windows, energy = detect_line_bursts(D_st, t_s, window_ms=window_ms, max_events=max_events)
+    # Detection mode. "energy" (default) keeps the four largest bursts and labels them
+    # afterwards; "phase" searches the expected MVC/AVC phase windows instead, so a large
+    # non-valvular burst cannot displace a genuine closure. Phase mode needs a usable R-peak
+    # record and falls back to energy when there is none.
+    #
+    # NOTE: switching modes changes which windows are detected, and the per-event M-lines are
+    # keyed by window INDEX - so it invalidates every stored per-event line for that folder and
+    # they must be redrawn. That is why the default is unchanged.
+    mode = str(cfg.get("detect", {}).get("mode", "energy")).lower()
+    windows = None
+    if mode == "phase":
+        windows = _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder)
+        if windows is None:
+            print("  [detect] no usable R-peak record - falling back to energy ranking")
+    if windows is None:
+        windows, energy = detect_line_bursts(D_st, t_s, window_ms=window_ms,
+                                             max_events=max_events)
+    else:
+        from .mline.select import energy_along_line
+        energy, _ = energy_along_line(D_st, 30)
+        print(f"  [detect] phase-aware: " + ", ".join(
+            f"{w.expect or 'energy'}@{w.t_peak * 1e3:.0f}ms" for w in windows))
     os.makedirs(outdir, exist_ok=True)
     bursts_png = os.path.join(outdir, "passive_bursts.png")
     plot_bursts(energy, t_s, windows, bursts_png,
@@ -273,6 +327,10 @@ def _detect_key(gen_mline, cfg, window_ms, max_events, overview_stride):
     """Everything detection depends on - a cached window list is valid only if this matches."""
     return dict(general_points=np.round(np.asarray(gen_mline.points), 7).tolist(),
                 detect_band=list(cfg.get("detect", {}).get("band", [5.0, 150.0])),
+                # the detection MODE is part of the key: switching it changes which windows are
+                # found, and the per-event M-lines are keyed by window index, so a cached window
+                # list from the other mode must not be reused.
+                detect_mode=str(cfg.get("detect", {}).get("mode", "energy")).lower(),
                 window_ms=window_ms, max_events=max_events, overview_stride=overview_stride)
 
 
@@ -362,7 +420,8 @@ def draw_passive_mlines(folder, config="configs/passive.yaml", acq=None, window_
         # Fresh detection: any existing window lines belong to an earlier detection (a different
         # general line or settings) and would silently be reused for the wrong event - archive them.
         _archive_window_lines(p["mlines"])
-        windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events, overview_stride)
+        windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events,
+                                 overview_stride, folder=folder)
         st = dict(key=key, windows=[dataclasses.asdict(w) for w in windows], drawn=[], skipped=[])
         _write_windows(p["windows_json"], st)
 
@@ -600,7 +659,8 @@ def process_single_line(folder, config="configs/passive.yaml", acq=None, window_
     st, windows = _cached_windows(p, gen, cfg, key)
     if st is None:
         _archive_window_lines(p["mlines"])
-        windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events, overview_stride)
+        windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events,
+                                 overview_stride, folder=folder)
         st = dict(key=key, windows=[dataclasses.asdict(w) for w in windows])
     if label_windows(folder, st):
         _write_windows(p["windows_json"], st)

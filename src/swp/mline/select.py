@@ -61,6 +61,7 @@ class BurstWindow:
     t1: float                # window end, seconds
     score: float             # peak energy (relative burst strength)
     label: str = ""          # optional user label, e.g. "mitral" / "aortic"
+    expect: str = ""         # phase window this burst was SEARCHED in ("MVC"/"AVC"), if any
 
     @property
     def window(self) -> tuple[float, float]:
@@ -1208,3 +1209,79 @@ if __name__ == "__main__":
           "(edit IQ_FILE / MLineConfig there). Or from a script:\n"
           "    from swi_mline import process_mline, MLineConfig\n"
           "    process_mline(r'...\\CombinedData_buffer4_iq.hdf5', MLineConfig())")
+
+
+def detect_phase_windows(D_st, t_s, r_peaks_s, rr_s, window_ms=100.0, edge_frames=30,
+                         mvc_max_ms=150.0, avc_tol_ms=120.0, min_separation_s=0.15,
+                         max_events=4, fill_with_energy=True):
+    """Detect bursts by SEARCHING the expected valve-closure phases, not by ranking energy.
+
+    The default detector (:func:`detect_line_bursts`) keeps the ``max_events`` largest bursts of
+    along-line energy and only afterwards asks what cardiac phase they fell in. Nothing stops a
+    large non-valvular event - rapid filling, respiratory motion, a reverberation transient - from
+    displacing a genuine valve closure out of the list, and nothing guarantees both MVC and AVC
+    are among the four. This searches the other way round: for each beat, take the strongest burst
+    *inside* the window where a given closure must occur.
+
+    The phase windows are the same ones :func:`swp.acquisition.triggerlog.label_event` labels with,
+    so detection and labelling can no longer disagree:
+
+    * **MVC** within ``mvc_max_ms`` after an R-peak;
+    * **AVC** within ``avc_tol_ms`` of the Weissler QS2, ``546 - 2.1 * HR`` ms after the R-peak.
+
+    Args:
+        r_peaks_s: R-peak times on the same clock as ``t_s`` (i.e. relative to buffer-4 frame 0).
+        rr_s: reference RR interval [s], used for the heart rate in QS2.
+        fill_with_energy: if fewer than ``max_events`` phase-matched bursts are found, top up from
+            the largest remaining bursts so the behaviour degrades to the old detector rather than
+            returning nothing.
+
+    Returns ``(windows, energy_raw)`` exactly like :func:`detect_line_bursts`; each window carries
+    ``expect`` naming the phase it was found in ("MVC" / "AVC"), or "" for an energy top-up.
+    """
+    t_s = np.asarray(t_s, float)
+    r_peaks_s = np.asarray(r_peaks_s, float)
+    e_raw, e = energy_along_line(D_st, edge_frames)
+    half = 0.5 * window_ms * 1e-3
+    hr = 60.0 / rr_s if rr_s and np.isfinite(rr_s) and rr_s > 0 else np.nan
+    qs2 = (546.0 - 2.1 * hr) * 1e-3 if np.isfinite(hr) else np.nan
+
+    targets = []
+    for r in r_peaks_s:
+        targets.append(("MVC", r, r + mvc_max_ms * 1e-3))
+        if np.isfinite(qs2):
+            targets.append(("AVC", r + qs2 - avc_tol_ms * 1e-3, r + qs2 + avc_tol_ms * 1e-3))
+
+    found = []
+    for name, lo, hi in targets:
+        m = (t_s >= lo) & (t_s <= hi)
+        if m.sum() < 3:
+            continue
+        idx = np.where(m)[0]
+        pk = idx[int(np.argmax(e[idx]))]
+        if any(abs(t_s[pk] - t_s[q]) < min_separation_s for _, q in found):
+            continue
+        found.append((name, pk))
+
+    found.sort(key=lambda nq: -e[nq[1]])
+    found = found[:max_events]
+
+    if fill_with_energy and len(found) < max_events:
+        taken = [q for _, q in found]
+        for pk in _detect_peaks(e, t_s, min_separation_s, max_events * 3):
+            if len(found) >= max_events:
+                break
+            if all(abs(t_s[pk] - t_s[q]) >= min_separation_s for q in taken):
+                found.append(("", pk))
+                taken.append(pk)
+
+    found.sort(key=lambda nq: t_s[nq[1]])
+    windows = []
+    for name, pk in found:
+        w = BurstWindow(t_peak=float(t_s[pk]),
+                        t0=float(max(t_s[0], t_s[pk] - half)),
+                        t1=float(min(t_s[-1], t_s[pk] + half)),
+                        score=float(e[pk]))
+        w.expect = name
+        windows.append(w)
+    return windows, e_raw

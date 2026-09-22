@@ -161,12 +161,69 @@ so every 1-D estimate is biased high). **Both failed on real data.** Full record
   they must give identical `k`, and they differ by a median 1.25x in speed and 12.4 deg in
   direction.
 
-**The unifying reason is geometric, and it is the same one that limits the 1-D path.** The shear
-wavelength is 5-10x the imageable region (150-290 mm against 19-43 mm of M-line or ~40 mm of ROI).
-That single fact defeats the slant stack, `remove_flat`, the structure tensor, the phase gradient
-and every clutter filter tried, each for the same reason: what is nearly uniform across the
-aperture is *the wave*. No estimator fixes it. What would: a longer aperture, a higher-frequency
-wave, or clutter suppression at acquisition.
+**The common factor is geometric.** The shear wavelength is 5-10x the imageable region
+(150-290 mm against 19-43 mm of M-line or ~40 mm of ROI), so what is nearly uniform across the
+aperture is *the wave itself*. That is why the slant stack, `remove_flat`, the structure tensor,
+the phase gradient and every clutter filter tried all fail in the same way.
 
-**Practical consequence: the hand-drawn slope with a stated +/-25 % uncertainty remains the
-defensible measurement for this data.**
+**Do not over-read that as "the acquisition cannot work".** Keijzer et al. obtained usable medians
+with a significant AVC > MVC difference from M-mode Radon on a comparable geometry, and Strachinaru
+and Salles likewise report speeds from similar apertures. The honest statement is that this
+geometry makes the **per-window** uncertainty large - which is consistent both with the +/-25 %
+measured here and with the literature's approach of reporting medians over many sequences, on
+open-chest pigs or selected volunteers with far better SNR than this cohort. What is not supported
+is a per-window automatic number.
+
+**Practical consequence: the hand-drawn slope with a stated uncertainty remains the defensible
+measurement for this data**, and group statistics over many events are more likely to be
+meaningful than any single window.
+
+
+## The manual measurements have their own uncertainty
+
+Everything above benchmarks automatic estimators *against the hand-drawn slopes*, which makes it
+easy to read the hand values as ground truth. They are not. Two separate sources of error:
+
+**Drawing precision, ~+/-25 %.** Measured, not assumed: on a blind redraw the AVC pair reproduced
+to 0.6 % and MVC displacement to 8 %, while an independent ridge-tracking fit of the same panels
+landed 25 % away *with an identical on-wave score*. Two clicks over a ~5 ms moveout is not a
+precise instrument.
+
+**Whether there was a wavefront to draw at all.** This is the larger and less tractable one. The
+propagation is often unclear and sometimes not visible, and the operator still has to put a line
+somewhere. Concretely, from the 15-window labelled set:
+
+* of the 66 labelled valve windows in the study, **not one** has all three processing views
+  agreeing on a speed - the set contains no easy cases because there are none;
+* 6 of 15 windows fail the displacement-vs-velocity cross-check, and two that pass it do so on
+  physically impossible values (0.45 m/s travelling backwards, 0.91 m/s);
+* on the MVC velocity panel of C000000023 the tracked ridge propagates only over the first
+  ~14 mm and is stationary beyond - the panel does not contain a single wavefront to draw.
+
+**C000000023 is the best case for the manual measurement too, not just for the automatic one.** It
+was selected for image quality and consistency, and four separate conclusions drawn from it alone
+did not survive the labelled set. Its hand values are the most reliable in the cohort and should
+not be taken as typical.
+
+**Consequence for how these numbers are used.** A per-window hand value carries at least the
++/-25 % drawing precision, plus an unquantified term for panel quality that can be much larger
+where the wavefront is faint. Any comparison between events or subjects needs a per-measurement
+confidence recorded alongside the speed, so that windows where nothing was clearly visible can be
+weighted or excluded rather than averaged in as if they were measurements. Collecting that
+confidence is an open action - see `study/logs/labelled_panels.json` for the window list it would
+attach to.
+
+## Two ways to draw the line
+
+`study/analysis/manual_slope.py --mode clicks` (default) is the original: click two points on the
+wavefront, speed is `dr/dt` between them.
+
+`--mode slider` anchors the line with **one** click and sets the slope with a slider. It separates
+the two judgements the operator is actually making - *where* the wavefront is, and *how steep* it
+is - so a slip in one does not corrupt the other, and it makes the sensitivity visible: if a wide
+range of speeds looks equally good on a panel, that is information about the panel rather than a
+failure to click accurately. Arrow keys nudge the slope in 0.05 m/s steps.
+
+Both store the same format (two points on the line plus the speed, now with a `method` field), so
+everything downstream reads them identically and the two-click method remains available
+unchanged.

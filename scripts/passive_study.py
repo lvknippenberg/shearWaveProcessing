@@ -204,16 +204,28 @@ def cmd_label(folders, a):
     Updates ``passive_windows.json`` (labels + timing) and adds the label to the rows of
     ``passive_speeds.json``; montages pick the labels up the next time a folder is processed.
     Writes a study table ``passive_window_labels.csv`` into the logs folder.
+
+    **Every row carries the R-peak quality of its acquisition.** A label is only as good as the
+    R-peak it is measured from, and 20 of 44 acquisitions do not have a trustworthy one
+    (``swp.acquisition.rrcheck``): 5 are fixed-rate pulse trains rather than ECGs, where a cardiac
+    phase is meaningless rather than merely shifted. Rows from those folders are labelled but
+    flagged, and ``--trustworthy-only`` drops them outright so a phase-resolved comparison cannot
+    silently include them.
     """
     import csv
     import json
+    from swp.acquisition.rrcheck import assess_rr
     from swp.passive import _paths, _write_windows, label_windows, read_windows
 
-    rows, counts = [], {}
+    rows, counts, skipped = [], {}, []
     for f in folders:
         _, p = _paths(str(f), a.config)
         st, _ = read_windows(p["windows_json"])
         if st is None or not st.get("windows"):
+            continue
+        ecg = assess_rr(str(f))
+        if a.trustworthy_only and not ecg.trustworthy:
+            skipped.append((_name(f), ecg.status, ecg.quality))
             continue
         if label_windows(str(f), st):
             _write_windows(p["windows_json"], st)
@@ -232,10 +244,13 @@ def cmd_label(folders, a):
             counts[lab] = counts.get(lab, 0) + 1
             tags.append(f"{lab}@{w['t_peak'] * 1e3:.0f}")
             rows.append(dict(folder=_name(f), window=i, t_peak_ms=round(w["t_peak"] * 1e3, 1),
-                             label=lab, **{k: ph.get(k) for k in
-                                           ("phase_ms", "to_next_r_ms", "rr_ms", "hr_bpm", "qs2_ms",
-                                            "next_r_logged")}))
-        print(f"  {_name(f)[:10]}  " + "  ".join(tags))
+                             label=lab, ecg_status=ecg.status, ecg_quality=ecg.quality,
+                             phases_trustworthy=ecg.trustworthy,
+                             **{k: ph.get(k) for k in
+                                ("phase_ms", "to_next_r_ms", "rr_ms", "hr_bpm", "qs2_ms",
+                                 "next_r_logged")}))
+        warn = "" if ecg.trustworthy else f"   [ECG {ecg.status}: {ecg.quality}]"
+        print(f"  {_name(f)[:10]}  " + "  ".join(tags) + warn)
     out = _ROOT / "study" / "logs" / "passive_window_labels.csv"
     if rows:
         with open(out, "w", newline="") as fh:
@@ -265,6 +280,9 @@ def main():
                    help="draw-events: do not reprocess between folders (run `reprocess` after)")
     p.add_argument("--only-event-lines", action="store_true",
                    help="reprocess: only folders that have per-event M-lines")
+    p.add_argument("--trustworthy-only", action="store_true",
+                   help="label: drop folders whose R-peak record fails swp.acquisition.rrcheck "
+                        "(20 of 44); use for any phase-resolved comparison")
     a = p.parse_args()
     if not a.root and not a.folder:
         p.error("give --root and/or --folder")

@@ -531,9 +531,12 @@ fact defeats, for the same reason each time:
   clutter of comparable magnitude dominates it;
 * the **lateral-demean clutter filter** - same argument as `remove_flat`.
 
-It is not an algorithmic problem and no estimator fixes it. What would: a longer imaging aperture
-(a wider sector or a stitched view), a higher-frequency wave where the wavelength is shorter, or
-an acquisition that suppresses the clutter at source.
+It is not an algorithmic problem. **But it does not mean the acquisition cannot work**: Keijzer
+et al. obtained usable medians with a significant AVC > MVC difference from M-mode Radon on a
+comparable geometry. The supportable claim is narrower - this geometry makes the **per-window**
+uncertainty large, so a per-window automatic number is not achievable here, while group statistics
+over many events may still be. What would reduce the uncertainty itself: a longer imaging aperture,
+a higher-frequency wave, better SNR, or clutter suppression at source.
 
 ### Recommendation
 

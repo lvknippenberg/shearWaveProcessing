@@ -164,6 +164,101 @@ class SlopePicker:
             pass
 
 
+class SlopeSlider:
+    """Anchor the line with ONE click, then set its slope with a slider.
+
+    Why an alternative to two clicks. The two-click pick puts the whole measurement in the
+    difference of two hand-placed points, so a 1 ms slip over a ~5 ms moveout is a 25 % error -
+    which is the measured precision of the method. Anchoring on the single point the operator is
+    most confident about and then *rotating* the line separates the two judgements: where the
+    wavefront is, and how steep it is. The slider also makes the sensitivity visible - if a wide
+    range of speeds looks equally good, that is information about the panel, not a failure to
+    click accurately.
+
+    The two-click picker is unchanged and remains the default; this is opt-in with
+    ``--mode slider``. Picks from both are stored in the same format (two points on the line plus
+    the speed), so everything downstream reads them identically.
+    """
+
+    def __init__(self, ax, fig, auto=None, cmax=12.0):
+        from matplotlib.widgets import Slider
+
+        self.ax, self.fig, self.auto = ax, fig, auto
+        self.anchor = None
+        self.speed = float(auto[1]) if auto and np.isfinite(auto[1]) else 3.0
+        self.speed = float(np.clip(self.speed, -cmax, cmax))
+        self.line = self.mark = None
+        self.accepted = self.skipped = False
+
+        fig.subplots_adjust(bottom=0.22)
+        sax = fig.add_axes([0.13, 0.08, 0.72, 0.035])
+        self.slider = Slider(sax, "speed [m/s]", -cmax, cmax, valinit=self.speed, valstep=0.01)
+        self.slider.on_changed(self._on_slide)
+        self.cids = [fig.canvas.mpl_connect("button_press_event", self.on_click),
+                     fig.canvas.mpl_connect("key_press_event", self.on_key),
+                     fig.canvas.mpl_connect("close_event", self.on_close)]
+        self.redraw()
+
+    # -- geometry ------------------------------------------------------------
+    def points(self):
+        """Two points on the drawn line, so the stored format matches the two-click picker."""
+        if self.anchor is None:
+            return []
+        t0, r0 = self.anchor
+        rl, rh = self.ax.get_ylim()
+        rs = np.array([min(rl, rh), max(rl, rh)])
+        ts = t0 + (rs - r0) / self.speed if abs(self.speed) > 1e-9 else np.array([t0, t0])
+        return [(float(ts[0]), float(rs[0])), (float(ts[1]), float(rs[1]))]
+
+    def _on_slide(self, val):
+        self.speed = float(val)
+        self.redraw()
+
+    def redraw(self):
+        for h in (self.line, self.mark):
+            if h is not None:
+                h.remove()
+        self.line = self.mark = None
+        if self.anchor is not None:
+            t0, r0 = self.anchor
+            self.mark = self.ax.plot(t0, r0, "o", color="lime", ms=8, mec="k", zorder=6)[0]
+            pts = self.points()
+            self.line = self.ax.plot([pts[0][0], pts[1][0]], [pts[0][1], pts[1][1]],
+                                     "-", color="lime", lw=2, zorder=5)[0]
+        auto = (f"   |   auto {self.auto[1]:+.2f} m/s (sem {self.auto[0]:.2f})"
+                if self.auto else "")
+        msg = ("click ONE point on the wavefront" if self.anchor is None
+               else f"slope {self.speed:+.2f} m/s")
+        self.ax.set_xlabel(f"t [ms]      [{msg}{auto}]   drag the slider, "
+                           f"r = clear, ENTER = accept")
+        self.fig.canvas.draw_idle()
+
+    # -- events --------------------------------------------------------------
+    def on_click(self, ev):
+        if ev.inaxes is not self.ax or ev.button != 1:
+            return
+        self.anchor = (float(ev.xdata), float(ev.ydata))
+        self.redraw()
+
+    def on_key(self, ev):
+        if ev.key == "r":
+            self.anchor = None
+            self.redraw()
+        elif ev.key in ("left", "right"):          # nudge without grabbing the slider
+            self.slider.set_val(np.clip(self.speed + (0.05 if ev.key == "right" else -0.05),
+                                        self.slider.valmin, self.slider.valmax))
+        elif ev.key in ("enter", "return") and self.anchor is not None:
+            self.accepted = True
+            self.fig.canvas.stop_event_loop()
+
+    def on_close(self, _ev):
+        self.skipped = not self.accepted
+        try:
+            self.fig.canvas.stop_event_loop()
+        except Exception:                                          # noqa: BLE001
+            pass
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -174,6 +269,11 @@ def main():
                     help="comma-separated substrings of view names (default: all)")
     ap.add_argument("--config", default=str(_REPO / "configs" / "passive.yaml"))
     ap.add_argument("--redraw", action="store_true", help="ignore stored picks")
+    ap.add_argument("--mode", default="clicks", choices=["clicks", "slider"],
+                    help="clicks (default): pick two points on the wavefront. "
+                         "slider: pick ONE anchor point and rotate the line with a slider - "
+                         "separates 'where is the wavefront' from 'how steep is it', and makes "
+                         "the sensitivity of the answer visible.")
     ap.add_argument("--figure", default=None, help="also write a figure of the accepted panels")
     a = ap.parse_args()
 
@@ -202,17 +302,21 @@ def main():
         draw_panel(ax, res.st, f"{os.path.basename(a.folder)[:28]}  win{a.window} {label} "
                                f"{w.t_peak * 1e3:.0f} ms  [{vname}]  ({a.part}, "
                                f"{ml.r[-1] * 1e3:.0f} mm)")
-        picker = SlopePicker(ax, fig, auto=auto)
+        picker = (SlopeSlider(ax, fig, auto=auto) if a.mode == "slider"
+                  else SlopePicker(ax, fig, auto=auto))
         fig.tight_layout()
         plt.show(block=False)
         fig.canvas.start_event_loop(timeout=-1)
         if picker.accepted:
+            pts = picker.points() if a.mode == "slider" else picker.pts
+            spd = picker.speed if a.mode == "slider" else picker.speed()
             picks[k] = dict(window=a.window, part=a.part, view=vname, label=label,
-                            t_peak_ms=w.t_peak * 1e3, points=picker.pts,
-                            speed_m_s=picker.speed(), auto_speed_m_s=auto[1],
+                            method=a.mode,
+                            t_peak_ms=w.t_peak * 1e3, points=pts,
+                            speed_m_s=spd, auto_speed_m_s=auto[1],
                             auto_semblance=auto[0], mline_length_mm=float(ml.r[-1] * 1e3))
-            print(f"  [{vname}] manual {picker.speed():+.2f} m/s "
-                  f"(auto {auto[1]:+.2f}, sem {auto[0]:.2f})")
+            print(f"  [{vname}] manual {spd:+.2f} m/s "
+                  f"(auto {auto[1]:+.2f}, sem {auto[0]:.2f})  [{a.mode}]")
         else:
             print(f"  [{vname}] skipped")
         plt.close(fig)
