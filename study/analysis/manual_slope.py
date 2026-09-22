@@ -8,8 +8,11 @@ The panel is the same one the montage shows: x = time (ms), y = along-line posit
 straight wavefront has slope dr/dt and the speed is simply |dr/dt| in mm/ms = m/s. Sign follows the
 montage convention: + travels toward increasing r (away from the r=0 end of the M-line).
 
-Click two points on the wavefront; the line, its speed, and the automatic fit for comparison are
-drawn live. 'r' clears, ENTER accepts and moves to the next panel, closing the window skips it.
+Two ways to draw the line. **Default (`--mode slider`)**: click ONE point on the wavefront and set
+the slope with a slider, which separates *where* the wavefront is from *how steep* it is and makes
+the sensitivity visible - if a wide range of slopes looks equally good, that is a property of the
+panel. **`--mode clicks`**: the original two-point pick, kept so earlier results reproduce exactly.
+'r' clears, ENTER accepts and moves to the next panel, closing the window skips it.
 Picks are stored per (window, part, view) in ``output/swp_passive/manual_slopes.json`` and reused on
 a later run unless ``--redraw`` is given, so the figure can be re-rendered without redrawing.
 
@@ -269,11 +272,12 @@ def main():
                     help="comma-separated substrings of view names (default: all)")
     ap.add_argument("--config", default=str(_REPO / "configs" / "passive.yaml"))
     ap.add_argument("--redraw", action="store_true", help="ignore stored picks")
-    ap.add_argument("--mode", default="clicks", choices=["clicks", "slider"],
-                    help="clicks (default): pick two points on the wavefront. "
-                         "slider: pick ONE anchor point and rotate the line with a slider - "
-                         "separates 'where is the wavefront' from 'how steep is it', and makes "
-                         "the sensitivity of the answer visible.")
+    ap.add_argument("--mode", default="slider", choices=["slider", "clicks"],
+                    help="slider (DEFAULT): pick ONE anchor point and rotate the line with a "
+                         "slider - separates 'where is the wavefront' from 'how steep is it', "
+                         "and makes the sensitivity of the answer visible. "
+                         "clicks: the original two-point pick, kept so earlier results can "
+                         "always be reproduced.")
     ap.add_argument("--figure", default=None, help="also write a figure of the accepted panels")
     a = ap.parse_args()
 

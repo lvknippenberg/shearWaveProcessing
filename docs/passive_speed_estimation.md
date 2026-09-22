@@ -206,12 +206,42 @@ did not survive the labelled set. Its hand values are the most reliable in the c
 not be taken as typical.
 
 **Consequence for how these numbers are used.** A per-window hand value carries at least the
-+/-25 % drawing precision, plus an unquantified term for panel quality that can be much larger
-where the wavefront is faint. Any comparison between events or subjects needs a per-measurement
-confidence recorded alongside the speed, so that windows where nothing was clearly visible can be
-weighted or excluded rather than averaged in as if they were measurements. Collecting that
-confidence is an open action - see `study/logs/labelled_panels.json` for the window list it would
-attach to.
++/-25 % drawing precision, plus a term for panel quality that can be much larger where the
+wavefront is faint. That term has now been measured.
+
+### Panel confidence: the estimators work where a wave is visible
+
+All 30 hand-drawn panels were scored for whether a wavefront was actually visible
+(`study/analysis/score_panels.py` -> `study/logs/panel_confidence.csv`): **13 clear, 10 plausible,
+4 guess, 3 none**. Estimator error tracks that score monotonically.
+
+| panel confidence | n | automatic unusable | automatic median bias | field-estimator median error |
+|---|---|---|---|---|
+| clear     | 13 |  8 % | **+14 %** |  32 % |
+| plausible | 10 | 20 % | +35 % |  33 % |
+| guess     |  4 | 25 % | +59 % |  69 % |
+| none      |  3 | 67 % | **+355 %** | 142 % |
+
+**This reframes the headline numbers.** The study-wide "+24 % median bias, 20 % of fits unusable"
+is dominated by panels where there was nothing to measure. Where a wavefront is clearly visible
+the automatic fit is within **14 %** and fails outright in 1 case of 13. The catastrophic errors
+(+389 %, direction flips, railing at a search bound) are concentrated almost entirely in the
+`guess` and `none` panels.
+
+So the yield problem is substantially about **event quality, not algorithms** - which is also
+consistent with the literature obtaining usable results from comparable acquisitions by reporting
+medians over many sequences on better-SNR data. The practical route is to screen panels for a
+visible wavefront first and report only those, rather than to keep rebuilding the estimator.
+
+**One check does NOT track visibility**: displacement-vs-velocity agreement is 1.34x on clear
+panels but 2.72x / 1.52x / 1.69x on the rest, with only 2-6 windows per cell. On this evidence it
+is a useful rejection rule but not a proxy for whether a wave was visible.
+
+**Caveat on how the scores were collected.** The scoring tool displayed the hand and automatic
+speeds in each panel title, so the scoring was **not blind** and anchoring cannot be excluded. The
+effect is large and monotonic across four levels, which is hard to produce by anchoring alone, but
+a blinded re-scoring (hide the numbers) would make this result solid rather than suggestive. That
+is a one-line change to `score_panels.py` and an open action.
 
 ## Two ways to draw the line
 

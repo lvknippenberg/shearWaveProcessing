@@ -60,6 +60,11 @@ class RRCheck:
     rmssd_ms: float = float("nan")
     hr_bpm: float = float("nan")
     gating_error_us: float = float("nan")   # passive block start vs its closest R-peak
+    # --- the beats the passive block actually spans (what the phases are measured from) ---
+    n_rr_local: int = 0
+    n_local_bad: int = 0
+    local_rr_min_ms: float = float("nan")
+    local_rr_max_ms: float = float("nan")
 
     @property
     def trustworthy(self):
@@ -179,9 +184,56 @@ def assess_rr(folder, buffer=4):
                  f"labels.")
     res.status, res.quality = status, quality
 
-    # --- gating: where the passive block starts relative to its closest R-peak -------------
+    # --- gating, and the LOCAL beats that actually matter -----------------------------------
     bt = buffer_timing(folder, buffer)
     if bt is not None and r.size:
         d = r - bt.t0_ms
         res.gating_error_us = float(d[int(np.argmin(np.abs(d)))] * 1e3)
+        _assess_local(res, r, rr, bt, med)
     return res
+
+
+def _assess_local(res, r, rr, bt, med):
+    """Judge only the beats the passive block spans, and let that decide the verdict.
+
+    The trigger record covers ~40 s while the ultrafast block is ~1.2 s - about 1.5 beats. An
+    ectopic beat or a dropped trigger 30 s before the acquisition says nothing about the phase of
+    the events actually measured, so judging the whole record excludes folders for arrhythmia that
+    never touches the data. The global statistics stay in the result as context; the **verdict**
+    is decided here, on the beat containing the block plus one beat either side.
+    """
+    block_ms = bt.n_frames * bt.frame_ms
+    lo = bt.t0_ms - 1.5 * med
+    hi = bt.t0_ms + block_ms + 1.5 * med
+    starts = r[:-1]
+    sel = (starts >= lo) & (starts <= hi)
+    local = rr[sel]
+    res.n_rr_local = int(local.size)
+    if local.size == 0:
+        return
+    res.local_rr_min_ms, res.local_rr_max_ms = float(local.min()), float(local.max())
+    bad_short = local < RR_PLAUSIBLE_MS[0]
+    bad_long = local > RR_PLAUSIBLE_MS[1]
+    bad_outlier = np.abs(local - med) > RR_OUTLIER_FRAC * med
+    bad = bad_short | bad_long | bad_outlier
+    res.n_local_bad = int(bad.sum())
+
+    # A record that is not an ECG at all stays unusable however clean the local beats look.
+    if res.status == "unusable":
+        return
+    if res.n_local_bad == 0:
+        res.status = "corrected" if res.n_corrected else "ok"
+        res.quality = "clean" if not res.n_corrected else "extra triggers"
+        res.messages = [m for m in res.messages if not m.startswith("WARNING")]
+        res.messages.append(
+            f"{res.n_rr_local} beat(s) span the passive block and all are plausible "
+            f"({res.local_rr_min_ms:.0f}-{res.local_rr_max_ms:.0f} ms); "
+            f"record-level irregularities elsewhere do not affect these phases.")
+    else:
+        res.status = "warn"
+        res.quality = "irregular at the block"
+        res.messages.append(
+            f"WARNING: {res.n_local_bad} of {res.n_rr_local} beat(s) spanning the passive block "
+            f"are implausible or more than {RR_OUTLIER_FRAC:.0%} off the median "
+            f"({res.local_rr_min_ms:.0f}-{res.local_rr_max_ms:.0f} ms vs {med:.0f} ms) - "
+            f"the phases of these events may be wrong.")

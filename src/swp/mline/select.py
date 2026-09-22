@@ -1223,6 +1223,9 @@ def detect_phase_windows(D_st, t_s, r_peaks_s, rr_s, window_ms=100.0, edge_frame
     are among the four. This searches the other way round: for each beat, take the strongest burst
     *inside* the window where a given closure must occur.
 
+    Inputs are **R-peak times only**: the expected windows come from the R-peaks and the heart
+    rate implied by their spacing. No ECG waveform is read at any point.
+
     The phase windows are the same ones :func:`swp.acquisition.triggerlog.label_event` labels with,
     so detection and labelling can no longer disagree:
 

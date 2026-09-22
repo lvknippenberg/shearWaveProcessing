@@ -224,11 +224,16 @@ def window_cine(acq: Acquisition, w: BurstWindow):
 def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None):
     """Phase-aware burst search -> windows, or None when there is no usable R-peak record.
 
-    Bridges the trigger log into :func:`swp.mline.select.detect_phase_windows`: the R-peaks are
-    read from ``ECG_trigger`` and expressed relative to buffer-4 frame 0, which is the clock
-    ``t_s`` is on. Returns None (so the caller falls back to energy ranking) when the ECG is a
-    fixed-rate pulse train or too sparse, since searching a cardiac phase that does not exist
-    would be worse than not searching at all.
+    **R-peaks only - the ECG waveform is never read.** The expected MVC and AVC intervals are
+    derived entirely from the ``ECG_trigger`` timestamps: the R-peak times themselves, and the
+    heart rate from their median interval, which sets the Weissler QS2. The logged ``Signal``
+    trace plays no part (``docs/ecg_timing.md`` explains why it must not).
+
+    Bridges the trigger log into :func:`swp.mline.select.detect_phase_windows`, expressing the
+    R-peaks relative to buffer-4 frame 0, which is the clock ``t_s`` is on. Returns None (so the
+    caller falls back to energy ranking) when the trigger record is a fixed-rate pulse train or
+    too sparse, since searching a cardiac phase that does not exist would be worse than not
+    searching at all.
     """
     from .acquisition.triggerlog import buffer_timing, clean_r_peaks
     from .mline.select import detect_phase_windows
