@@ -44,6 +44,11 @@ from swp.viz.pipeline import run_pipeline
 
 PICKS_JSON = "manual_slopes.json"
 
+# Accepting a line and scoring how clearly a wavefront was visible is one keypress, because the
+# score can only be judged while the panel is on screen and it predicts estimator error better
+# than anything else measured (docs/passive_speed_estimation.md).
+CONFIDENCE = {"3": "clear", "2": "plausible", "1": "guess", "0": "none"}
+
 
 def _load_picks(path):
     if os.path.exists(path):
@@ -192,6 +197,7 @@ class SlopeSlider:
         self.speed = float(np.clip(self.speed, -cmax, cmax))
         self.line = self.mark = None
         self.accepted = self.skipped = False
+        self.confidence = None
 
         fig.subplots_adjust(bottom=0.22)
         sax = fig.add_axes([0.13, 0.08, 0.72, 0.035])
@@ -232,8 +238,9 @@ class SlopeSlider:
                 if self.auto else "")
         msg = ("click ONE point on the wavefront" if self.anchor is None
                else f"slope {self.speed:+.2f} m/s")
-        self.ax.set_xlabel(f"t [ms]      [{msg}{auto}]   drag the slider, "
-                           f"r = clear, ENTER = accept")
+        self.ax.set_xlabel(f"t [ms]      [{msg}{auto}]   slider / arrows set the slope,  "
+                           f"r = clear,  3 clear | 2 plausible | 1 guess | 0 none = accept+score,"
+                           f"  ENTER = accept unscored")
         self.fig.canvas.draw_idle()
 
     # -- events --------------------------------------------------------------
@@ -250,8 +257,16 @@ class SlopeSlider:
         elif ev.key in ("left", "right"):          # nudge without grabbing the slider
             self.slider.set_val(np.clip(self.speed + (0.05 if ev.key == "right" else -0.05),
                                         self.slider.valmin, self.slider.valmax))
-        elif ev.key in ("enter", "return") and self.anchor is not None:
+        elif ev.key in CONFIDENCE and self.anchor is not None:
+            # Accept AND score in one keypress. Panel confidence is the strongest predictor of
+            # estimator error measured so far (automatic bias +14 % on panels with a clearly
+            # visible wavefront against +355 % where nothing was visible), and this is the only
+            # moment it can be judged - the operator is looking at the panel right now.
+            self.confidence = int(ev.key)
             self.accepted = True
+            self.fig.canvas.stop_event_loop()
+        elif ev.key in ("enter", "return") and self.anchor is not None:
+            self.accepted = True               # accept without scoring
             self.fig.canvas.stop_event_loop()
 
     def on_close(self, _ev):
@@ -314,13 +329,19 @@ def main():
         if picker.accepted:
             pts = picker.points() if a.mode == "slider" else picker.pts
             spd = picker.speed if a.mode == "slider" else picker.speed()
+            conf = getattr(picker, "confidence", None)
             picks[k] = dict(window=a.window, part=a.part, view=vname, label=label,
                             method=a.mode,
+                            confidence=conf,
+                            confidence_meaning=CONFIDENCE.get(str(conf), "") if conf is not None
+                            else "",
                             t_peak_ms=w.t_peak * 1e3, points=pts,
                             speed_m_s=spd, auto_speed_m_s=auto[1],
                             auto_semblance=auto[0], mline_length_mm=float(ml.r[-1] * 1e3))
+            ctag = (f", confidence {conf} ({CONFIDENCE[str(conf)]})" if conf is not None
+                    else ", unscored")
             print(f"  [{vname}] manual {spd:+.2f} m/s "
-                  f"(auto {auto[1]:+.2f}, sem {auto[0]:.2f})  [{a.mode}]")
+                  f"(auto {auto[1]:+.2f}, sem {auto[0]:.2f})  [{a.mode}{ctag}]")
         else:
             print(f"  [{vname}] skipped")
         plt.close(fig)

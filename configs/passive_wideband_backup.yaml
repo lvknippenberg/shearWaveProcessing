@@ -56,7 +56,7 @@ pipeline:
   # light Gaussian spatial smoothing; light slow-time smoothing. NO directional filter (see below).
   # Sampling rate ~925 Hz (buffer 4). bp5-150 and bp10-150 both work; median 1 mm ~= gauss 0.6 mm.
   field_filters:
-    - {name: temporal_bandpass, params: {f_lo: 8, f_hi: 45}}
+    - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
     - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}   # light Gaussian (~= median 1 mm)
     - {name: temporal_moving_mean, params: {window: 3}}
 
@@ -71,29 +71,7 @@ pipeline:
 # Burst detection uses a FIXED band, independent of pipeline.field_filters, so tuning the
 # processing band does not move the detected windows (index-based M-lines stay valid).
 detect:
-  # NARROWED 2026-09-22 from [5, 150]. Measured over 30 hand-drawn panels: the wave's peak is at
-  # 14.6 Hz, f50 18.8 Hz, f90 29.7 Hz - 73 % of the energy is in 10-40 Hz and only 5 % above
-  # 40 Hz. The old band passed ~110 Hz of essentially noise bandwidth to collect that 5 %, which
-  # set the SNR of the burst detection that places every window.
-  band: [5, 45]                             # Hz, for the along-line energy used to place windows
-
-  # Event SELECTION. "energy" keeps the max_events largest bursts and labels them afterwards;
-  # "phase" searches the windows label_event labels with (MVC within 150 ms of an R-peak, AVC
-  # within 120 ms of the Weissler QS2) and takes the strongest burst inside each, topping up from
-  # the energy ranking if fewer are found. Phase mode uses the ECG_trigger R-peaks only - never
-  # the logged waveform.
-  #
-  # Measured where energy ranking lost a closure:
-  #   C000000032  energy: MVC@33, other@581, MVC@846, other@1065   (no AVC at all)
-  #               phase : MVC@33, AVC@503,   MVC@846, AVC@1069
-  #   C000000040  energy: other@158, other@535, MVC@1041
-  #               phase : MVC@149,   AVC@532,   MVC@1041
-  # In both, the energy peaks fell just OUTSIDE the AVC window and were labelled "other".
-  #
-  # Switching mode changes which windows are detected, and per-event M-lines are keyed by window
-  # INDEX - so changing this invalidates stored per-event lines and they must be redrawn. It is
-  # part of the detection cache key for exactly that reason.
-  mode: phase
+  band: [5, 150]                            # Hz, for the along-line energy used to place windows
 
 run:
   measurement: 0
@@ -113,13 +91,7 @@ run:
       offsets: 5
       offset_step_mm: 0.5
       field_filters:
-        # 8-45 Hz (was 10-150). Validated on the 30 cached panels: the lag-ramp residual - the
-        # scatter about a linear arrival-time ramp, which is what a speed actually is - improves
-        # from 0.89 to 0.67 ms overall and 0.54 to 0.43 ms on panels with a clearly visible
-        # wavefront. Visual contrast drops slightly (on-wave 2.21 -> 1.96) because a narrower
-        # band lengthens the packet; that is cosmetic, the timing is the measurement. 12-32 Hz
-        # was also tried and is too narrow (residual worsens to 0.78 ms).
-        - {name: temporal_bandpass, params: {f_lo: 8, f_hi: 45}}
+        - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
         - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
         - {name: temporal_moving_mean, params: {window: 3}}
 
@@ -130,9 +102,7 @@ run:
       offsets: 9
       offset_step_mm: 0.5
       field_filters:
-        # still the WIDEST of the three (the views must stay independent for their agreement to
-        # mean anything), but without the dead 60-150 Hz bandwidth.
-        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 60}}
+        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
         - {name: spatial_median, params: {size_z_mm: 1.0, size_x_mm: 2.0}}
 
     # C -- different QUANTITY (velocity), narrower shear band, stronger Gaussian + longer temporal mean.
@@ -142,8 +112,6 @@ run:
       offsets: 9
       offset_step_mm: 0.8
       field_filters:
-        # velocity emphasises the higher part of the band; 12-45 keeps that character while
-        # dropping the 45-90 Hz region that carries ~5 % of the energy.
-        - {name: temporal_bandpass, params: {f_lo: 12, f_hi: 45}}
+        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 90}}
         - {name: spatial_smooth, params: {sigma_z_mm: 1.0, sigma_x_mm: 2.0}}
         - {name: temporal_moving_mean, params: {window: 5}}
