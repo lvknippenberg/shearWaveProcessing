@@ -33,14 +33,34 @@ with the literature recipe (`scripts/invivo_recipe_contrast.py` recipes); read s
 **and** automatically. Deliverable: bias and spread per estimator against the certified value -
 this also settles the automatic-estimator biases found in the synthetic tests (item 9).
 
-### 2. In vivo: a zero-amplitude-push acquisition
+### 2. In vivo: a zero-amplitude-push acquisition (a true no-push control)
 
-The reference and tracking blocks decorrelate across the push in vivo (speckle correlation ~0.8
-vs ~0.95 within a block; none in the phantom) and we could not tell whether the push itself or
-the sequence causes it. Bouchard et al. (2009) repeat the sequence with the push amplitude set to
-zero. One such acquisition (same settings, push TX voltage/elements off) answers it: decorrelation
-still there -> sequence/timing; gone -> the push disturbs the tissue/probe. Analyse with
-`study/analysis/push_gap_check.py`.
+**What.** The active sequence exactly as used - same R-peak gating, 20 pushes/s, 39 reference
+frames, the ~1 ms push interval, 59 tracking frames, same TX/receive and TPC settings - but with
+the push transmitting nothing. On the Verasonics: set the push `TX.Apod` to zeros, so the push
+*event* and its `timeToNextAcq` stay in the sequence (check it is not skipped when the apodisation
+is all zero). This is the control Bouchard et al. (2009) used.
+
+**Why it gives more than the pre-push frames** (the split-reference control used so far):
+
+1. *It crosses the push boundary.* In vivo the reference and tracking blocks decorrelate across
+   the push (speckle correlation ~0.8 vs ~0.95 within a block; none in the phantom), the echo is
+   4-10 % weaker after it, and tracking frame 0 is corrupted. Frames inside the reference block
+   never see that boundary, so they cannot say whether the push (tissue/probe motion) or the
+   sequence (timing, supply sag, hardware settling) causes it. Zero push: decorrelation still
+   there -> sequence; gone -> the push. This decides whether reference-relative methods can work
+   in vivo at all, and it is what created the false 1.28x "push effect" in the continuous-record
+   test, which needed an improvised gap-matched control to remove.
+2. *It is the real window.* The split reference is ~8 ms after an 8-frame reference, so the push
+   window has to be cut and processed to match. A zero-push window is the full ~16 ms tracking
+   window after the full reference at the same cardiac phase: the unchanged production recipe
+   runs on it, giving a genuine null distribution for every measure - amplitude, coherence, the
+   V-detector, and hand reading (push and zero-push panels can be mixed in a blind scoring).
+3. *Limitation:* it is another heartbeat. Pair it phase-matched (R-peak gated, push k vs push k),
+   or better, alternate push on / off within one acquisition if the sequence allows.
+
+**Analysis.** `study/analysis/push_gap_check.py` (cross-push decorrelation) and
+`scripts/invivo_recipe_contrast.py` with the zero-push acquisition as the control dataset.
 
 ### 3. Safety before any stronger push
 
@@ -105,7 +125,7 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
   phantom value; pick the active view A from that, not from an automatic metric. A second
   observer (item 4) on a subset makes the comparison defensible.
 
-## Decisions (code is ready, defaults were deliberately not changed)
+## Decisions (code is ready; defaults change only when you decide)
 
 9. **Automatic active speed.** On a synthetic wave with known speed (`tests/test_pipeline.py`):
    the estimators are exact, but the outward directional filter biases speed +5 to +37 %, the
@@ -118,11 +138,40 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
    a real push from its control ~8x better than the current one on Caenen's data (11.7x vs 1.47x).
    If the calibrated phantom (item 1) and item 8 agree, adopt it as view A in `configs/active.yaml`.
 
+11. **Default passive pipeline - DECIDED 2026-09-24, done.** `configs/passive.yaml` now uses the
+   part-2 default: velocity, 15-150 Hz, Gaussian 0.6 x 1.2 mm, moving mean 3, 5 M-lines x 0.5 mm,
+   no directional filter, no SVD, no CFWI; further tuning did not improve the panels. The "medium"
+   setting (Gauss 1.0 x 2.0, mean 5, 9 lines) over-smooths. Because 0.6 x 1.2 mm may already
+   steepen the front, the three views are now default / unsmoothed / median 1.0 x 2.0 mm (same
+   recipe otherwise) - use them side by side for manual speeds. The small effect of temporal
+   smoothing and M-line count was checked (`study/analysis/smoothing_effect_check.py`): both are
+   applied and scale with strength (mean 9: 27 % RMS change, 15 lines x 0.8 mm: 50 %), but the
+   signal is slow (f50 29 Hz, f90 66 Hz; mean 3 passes 94 % at f90) and varies little across the
+   line. `tests/test_passive_default.py` pins the recipe. The old config is frozen as
+   `configs/passive_v1.yaml` (the scored panels and manual slopes are keyed by its view names;
+   `score_panels.py` / `field_stage4.py` use it). Reprocess the study with the new default (item 14).
+
+12. **Which image to draw passive M-lines on.** Part 3 (`report/passive_methods/passive_methods_v3.pdf`):
+   buffer-3 frames are 2-3 beats before buffer 4 and the heart has moved a median 3.1 mm (buffer 1:
+   0.8 mm); the buffers themselves agree to < 35 um (phantom). The redrawn buffer-3 lines are not
+   better. Options: keep buffer-1 lines; or shift each buffer-3 line by its measured buffer-3 ->
+   buffer-4 anatomy offset (`study/analysis/mline_difference_check.py` computes it) and re-test.
+   **Done (mapping):** `swp.mline.transfer.transfer_line` moves a line by the local translation
+   between the frame it was drawn on and buffer 4 at the event, with two checks (ensemble agreement
+   and recovery of known shifts). Phantom: <= 0.3 mm error. In vivo
+   (`study/analysis/map_mlines_b3_to_b4.py`): 7/15 mappings reliable (motion 0.4-6 mm); rotation
+   is not identifiable in vivo and is left out. On the reliable 7, the mapped line scores higher
+   than the unmapped buffer-3 line in 6/7, but higher than the old buffer-1 line in only 2/7.
+   Conclusion: mapping corrects the motion, but a buffer-3 line is still not better than a
+   buffer-1 line drawn 1-2 beats from the event. Keep buffer-1 lines for the existing data.
+   **For new acquisitions:** acquire the focused buffer directly before/after buffer 4 (same or
+   adjacent beat) so the M-line image and the passive data share the heart position.
+
 ## Runs (commands ready; not run because they rewrite study outputs or take hours)
 
-11. Correct the reference timestamps of the study's buffer-2 files (only the timing arrays change;
+13. Correct the reference timestamps of the study's buffer-2 files (only the timing arrays change;
     the originals are kept as `custom/t_reference_v0`):
     `python scripts/retrofit_push_gap.py --root "Z:/raw_data"` (dry run), then `--apply`.
-12. Per-quantity passive speeds for the whole study (~4.5 min/folder, ~3 h):
+14. Per-quantity passive speeds for the whole study (~4.5 min/folder, ~3 h):
     `python scripts/passive_study.py reprocess --root "Z:/raw_data"` - writes
     `output/swp_passive/passive_speeds_by_quantity.json` next to each montage.

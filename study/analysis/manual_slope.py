@@ -13,6 +13,12 @@ the slope with a slider, which separates *where* the wavefront is from *how stee
 the sensitivity visible - if a wide range of slopes looks equally good, that is a property of the
 panel. **`--mode clicks`**: the original two-point pick, kept so earlier results reproduce exactly.
 'r' clears, ENTER accepts and moves to the next panel, closing the window skips it.
+
+**Side by side (default).** The panel being picked is shown next to the other views of the config
+with the line mirrored on them. With ``configs/passive.yaml`` the views are the default recipe,
+the same without spatial smoothing, and with a median instead of the Gaussian: if the drawn slope
+only fits the smoothed panel, the smoothing has steepened the front. Only the first view is picked
+unless ``--views`` names others; ``--no-compare`` restores one panel per view, each picked.
 Picks are stored per (window, part, view) in ``output/swp_passive/manual_slopes.json`` and reused on
 a later run unless ``--redraw`` is given, so the figure can be re-rendered without redrawing.
 
@@ -104,11 +110,22 @@ def draw_panel(ax, st, title):
     ax.set_title(title, fontsize=9)
 
 
+def _mirror(picker, ts, rs):
+    """Draw the picker's current line on its companion panels (or clear it)."""
+    for h in picker.mirror_lines:
+        h.remove()
+    picker.mirror_lines = []
+    if ts is not None:
+        picker.mirror_lines = [m.plot(ts, rs, "--", color="lime", lw=1.6, zorder=5)[0]
+                               for m in picker.mirrors]
+
+
 class SlopePicker:
     """Two clicks -> a straight wavefront; 'r' clears, ENTER accepts, closing skips."""
 
-    def __init__(self, ax, fig, auto=None, existing=None):
+    def __init__(self, ax, fig, auto=None, existing=None, mirrors=()):
         self.ax, self.fig, self.auto = ax, fig, auto
+        self.mirrors, self.mirror_lines = list(mirrors), []
         self.pts = list(existing) if existing else []
         self.line = None
         self.marks = []
@@ -143,6 +160,7 @@ class SlopePicker:
             rs = np.array([min(rl, rh), max(rl, rh)])
             ts = t1 + (rs - r1) * (t2 - t1) / (r2 - r1) if abs(r2 - r1) > 1e-9 else np.array([t1, t2])
             self.line = self.ax.plot(ts, rs, "-", color="lime", lw=2, zorder=4)[0]
+        _mirror(self, *((ts, rs) if self.line is not None else (None, None)))
         auto = f"   |   auto {self.auto[1]:+.2f} m/s (sem {self.auto[0]:.2f})" if self.auto else ""
         msg = "click 2 points on the wavefront" if len(self.pts) < 2 else f"manual {c:+.2f} m/s"
         self.ax.set_xlabel(f"t [ms]      [{msg}{auto}]   r = clear, ENTER = accept")
@@ -188,10 +206,11 @@ class SlopeSlider:
     the speed), so everything downstream reads them identically.
     """
 
-    def __init__(self, ax, fig, auto=None, cmax=12.0):
+    def __init__(self, ax, fig, auto=None, cmax=12.0, mirrors=()):
         from matplotlib.widgets import Slider
 
         self.ax, self.fig, self.auto = ax, fig, auto
+        self.mirrors, self.mirror_lines = list(mirrors), []
         self.anchor = None
         self.speed = float(auto[1]) if auto and np.isfinite(auto[1]) else 3.0
         self.speed = float(np.clip(self.speed, -cmax, cmax))
@@ -234,6 +253,9 @@ class SlopeSlider:
             pts = self.points()
             self.line = self.ax.plot([pts[0][0], pts[1][0]], [pts[0][1], pts[1][1]],
                                      "-", color="lime", lw=2, zorder=5)[0]
+            _mirror(self, [pts[0][0], pts[1][0]], [pts[0][1], pts[1][1]])
+        else:
+            _mirror(self, None, None)
         auto = (f"   |   auto {self.auto[1]:+.2f} m/s (sem {self.auto[0]:.2f})"
                 if self.auto else "")
         msg = ("click ONE point on the wavefront" if self.anchor is None
@@ -294,6 +316,9 @@ def main():
                          "clicks: the original two-point pick, kept so earlier results can "
                          "always be reproduced.")
     ap.add_argument("--figure", default=None, help="also write a figure of the accepted panels")
+    ap.add_argument("--no-compare", dest="compare", action="store_false",
+                    help="one panel per view, each picked (default: pick the first view, with the "
+                         "other views beside it and the line mirrored on them)")
     a = ap.parse_args()
 
     import matplotlib
@@ -304,10 +329,13 @@ def main():
     picks_path = os.path.join(p["outdir"], PICKS_JSON)
     picks = _load_picks(picks_path)
 
-    _, w, ml, views = build_spacetime(a.folder, a.config, a.window, a.part)
+    _, w, ml, all_views = build_spacetime(a.folder, a.config, a.window, a.part)
+    views = all_views
     if a.views:
         want = [s.strip().lower() for s in a.views.split(",")]
         views = [v for v in views if any(s in v[0].lower() for s in want)]
+    elif a.compare:
+        views = views[:1]
     label = w.label or "?"
     print(f"window {a.window} ({label}, {w.t_peak * 1e3:.0f} ms), part {a.part}, "
           f"{ml.r[-1] * 1e3:.0f} mm, {len(views)} view(s)")
@@ -317,12 +345,17 @@ def main():
         if k in picks and not a.redraw:
             print(f"  [{vname}] stored: {picks[k]['speed_m_s']:+.2f} m/s")
             continue
-        fig, ax = plt.subplots(figsize=(8, 5.5))
+        others = [v for v in all_views if v[0] != vname] if a.compare else []
+        fig, axs = plt.subplots(1, 1 + len(others), figsize=(8 + 5 * len(others), 5.5),
+                                squeeze=False, sharex=True, sharey=True)
+        ax = axs[0, 0]
         draw_panel(ax, res.st, f"{os.path.basename(a.folder)[:28]}  win{a.window} {label} "
                                f"{w.t_peak * 1e3:.0f} ms  [{vname}]  ({a.part}, "
                                f"{ml.r[-1] * 1e3:.0f} mm)")
-        picker = (SlopeSlider(ax, fig, auto=auto) if a.mode == "slider"
-                  else SlopePicker(ax, fig, auto=auto))
+        for axo, (oname, ores, _) in zip(axs[0, 1:], others):
+            draw_panel(axo, ores.st, f"[{oname}]  (for comparison - line mirrored)")
+        picker = (SlopeSlider(ax, fig, auto=auto, mirrors=axs[0, 1:]) if a.mode == "slider"
+                  else SlopePicker(ax, fig, auto=auto, mirrors=axs[0, 1:]))
         fig.tight_layout()
         plt.show(block=False)
         fig.canvas.start_event_loop(timeout=-1)

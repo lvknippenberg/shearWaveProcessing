@@ -173,7 +173,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--panels", default=str(_REPO / "study" / "logs" / "labelled_panels.json"))
-    ap.add_argument("--config", default=str(_REPO / "configs" / "passive.yaml"))
+    # the hand-scored / hand-picked panels were made with the v1 views (their names are keys in
+    # the logs and in manual_slopes.json), frozen in passive_v1.yaml
+    ap.add_argument("--config", default=str(_REPO / "configs" / "passive_v1.yaml"))
     ap.add_argument("--root", default="Z:/raw_data")
     ap.add_argument("--redo", action="store_true", help="also show panels already scored")
     ap.add_argument("--prepare", action="store_true",

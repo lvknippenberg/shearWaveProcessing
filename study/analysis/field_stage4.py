@@ -50,7 +50,9 @@ def main():
     ap.add_argument("--panels", default=str(_REPO / "study" / "logs" / "labelled_panels.json"))
     ap.add_argument("--out", default=str(_REPO / "study" / "logs" / "field_stage4.csv"))
     ap.add_argument("--root", default="Z:/raw_data")
-    ap.add_argument("--config", default=str(_REPO / "configs" / "passive.yaml"))
+    # the hand-scored / hand-picked panels were made with the v1 views (their names are keys in
+    # the logs and in manual_slopes.json), frozen in passive_v1.yaml
+    ap.add_argument("--config", default=str(_REPO / "configs" / "passive_v1.yaml"))
     ap.add_argument("--freqs", default="13,16,20")
     ap.add_argument("--roi-mm", type=float, default=12.0)
     a = ap.parse_args()

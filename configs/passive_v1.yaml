@@ -1,3 +1,8 @@
+# FROZEN 2026-09-24: the passive config as it was before the velocity 15-150 Hz default (report
+# part 2). Kept because the hand-scored panels (study/logs/panel_confidence*.csv) and the manual
+# slopes (manual_slopes.json) were made with these three views and are keyed by their names;
+# score_panels.py and field_stage4.py use it. For new processing use configs/passive.yaml.
+#
 # shearWaveProcessing -- PASSIVE SWE (natural shear waves, buffer 4).
 #
 # EXPERIMENTAL FRAMEWORK. Unlike active SWE, passive elastography has no ARF push and no
@@ -26,8 +31,8 @@ mline:
   type: manual
   npz: "mlines/passive_mline.npz"           # relative to data.root; auto-drawn if missing (mid-frame)
   n_samples: 250
-  offsets: 5                                 # 5 lines x 0.5 mm (report part 2: 1-15 lines change the
-  offset_step_mm: 0.5                        # panel little - the wave varies slowly across the line).
+  offsets: 5                                 # SEARCH: tight offset averaging (5 lines x 0.5 mm) best;
+  offset_step_mm: 0.5                        # more/wider offsets slightly worse (blurs the wavefront).
 
 focus:
   mode: auto                                # no ARF push; r0 = M-line point nearest the auto-detected
@@ -35,28 +40,28 @@ focus:
                                             # anchors the directional (outward) filter. TODO: a more
                                             # physical passive origin (valve-plane anchor per window).
 
-# --- processing pipeline: DEFAULT since 2026-09-24 (report/passive_methods, parts 1-2) ---
-# Velocity (frame-to-frame), band-pass 15-150 Hz, Gaussian 0.6 x 1.2 mm, moving mean 3, 5 M-lines x
-# 0.5 mm, no directional filter, no SVD, no CFWI. Part 1: velocity at 15-100/150 Hz gives the most
-# readable fronts; the directional filter fabricates tilt. Part 2 (one thing varied at a time):
-# spatial smoothing >= 1.5 x 3 mm fabricates bands and the "medium" setting (1.0 x 2.0, mean 5,
-# 9 lines) already over-smooths; temporal smoothing and M-line count change little (the signal is
-# slow: f50 29 Hz, f90 66 Hz - study/analysis/smoothing_effect_check.py); SVD beyond 1 component
-# hurts; CFWI is poor. The previous displacement 10-150 Hz config is frozen in passive_v1.yaml.
+# --- processing pipeline (TUNED by scripts/archive/search_passive2.py on invivo_sw; see docs/passive_search.md) ---
+# Optimal passive recipe from the v2 exhaustive search + the MATLAB comparison. The two decisive
+# changes vs the earlier config: (1) quantity = DISPLACEMENT (cleanest wavefront for visualisation;
+# velocity/acceleration are noisier and their auto-speed degrades), and (2) directional filter OFF
+# (the k-omega filter injected reverberation banding and biased the slope toward vertical / too-high
+# speed; MATLAB's passive pipeline uses none). On the clean AVC window (win1) this gives a strong
+# coherent wavefront at ~2.7 m/s.
 pipeline:
   estimator: loupas
   estimator_params: {}
   mode: frame_to_frame                      # passive: no reference; differential displacement
-  quantity: velocity                        # report part 1: velocity 15-150 Hz = most readable fronts
+  quantity: displacement                    # SEARCH v2: displacement = clearest wavefront for viz.
+                                            # (Use acceleration only for a least-biased SPEED number.)
   drop_first: 1
-  iq_filters: []                            # NO IQ pre-filter: no SVD (report part 2), no slow-time
-                                            # low-pass (washes the wavefront out).
+  iq_filters: []                            # SEARCH v2: NO IQ pre-filter (a 250 Hz slow-time low-pass
+                                            # washes the wavefront out, especially for acceleration).
 
-  # Band-pass to remove the bulk myocardial wall motion while keeping the shear-wave band; light
-  # Gaussian spatial smoothing; light slow-time smoothing. NO directional filter (see below).
-  # Sampling rate ~925 Hz (buffer 4).
+  # Band-pass to remove the bulk myocardial wall motion (< a few Hz) while keeping the shear-wave band;
+  # light Gaussian spatial smoothing; light slow-time smoothing. NO directional filter (see below).
+  # Sampling rate ~925 Hz (buffer 4). bp5-150 and bp10-150 both work; median 1 mm ~= gauss 0.6 mm.
   field_filters:
-    - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 150}}
+    - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
     - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}   # light Gaussian (~= median 1 mm)
     - {name: temporal_moving_mean, params: {window: 3}}
 
@@ -98,41 +103,56 @@ run:
   outdir: "swp_passive"                     # relative to data.root -> <folder>/output/swp_passive
   bands: [[5, 150]]
 
-  # THREE processing VIEWS -> one space-time plot per view per window (columns of the montage),
-  # used side by side for manual speed estimation. All share the default recipe (velocity,
-  # 15-150 Hz, moving mean 3, 5 lines x 0.5 mm, no directional filter) and differ ONLY in the
-  # spatial filter: the Gaussian 0.6 x 1.2 mm default may already steepen the wavefront, so the
-  # unsmoothed panel and the edge-preserving median are shown next to it. A slope that holds in all
-  # three is not a smoothing artefact. Reported speed is the signed-Radon (slant-stack) fit.
+  # THREE processing VIEWS -> one space-time plot per view per window (columns of the montage).
+  # All three are high-performing recipes from the v2 search but deliberately DIFFERENT (quantity,
+  # band, spatial-filter type, temporal filter, M-line count) so a genuine shear wave shows the same
+  # slope in all three while noise does not. None use a directional filter (SEARCH v2). View B uses
+  # NO temporal filtering. Reported speed is the signed-Radon (slant-stack) fit to the wave centre.
   views:
-    # A -- the default.
-    - name: "velocity bp15-150 gauss0.6 mean3"
-      quantity: velocity
+    # A -- default: displacement, mid band-pass, light Gaussian, light temporal mean.
+    - name: "disp bp10-150 gauss mean3"
+      quantity: displacement
       directional: false
       offsets: 5
       offset_step_mm: 0.5
       field_filters:
-        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 150}}
+        # 10-150 Hz. A narrowing to 8-45 was tried on 2026-09-22 and REVERTED. Do not repeat it
+        # without reading this:
+        #
+        #   * It was justified on the MEDIAN spectrum (f90 29.7 Hz, "only 5 % above 40 Hz"). The
+        #     spread is what matters: across the 30 hand-drawn panels f90 reaches 54 and 65 Hz
+        #     and f99 reaches 93 Hz. At a 45 Hz cutoff the worst panel loses 30 % of its energy.
+        #   * Side by side (D:/Luuk van Knippenberg/Claude/BandComparison/band_panels.png) the
+        #     high-f90 panels visibly lose their wavefront: a crisp band at 10-150 becomes a
+        #     smeared blob at 8-45, merging with its neighbouring fringes.
+        #   * The metric used to justify it - the cross-correlation lag-ramp residual - is biased
+        #     TOWARDS narrowing by construction. A narrower band smooths the traces in time, which
+        #     mechanically makes the lags smoother and more linear whether or not the arrival time
+        #     is better determined. It was not valid evidence for a cutoff.
+        #
+        # What does hold: 80-150 Hz carries almost nothing (median 0.3 %, worst panel 2.3 %), so
+        # a cutoff at 80 Hz would be a safe, small improvement if one is ever wanted.
+        - {name: temporal_bandpass, params: {f_lo: 10, f_hi: 150}}
         - {name: spatial_smooth, params: {sigma_z_mm: 0.6, sigma_x_mm: 1.2}}
         - {name: temporal_moving_mean, params: {window: 3}}
 
-    # B -- no spatial smoothing (check that the default does not steepen the front).
-    - name: "velocity bp15-150 unsmoothed mean3"
-      quantity: velocity
+    # B -- NO temporal filtering; median spatial; wider band; more M-lines (very different smoothing).
+    - name: "disp bp5-150 median NO-temporal"
+      quantity: displacement
       directional: false
-      offsets: 5
+      offsets: 9
       offset_step_mm: 0.5
       field_filters:
-        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 150}}
-        - {name: temporal_moving_mean, params: {window: 3}}
-
-    # C -- median 1.0 x 2.0 mm instead of the Gaussian (edge-preserving).
-    - name: "velocity bp15-150 median1.0 mean3"
-      quantity: velocity
-      directional: false
-      offsets: 5
-      offset_step_mm: 0.5
-      field_filters:
-        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 150}}
+        - {name: temporal_bandpass, params: {f_lo: 5, f_hi: 150}}
         - {name: spatial_median, params: {size_z_mm: 1.0, size_x_mm: 2.0}}
-        - {name: temporal_moving_mean, params: {window: 3}}
+
+    # C -- different QUANTITY (velocity), narrower shear band, stronger Gaussian + longer temporal mean.
+    - name: "velocity bp15-90 gauss1.0 mean5"
+      quantity: velocity
+      directional: false
+      offsets: 9
+      offset_step_mm: 0.8
+      field_filters:
+        - {name: temporal_bandpass, params: {f_lo: 15, f_hi: 90}}
+        - {name: spatial_smooth, params: {sigma_z_mm: 1.0, sigma_x_mm: 2.0}}
+        - {name: temporal_moving_mean, params: {window: 5}}
