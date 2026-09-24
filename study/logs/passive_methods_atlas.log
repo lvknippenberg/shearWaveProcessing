@@ -1,0 +1,27 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+C000000003 win1 full
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000003/VIS_03_SW_data_16-June-2026_10-09-42\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/values, 133.5 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000003/VIS_03_SW_data_16-June-2026_10-09-42\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+   45 panels -> C000000003_win1_full.npz
+C000000019 win1 left
+   45 panels -> C000000019_win1_left.npz
+C000000020 win1 left
+   45 panels -> C000000020_win1_left.npz
+C000000002 win0 right
+   45 panels -> C000000002_win0_right.npz
+C000000027 win0 right
+   45 panels -> C000000027_win0_right.npz
+C000000039 win0 right
+   45 panels -> C000000039_win0_right.npz
+C000000008 win2 right
+   45 panels -> C000000008_win2_right.npz
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\quantity.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\band_displacement.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\band_velocity.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\directional.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\spatial.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\temporal.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\mline.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\motion.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\literature.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\views.png

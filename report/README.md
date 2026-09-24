@@ -11,6 +11,12 @@ GUI, scoring experiments, the phantom/Caenen successes, and the in-vivo acquisit
   probe-comparison and in-vivo datasets, the buffer-2 receive-layout bug that invalidated the first
   round of processing, and the revised parameter recommendation. Standalone — compiles on its own.
   Its figures are the `sweep_*.png` files in `figures/`.
+- `passive_methods/passive_methods.pdf` (+ `.tex`, `figures/`) — atlas of the **passive** SWE
+  processing methods explored (quantity, band-pass, directional filter, smoothing, M-line
+  averaging, motion/clutter handling, literature recipes, production views) as space-time plots on
+  seven in-vivo windows, no automatic speeds (2026-09-24). Figures from
+  `study/analysis/passive_methods_atlas.py`; compiled with `tectonic` (in the zea env:
+  `tectonic passive_methods.tex`).
 - `figures/` — all figures referenced by both documents (copied from `docs/figures/` and the
   per-dataset `analysis/` outputs; kept here so the reports are self-contained).
 

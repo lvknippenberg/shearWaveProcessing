@@ -1,0 +1,339 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,landscape,margin=1.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\newcommand{\atlas}[1]{\begin{center}\includegraphics[width=\linewidth,height=0.74\textheight,keepaspectratio]{figures/#1}\end{center}}
+
+\title{Passive cardiac shear-wave elastography:\\ processing methods explored, as space-time plots}
+\author{shearWaveProcessing -- \texttt{study/analysis/passive\_methods\_atlas.py}}
+\date{24 September 2026}
+
+\begin{document}
+\maketitle
+
+\section*{What this document is}
+
+The passive (valve-closure) shear-wave work compared many processing choices: which motion
+quantity to show, the temporal band-pass, spatial and temporal smoothing, M-line averaging,
+directional filtering, clutter and motion handling, and recipes from the literature. The
+decisions were recorded in the repo's docs (\texttt{docs/passive\_search.md}, \texttt{HANDOFF.md}), but mostly
+on one acquisition and often through automatic scores. This document shows the choices
+\emph{side by side on the same in-vivo windows}, as space-time (M-mode) plots, so they can be
+judged by eye. \textbf{No automatically fitted speed is shown anywhere}; it is not what we trust
+(\texttt{docs/passive\_speed\_estimation.md}).
+
+All data are in vivo (buffer 4, the $\sim$\SI{926}{\hertz} diverging-wave stream of the S5-1
+sequence). The phantom has no passive shear waves.
+
+\subsection*{How to read the panels}
+\begin{itemize}
+  \item \textbf{Axes.} Horizontal: time relative to the detected event peak, in ms (dotted line
+    at 0). Vertical: distance along the analysed part of the M-line, in mm. So a wave travelling
+    along the septum is a \emph{tilted} band, and motion of the whole wall at once is a
+    \emph{vertical} band.
+  \item \textbf{How much tilt to expect.} A wave at \SI{3}{\metre\per\second} crosses a \SI{20}{\milli\metre}
+    line in about \SI{7}{\milli\second}. That is small on a \SI{130}{\milli\second} axis, so
+    Figure~\ref{fig:zoom} repeats the key comparison zoomed to $\pm$\SI{25}{\milli\second}.
+  \item \textbf{Colour.} Each panel has its own symmetric colour scale (99th percentile of
+    $|\cdot|$), so the plots show pattern, not amplitude.
+  \item \textbf{Columns.} Seven windows, always in the same order. Six were scored \emph{clear} in
+    the hand-labelled set: three aortic valve closures (AVC) and three mitral valve closures (MVC).
+    The last column was scored \emph{none}: it shows what processing makes of a window with no
+    visible wave. \textbf{A method that makes the last column look like a wave is manufacturing structure.}
+  \item \textbf{Timing.} The detected event peak and the visible wave do not always coincide:
+    in C000000003 the wave is $\sim$\SI{40}{\milli\second} before the peak.
+\end{itemize}
+
+\subsection*{Baseline recipe}
+Every family starts from view A of \texttt{configs/passive.yaml} and changes one thing. View A:
+\begin{itemize}
+  \item Loupas lag-1 estimator, frame-to-frame, cumulative displacement;
+  \item 10--150\,Hz zero-phase Butterworth band-pass;
+  \item Gaussian spatial smoothing, $\sigma$ = 0.6\,mm axial $\times$ 1.2\,mm lateral;
+  \item 3-frame moving mean;
+  \item 5 parallel M-lines 0.5\,mm apart, averaged;
+  \item no directional filter.
+\end{itemize}
+The exceptions are the literature recipes and the three production views, which are complete
+recipes. The IQ is cropped to the M-line box plus 8\,mm before processing.
+
+\begin{figure}[h]
+\atlas{windows.png}
+\caption{The seven windows: the buffer-1 B-mode frame at the event's cardiac phase, on which the
+per-event M-line was drawn. Yellow: the part of the line analysed (the part hand-labelled);
+grey: the rest of the line. M-lines are 19--22\,mm.}
+\end{figure}
+
+\clearpage
+\section{Motion quantity: displacement, velocity, acceleration}
+
+\textbf{What varies.} The same frame-to-frame estimate shown as cumulative displacement, as
+particle velocity, or as acceleration (the temporal derivatives).
+
+\textbf{Literature.} Velocity is used by Keijzer et al.\ (2019, 2020). Acceleration is used by
+Petrescu et al., Santos et al.\ (2019), Strachinaru et al.\ and Espeland et al.\ (2024).
+Nobody reports cumulative displacement. The wave is dispersive, so the three weight different
+frequencies and give different apparent speeds.
+
+\textbf{Earlier conclusion.} Displacement was chosen for visualisation (cleanest), velocity
+was noisier, and acceleration had the sharpest front but was noisiest.
+
+\textbf{What the atlas shows.}
+\begin{itemize}
+  \item \textbf{Displacement}: smooth but broad bands, roughly \SIrange{15}{25}{\milli\second}
+    wide. At this width a tilt of a few ms is hard to read.
+  \item \textbf{Velocity}: a bipolar front about half as wide. The tilt becomes visible in
+    C000000019, 020 and 002 (Figure~\ref{fig:zoom}).
+  \item \textbf{Acceleration}: the narrowest front exactly at the event (019, 020, 027 -- in 027
+    the clearest tilted line of all). But outside the event it is noise-dominated, and in 003 and
+    039 the front is lost.
+  \item \textbf{The no-wave window} is incoherent in velocity and acceleration. Displacement turns it
+    into smooth broad blobs that are easier to misread.
+\end{itemize}
+
+\atlas{quantity.png}
+
+\begin{figure}[p]
+\atlas{quantity_zoom.png}
+\caption{The quantity comparison of the previous page zoomed to $\pm$\SI{25}{\milli\second} around the midpoint of the hand-drawn
+wavefront (event peak for the no-wave window). Tilted fronts are readable in velocity (019, 020,
+002, 003) and in acceleration (027). Displacement bands are too wide to show the slope well.}
+\label{fig:zoom}
+\end{figure}
+
+\clearpage
+\section{Temporal band-pass}
+
+\textbf{What varies.} The zero-phase Butterworth band-pass that separates the wave from bulk wall
+motion (low corner) and from noise (high corner).
+\begin{itemize}
+  \item 15--100\,Hz is Keijzer's band and the Caenen review's band for MVC waves.
+  \item 15--90\,Hz is view C.
+  \item 8--45\,Hz is the narrowing tried on 2026-09-22 and reverted.
+  \item 30--150\,Hz tests a higher low corner.
+\end{itemize}
+
+\textbf{Earlier conclusion.} The low corner must be at least 10--20\,Hz, because 5\,Hz lets the
+flat bulk band through. The band content ends near 90\,Hz (f99), and 8--45\,Hz cut real signal.
+
+\textbf{What the atlas shows (displacement first, then velocity).}
+\begin{itemize}
+  \item \textbf{5--150\,Hz} leaves large slow blobs (e.g.\ 019 at $-20$\,ms, 020 and 027 broad):
+    bulk wall motion.
+  \item \textbf{10--150\,Hz} removes most of it.
+  \item \textbf{15--100 and 15--90\,Hz} give the narrowest clean fronts in both quantities. In
+    velocity they are the cleanest panels of the whole atlas, and the no-wave window stays
+    incoherent.
+  \item \textbf{8--45\,Hz} smears every front into a broad band.
+  \item \textbf{30--150\,Hz} turns each event into several narrow parallel bands (ringing): the low
+    corner now sits inside the wave's own spectrum, and the no-wave window becomes fine texture.
+\end{itemize}
+
+\atlas{band_displacement.png}
+\atlas{band_velocity.png}
+
+\clearpage
+\section{Directional (k--$\omega$) filter}
+
+\textbf{What varies.} The filter keeps only waves travelling one way along the line (toward low
+or toward high $r$). It is standard for ARF shear waves (Song et al.\ 2016). For natural waves
+none of the papers use one.
+
+\textbf{Earlier conclusion.} Keep it off for passive: it added banding and biased the slope. The
+synthetic tests of 2026-09-24 also show it biases the active speed high.
+
+\textbf{What the atlas shows.} \textbf{It imposes a tilt on everything.}
+\begin{itemize}
+  \item In the no-wave window it produces clean, regular tilted stripes -- a convincing-looking
+    wave that is not there.
+  \item In the real windows the apparent tilt follows the direction chosen: the same event tilts
+    one way with ``toward low $r$'' and the other way with ``toward high $r$'' (019, 020, 039).
+  \item The filter therefore decides the direction instead of measuring it. It must stay off
+    whenever the direction is not known in advance.
+\end{itemize}
+
+\atlas{directional.png}
+
+\clearpage
+\section{Spatial smoothing}
+
+\textbf{What varies.} Per-frame smoothing of the displacement field before sampling the M-line.
+
+\textbf{Earlier conclusion.} Light Gaussian (0.6--1.0\,mm) is best; median is similar or
+slightly worse.
+
+\textbf{What the atlas shows.}
+\begin{itemize}
+  \item \textbf{None}: fine horizontal stripes along $r$ (speckle decorrelation between depths).
+  \item \textbf{Gaussian 0.6\,$\times$\,1.2\,mm} removes them.
+  \item \textbf{Gaussian 1.0\,$\times$\,2.0\,mm} changes little beyond that.
+  \item \textbf{Gaussian 2\,$\times$\,4\,mm} makes the fronts look clean. But it turns the no-wave
+    window into smooth coherent bands as well: too much.
+  \item \textbf{Median 1\,$\times$\,2\,mm} sits between none and Gaussian and keeps some stripes.
+\end{itemize}
+
+\atlas{spatial.png}
+
+\clearpage
+\section{Temporal smoothing}
+
+\textbf{What varies.} A moving mean or median over 3--5 frames (3--5\,ms).
+
+\textbf{Earlier conclusion.} Second-order.
+
+\textbf{What the atlas shows.} Almost no visible difference between none, mean 3, mean 5 and
+median 5. The 150\,Hz low-pass corner already limits the bandwidth more than these windows do.
+Temporal smoothing matters for velocity and acceleration (derivatives amplify noise), not for
+band-passed displacement.
+
+\atlas{temporal.png}
+
+\clearpage
+\section{M-line averaging}
+
+\textbf{What varies.} How many parallel copies of the M-line, offset along its normal, are
+averaged.
+
+\textbf{Earlier conclusion.} Few lines. One line is best for the sharp acceleration front; more
+lines help smoother quantities.
+
+\textbf{What the atlas shows.}
+\begin{itemize}
+  \item Little change from 1 to 9 lines in displacement.
+  \item At 15 lines (a $\pm$5.6\,mm band -- more than half the wall thickness) the no-wave window
+    becomes smoother and more band-like, and near the wall edges (003, 002) the pattern changes.
+\end{itemize}
+
+\atlas{mline.png}
+
+\clearpage
+\section{Motion and clutter handling}
+
+\textbf{What varies.} What removes the bulk wall motion:
+\begin{itemize}
+  \item the band-pass alone (view A);
+  \item plus an IQ slow-time low-pass at 250\,Hz (Keijzer's blood/noise filter);
+  \item plus an SVD clutter filter on the IQ (one component, Demen\'e-style);
+  \item a polynomial detrend instead of the band-pass high side;
+  \item or only a 5\,Hz high-pass, which leaves the bulk motion in as a reference.
+\end{itemize}
+
+\textbf{Earlier conclusion.} The low corner of the band-pass is the decisive motion remover. SVD
+and polynomial detrending do not substitute for it, and the 250\,Hz IQ low-pass washed out the
+wave in the search.
+
+\textbf{What the atlas shows.}
+\begin{itemize}
+  \item With the 10\,Hz high-pass in place, the IQ low-pass and the SVD filter leave the panels
+    essentially unchanged.
+  \item The polynomial detrend adds bands at both window ends (the polynomial does not fit the
+    edges) and keeps more low-frequency content.
+  \item The 5\,Hz-only row is dominated by broad bulk motion.
+\end{itemize}
+
+\atlas{motion.png}
+
+\clearpage
+\section{Recipes from the literature}
+
+\begin{itemize}
+  \item \textbf{Keijzer et al.} IQ slow-time low-pass at 250\,Hz; lag-1 velocity with Gaussian
+    smoothing of the autocorrelation before the angle (4\,mm axial; their lateral 6.7 is
+    approximated as 3\,mm); 15--100\,Hz band-pass (6th order).
+  \item \textbf{Petrescu / Santos.} Acceleration, with a 3-frame moving mean on the velocity
+    before differentiation.
+  \item \textbf{Espeland et al.\ 2024 (clutter filter wave imaging, CFWI, PLAX view).} IQ
+    high-pass at a 2\,cm/s cutoff, envelope, temporal derivative. The first and last 10 frames
+    are dropped (filter end transient).
+\end{itemize}
+
+\textbf{What the atlas shows.}
+\begin{itemize}
+  \item \textbf{Keijzer's velocity recipe} looks like the 15--100\,Hz velocity rows: clean bipolar
+    fronts, and an incoherent no-wave window.
+  \item \textbf{The acceleration recipe} has sharp fronts at 019, 020 and 027 and is
+    noise-dominated elsewhere.
+  \item \textbf{CFWI} shows the event as a front in 002, 027 and 039, faintly in 019 and 020, with
+    lower contrast and vertical streaks. Its automatic direction agreed with the hand picks only at
+    chance level (\texttt{study/analysis/cfwi\_benchmark.py}).
+\end{itemize}
+
+\atlas{literature.png}
+
+\clearpage
+\section{The three production views}
+
+\texttt{configs/passive.yaml} renders three deliberately different recipes per window:
+\begin{itemize}
+  \item \textbf{A}: displacement, 10--150\,Hz;
+  \item \textbf{B}: displacement, 5--150\,Hz, median 1\,$\times$\,2\,mm, no temporal smoothing,
+    9 lines;
+  \item \textbf{C}: velocity, 15--90\,Hz, Gaussian 1.0\,$\times$\,2.0\,mm, mean 5, 9 lines.
+\end{itemize}
+In these windows:
+\begin{itemize}
+  \item \textbf{C} gives the sharpest, most readable fronts and the most clearly incoherent
+    no-wave window.
+  \item \textbf{B} carries bulk-motion blobs from its 5\,Hz corner (019, 027) and median streaks.
+  \item \textbf{A} is in between: smooth but broad.
+\end{itemize}
+
+\atlas{views.png}
+
+\clearpage
+\section{Summary}
+
+\begin{center}
+\small
+\begin{tabular}{p{4.2cm}p{11.2cm}p{7.2cm}}
+\toprule
+choice & what the space-time plots show (7 windows) & suggestion for visual reading \\
+\midrule
+quantity & displacement smooth but broad (slope hard to read); velocity half as wide, tilt visible;
+  acceleration sharpest at the event, noisy elsewhere & read slopes on \textbf{velocity}; use
+  acceleration as a timing cross-check; displacement for robustness only \\
+band-pass & 5\,Hz keeps bulk motion; 15--90/100\,Hz narrowest clean fronts; 8--45 smears;
+  30--150 rings & \textbf{15--100\,Hz} (literature band) \\
+directional filter & imposes a tilt, including on the no-wave window; direction follows the
+  setting & \textbf{off} \\
+spatial smoothing & none striped; 0.6--1.0\,mm Gaussian clean; 2\,$\times$\,4\,mm fabricates bands
+  in noise & Gaussian \textbf{0.6--1.0\,mm} \\
+temporal smoothing & no visible effect on band-passed displacement & mean 3--5 on velocity /
+  acceleration \\
+M-line averaging & little effect up to 9 lines; 15 lines smooths noise into bands & \textbf{5--9 lines}
+  within the wall \\
+IQ low-pass / SVD & no visible change once the high-pass is in place & not needed \\
+polynomial detrend & edge bands, more low-frequency content & not a substitute for the band-pass \\
+CFWI & fronts in 3--5 of 6 windows at lower contrast; direction at chance & not better here \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Caveats.}
+\begin{itemize}
+  \item Seven windows, labelled by one observer; the confidence scores were not blind.
+  \item The lines are short (19--22\,mm) compared with the shear wavelength (150\,mm or more at
+    20\,Hz). Much of the ``front'' is therefore the whole segment moving nearly together, and a
+    method can look good by making bands vertical.
+  \item Per-panel colour scaling hides amplitude differences.
+  \item These observations favour a velocity view in the $\sim$15--100\,Hz band (close to view C
+    and to Keijzer's recipe) over displacement for reading slopes. That differs from the earlier
+    ``displacement is cleanest'' conclusion, which was reached on one acquisition. A second
+    observer's reading (\texttt{docs/TODO.md}, item 4) should settle it.
+\end{itemize}
+
+\textbf{Reproduce.}
+\begin{itemize}
+  \item \texttt{python study/analysis/passive\_methods\_atlas.py} reads the seven windows from
+    \texttt{Z:/raw\_data} ($\sim$20\,min) and writes \texttt{report/passive\_methods/figures/}.
+  \item \texttt{--figures} re-renders from the cache.
+  \item Compile with \texttt{tectonic passive\_methods.tex}.
+\end{itemize}
+
+\end{document}
