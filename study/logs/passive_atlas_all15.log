@@ -1,0 +1,254 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+C000000019 win1 (clear, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000020 win1 (clear, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000002 win0 (clear, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000018 win0 (clear, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000027 win0 (clear, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000039 win0 (clear, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000003 win1 (plausible, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000004 win1 (plausible, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000022 win1 (plausible, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000029 win1 (plausible, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000037 win1 (plausible, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000040 win2 (plausible, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000042 win0 (plausible, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000008 win2 (guess/none, AVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+C000000045 win0 (guess/none, MVC)
+   b1/v1: 45 panels
+   b1/v2: 38 panels
+   b3/v1: 45 panels
+   b3/v2: 38 panels
+figures b3/v1 -> D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures15
+figures b3/v2 -> D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures15
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000019/VIS-027_SW_data_21-July-2026_11-19-20\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 49.3 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000019/VIS-027_SW_data_21-July-2026_11-19-20\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.3 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+line comparison figures written
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\passive_atlas15_scores.csv
+
+=== b1 lines: best-line score, median per group (separation = clear - guess/none)
+set family            recipe                                                clear  plaus    g/n    sep
+v1  quantity          displacement                                           2.41   1.97   1.80   0.61
+v1  quantity          velocity                                               2.39   2.19   1.90   0.49
+v1  quantity          acceleration                                           2.19   1.71   1.95   0.24
+v1  band_displacement 5-150 Hz                                               1.95   1.70   1.63   0.32
+v1  band_displacement 10-150 Hz                                              2.41   1.97   1.80   0.61
+v1  band_displacement 15-100 Hz                                              2.57   2.33   1.86   0.70
+v1  band_displacement 15-90 Hz                                               2.55   2.33   1.86   0.69
+v1  band_displacement 8-45 Hz                                                2.05   1.84   1.67   0.39
+v1  band_displacement 30-150 Hz                                              2.83   2.39   1.93   0.90
+v1  band_velocity     5-150 Hz                                               2.20   2.05   1.77   0.43
+v1  band_velocity     10-150 Hz                                              2.39   2.19   1.90   0.49
+v1  band_velocity     15-100 Hz                                              2.47   2.25   1.87   0.61
+v1  band_velocity     15-90 Hz                                               2.42   2.25   1.83   0.59
+v1  band_velocity     8-45 Hz                                                2.23   2.07   1.76   0.47
+v1  band_velocity     30-150 Hz                                              2.87   1.98   1.97   0.90
+v1  directional       displacement, none                                     2.41   1.97   1.80   0.61
+v1  directional       displacement, keep toward low r                        2.27   1.72   1.68   0.59
+v1  directional       displacement, keep toward high r                       2.28   1.94   1.76   0.52
+v1  directional       velocity, none                                         2.39   2.19   1.90   0.49
+v1  directional       velocity, keep toward low r                            2.34   2.47   1.67   0.66
+v1  directional       velocity, keep toward high r                           2.39   2.23   2.07   0.32
+v1  spatial           none                                                   2.30   1.94   1.67   0.63
+v1  spatial           Gaussian 0.6 x 1.2 mm (view A)                         2.41   1.97   1.80   0.61
+v1  spatial           Gaussian 1.0 x 2.0 mm                                  2.43   1.95   1.85   0.58
+v1  spatial           Gaussian 2.0 x 4.0 mm                                  2.48   1.94   1.88   0.59
+v1  spatial           median 1.0 x 2.0 mm                                    2.37   1.98   1.75   0.62
+v1  temporal          none                                                   2.43   1.98   1.81   0.62
+v1  temporal          moving mean 3 (view A)                                 2.41   1.97   1.80   0.61
+v1  temporal          moving mean 5                                          2.37   1.96   1.79   0.58
+v1  temporal          moving median 5                                        2.39   1.96   1.79   0.60
+v1  mline             1 line                                                 2.42   2.00   1.81   0.61
+v1  mline             5 lines x 0.5 mm (view A)                              2.41   1.97   1.80   0.61
+v1  mline             9 lines x 0.8 mm                                       2.40   1.96   1.82   0.58
+v1  mline             15 lines x 0.8 mm                                      2.41   1.96   1.79   0.61
+v1  motion            band-pass 10-150 (view A)                              2.41   1.97   1.80   0.61
+v1  motion            + IQ slow-time low-pass 250 Hz                         2.41   1.93   1.83   0.58
+v1  motion            + IQ SVD clutter (1 component)                         2.44   1.99   1.78   0.66
+v1  motion            polynomial detrend (order 3) + low-pass 150            2.19   1.99   2.04   0.15
+v1  motion            high-pass 5 Hz only (bulk motion kept)                 1.96   1.70   1.64   0.32
+v1  literature        Keijzer 2019/20: IQ low-pass 250, velocity, R1 Gau     2.48   2.48   1.97   0.52
+v1  literature        Petrescu / Santos: acceleration, velocity mean 3       2.74   1.87   1.67   1.08
+v1  literature        Espeland 2024 CFWI: 2 cm/s clutter filter, envelop     2.54   2.27   2.15   0.39
+v1  views             A: displacement, 10-150, Gauss 0.6, mean 3, 5 line     2.41   1.97   1.80   0.61
+v1  views             B: displacement, 5-150, median 1 x 2, no temporal,     1.94   1.70   1.64   0.30
+v1  views             C: velocity, 15-90, Gauss 1.0 x 2.0, mean 5, 9 lin     2.57   2.49   1.88   0.69
+v2  spatial           none                                                   2.09   1.98   1.48   0.61
+v2  spatial           Gaussian 0.3 x 0.6 mm                                  2.22   2.15   1.69   0.53
+v2  spatial           Gaussian 0.6 x 1.2 mm (default)                        2.40   2.24   1.90   0.50
+v2  spatial           Gaussian 1.0 x 2.0 mm                                  2.56   2.37   2.15   0.42
+v2  spatial           Gaussian 1.5 x 3.0 mm                                  2.63   2.50   2.22   0.40
+v2  spatial           Gaussian 2.0 x 4.0 mm                                  2.65   2.57   2.17   0.48
+v2  spatial           median 1.0 x 2.0 mm                                    2.28   2.22   1.73   0.55
+v2  temporal          none                                                   2.39   2.24   1.91   0.48
+v2  temporal          moving mean 3 (default)                                2.40   2.24   1.90   0.50
+v2  temporal          moving mean 5                                          2.44   2.22   1.87   0.58
+v2  temporal          moving mean 7                                          2.35   2.23   1.77   0.59
+v2  temporal          moving mean 9                                          2.43   2.23   1.65   0.78
+v2  temporal          moving median 5                                        2.42   2.20   1.87   0.56
+v2  temporal          Savitzky-Golay 9, order 3                              2.46   2.24   1.91   0.54
+v2  mline             1 line                                                 2.34   2.25   1.81   0.53
+v2  mline             3 lines x 0.5 mm                                       2.37   2.24   1.85   0.52
+v2  mline             5 lines x 0.5 mm (default)                             2.40   2.24   1.90   0.50
+v2  mline             9 lines x 0.5 mm                                       2.44   2.22   1.93   0.50
+v2  mline             9 lines x 0.8 mm                                       2.47   2.31   1.91   0.56
+v2  mline             15 lines x 0.5 mm                                      2.48   2.32   1.91   0.56
+v2  mline             15 lines x 0.8 mm                                      2.51   2.40   1.90   0.61
+v2  combined          none: no spatial, no temporal, 1 line                  1.84   1.64   1.20   0.64
+v2  combined          light: Gauss 0.3 x 0.6, mean 3, 3 lines                2.17   2.12   1.64   0.53
+v2  combined          default: Gauss 0.6 x 1.2, mean 3, 5 lines              2.40   2.24   1.90   0.50
+v2  combined          medium: Gauss 1.0 x 2.0, mean 5, 9 lines               2.58   2.43   2.06   0.53
+v2  combined          heavy: Gauss 2.0 x 4.0, mean 9, 15 lines               2.51   2.44   2.02   0.50
+v2  svd               no SVD (default)                                       2.40   2.24   1.90   0.50
+v2  svd               IQ SVD, 1 component removed                            2.39   2.29   1.81   0.58
+v2  svd               IQ SVD, 2 components removed                           2.41   2.25   2.03   0.38
+v2  svd               IQ SVD, 3 components removed                           2.44   2.37   2.13   0.30
+v2  svd               velocity-field SVD, 1 component                        2.33   2.27   1.90   0.43
+v2  svd               IQ SVD 2 + low-pass 150 only (SVD as motion filter     1.77   1.66   1.83  -0.05
+v2  cfwi              velocity 15-150 (default, reference)                   2.40   2.24   1.90   0.50
+v2  cfwi              CFWI 1 cm/s                                            2.33   1.68   1.63   0.70
+v2  cfwi              CFWI 2 cm/s (Espeland)                                 2.33   2.06   1.83   0.50
+v2  cfwi              CFWI 3 cm/s                                            2.17   1.94   2.02   0.14
+v2  cfwi              CFWI 4 cm/s                                            1.97   1.63   2.10  -0.12
+v2  cfwi              CFWI 2 cm/s + band-pass 15-150                         3.49   3.91   3.41   0.08
+
+=== b3 lines: best-line score, median per group (separation = clear - guess/none)
+set family            recipe                                                clear  plaus    g/n    sep
+v1  quantity          displacement                                           2.09   1.88   1.60   0.49
+v1  quantity          velocity                                               2.17   2.01   1.64   0.53
+v1  quantity          acceleration                                           2.35   1.58   1.06   1.29
+v1  band_displacement 5-150 Hz                                               1.80   1.53   1.62   0.17
+v1  band_displacement 10-150 Hz                                              2.09   1.88   1.60   0.49
+v1  band_displacement 15-100 Hz                                              2.33   2.00   1.58   0.75
+v1  band_displacement 15-90 Hz                                               2.34   2.00   1.57   0.76
+v1  band_displacement 8-45 Hz                                                1.92   1.68   1.54   0.38
+v1  band_displacement 30-150 Hz                                              2.37   2.12   1.63   0.74
+v1  band_velocity     5-150 Hz                                               1.92   1.74   1.62   0.31
+v1  band_velocity     10-150 Hz                                              2.17   2.01   1.64   0.53
+v1  band_velocity     15-100 Hz                                              2.28   2.15   1.64   0.64
+v1  band_velocity     15-90 Hz                                               2.28   2.12   1.64   0.64
+v1  band_velocity     8-45 Hz                                                1.84   1.91   1.63   0.21
+v1  band_velocity     30-150 Hz                                              2.30   1.90   1.50   0.79
+v1  directional       displacement, none                                     2.09   1.88   1.60   0.49
+v1  directional       displacement, keep toward low r                        1.91   1.79   1.68   0.23
+v1  directional       displacement, keep toward high r                       1.94   1.76   1.68   0.26
+v1  directional       velocity, none                                         2.17   2.01   1.64   0.53
+v1  directional       velocity, keep toward low r                            2.15   1.89   1.59   0.57
+v1  directional       velocity, keep toward high r                           2.10   2.19   1.55   0.55
+v1  spatial           none                                                   1.98   1.72   1.45   0.53
+v1  spatial           Gaussian 0.6 x 1.2 mm (view A)                         2.09   1.88   1.60   0.49
+v1  spatial           Gaussian 1.0 x 2.0 mm                                  2.14   1.89   1.67   0.46
+v1  spatial           Gaussian 2.0 x 4.0 mm                                  2.23   1.91   1.84   0.39
+v1  spatial           median 1.0 x 2.0 mm                                    2.05   1.80   1.52   0.53
+v1  temporal          none                                                   2.09   1.88   1.60   0.49
+v1  temporal          moving mean 3 (view A)                                 2.09   1.88   1.60   0.49
+v1  temporal          moving mean 5                                          2.09   1.88   1.60   0.49
+v1  temporal          moving median 5                                        2.09   1.87   1.60   0.49
+v1  mline             1 line                                                 2.05   1.86   1.54   0.51
+v1  mline             5 lines x 0.5 mm (view A)                              2.09   1.88   1.60   0.49
+v1  mline             9 lines x 0.8 mm                                       2.21   1.91   1.75   0.46
+v1  mline             15 lines x 0.8 mm                                      2.23   1.88   1.89   0.35
+v1  motion            band-pass 10-150 (view A)                              2.09   1.88   1.60   0.49
+v1  motion            + IQ slow-time low-pass 250 Hz                         2.10   1.87   1.61   0.49
+v1  motion            + IQ SVD clutter (1 component)                         2.10   1.80   1.64   0.46
+v1  motion            polynomial detrend (order 3) + low-pass 150            1.86   1.81   1.72   0.14
+v1  motion            high-pass 5 Hz only (bulk motion kept)                 1.80   1.52   1.62   0.17
+v1  literature        Keijzer 2019/20: IQ low-pass 250, velocity, R1 Gau     2.22   2.06   1.72   0.50
+v1  literature        Petrescu / Santos: acceleration, velocity mean 3       2.31   1.79   1.53   0.79
+v1  literature        Espeland 2024 CFWI: 2 cm/s clutter filter, envelop     2.21   2.17   2.05   0.17
+v1  views             A: displacement, 10-150, Gauss 0.6, mean 3, 5 line     2.09   1.88   1.60   0.49
+v1  views             B: displacement, 5-150, median 1 x 2, no temporal,     1.82   1.53   1.64   0.18
+v1  views             C: velocity, 15-90, Gauss 1.0 x 2.0, mean 5, 9 lin     2.47   2.23   1.76   0.72
+v2  spatial           none                                                   1.81   1.69   1.19   0.62
+v2  spatial           Gaussian 0.3 x 0.6 mm                                  1.99   2.01   1.43   0.56
+v2  spatial           Gaussian 0.6 x 1.2 mm (default)                        2.25   2.17   1.60   0.64
+v2  spatial           Gaussian 1.0 x 2.0 mm                                  2.41   2.21   1.76   0.66
+v2  spatial           Gaussian 1.5 x 3.0 mm                                  2.45   2.28   1.83   0.62
+v2  spatial           Gaussian 2.0 x 4.0 mm                                  2.45   2.35   1.82   0.63
+v2  spatial           median 1.0 x 2.0 mm                                    1.98   2.05   1.38   0.60
+v2  temporal          none                                                   2.24   2.18   1.57   0.67
+v2  temporal          moving mean 3 (default)                                2.25   2.17   1.60   0.64
+v2  temporal          moving mean 5                                          2.27   2.13   1.63   0.64
+v2  temporal          moving mean 7                                          2.28   2.08   1.62   0.65
+v2  temporal          moving mean 9                                          2.22   2.07   1.64   0.59
+v2  temporal          moving median 5                                        2.26   2.15   1.61   0.65
+v2  temporal          Savitzky-Golay 9, order 3                              2.26   2.17   1.62   0.64
+v2  mline             1 line                                                 2.17   2.14   1.50   0.68
+v2  mline             3 lines x 0.5 mm                                       2.20   2.17   1.54   0.66
+v2  mline             5 lines x 0.5 mm (default)                             2.25   2.17   1.60   0.64
+v2  mline             9 lines x 0.5 mm                                       2.35   2.10   1.66   0.69
+v2  mline             9 lines x 0.8 mm                                       2.44   2.16   1.64   0.80
+v2  mline             15 lines x 0.5 mm                                      2.44   2.19   1.64   0.80
+v2  mline             15 lines x 0.8 mm                                      2.47   2.35   1.77   0.70
+v2  combined          none: no spatial, no temporal, 1 line                  1.53   1.31   1.05   0.47
+v2  combined          light: Gauss 0.3 x 0.6, mean 3, 3 lines                1.93   1.90   1.30   0.63
+v2  combined          default: Gauss 0.6 x 1.2, mean 3, 5 lines              2.25   2.17   1.60   0.64
+v2  combined          medium: Gauss 1.0 x 2.0, mean 5, 9 lines               2.43   2.20   1.77   0.66
+v2  combined          heavy: Gauss 2.0 x 4.0, mean 9, 15 lines               2.44   2.35   1.80   0.64
+v2  svd               no SVD (default)                                       2.25   2.17   1.60   0.64
+v2  svd               IQ SVD, 1 component removed                            2.30   2.10   1.75   0.55
+v2  svd               IQ SVD, 2 components removed                           2.17   2.07   1.69   0.47
+v2  svd               IQ SVD, 3 components removed                           2.17   2.04   1.77   0.41
+v2  svd               velocity-field SVD, 1 component                        2.33   2.15   1.63   0.70
+v2  svd               IQ SVD 2 + low-pass 150 only (SVD as motion filter     1.57   1.65   1.79  -0.22
+v2  cfwi              velocity 15-150 (default, reference)                   2.25   2.17   1.60   0.64
+v2  cfwi              CFWI 1 cm/s                                            1.96   1.66   1.38   0.58
+v2  cfwi              CFWI 2 cm/s (Espeland)                                 1.86   1.97   1.87  -0.01
+v2  cfwi              CFWI 3 cm/s                                            1.73   1.97   1.78  -0.05
+v2  cfwi              CFWI 4 cm/s                                            1.49   1.73   1.67  -0.18
+v2  cfwi              CFWI 2 cm/s + band-pass 15-150                         3.88   3.79   3.61   0.27

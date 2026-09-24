@@ -34,3 +34,5 @@ study/montages/*.gif
 # regenerable caches written on 2026-09-24 (review follow-up)
 study/analysis/atlas_cache/
 study/analysis/panel_cache/*_cfwi.npz
+study/analysis/atlas_cache_*/
+study/analysis/atlas15_cache/

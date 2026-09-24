@@ -1,0 +1,16 @@
+subject,window,event,buffer,frame,event_phase_ms,frame_phase_ms,kept_old_segment,skipped,part_before
+C000000002,0,MVC,3,3,63.7,83.3,False,,right
+C000000003,1,AVC,3,17,402.8,413.1,False,,full
+C000000004,1,AVC,3,13,402.8,387.5,False,,right
+C000000008,2,AVC,3,17,490.3,492.0,False,,right
+C000000018,0,MVC,3,23,60.5,53.9,False,,left
+C000000019,1,AVC,3,18,450.4,457.9,False,,left
+C000000020,1,AVC,3,14,416.9,428.4,False,,left
+C000000022,1,AVC,3,14,500.0,504.4,False,,full
+C000000027,0,MVC,3,15,56.2,72.6,False,,right
+C000000029,1,AVC,3,30,349.9,342.4,False,,left
+C000000037,1,MVC,3,18,30.4,30.5,False,,left
+C000000039,0,MVC,3,4,84.2,95.5,False,,right
+C000000040,2,MVC,3,10,7.5,14.4,False,,right
+C000000042,0,MVC,3,17,55.1,43.0,False,,left
+C000000045,0,MVC,3,19,77.8,77.9,False,,right

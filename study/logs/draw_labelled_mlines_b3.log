@@ -1,0 +1,140 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000002/SWE02_SW_data_28-April-2026_10-09-45\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000002/SWE02_SW_data_28-April-2026_10-09-45\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.3 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1/15] C000000002 win0: drawing on buffer 3 frame 3
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (27.3 mm) -> passive_win0_mline_b3.npz (+ .png)
+[2/15] C000000003 win1: drawing on buffer 3 frame 17
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (27.9 mm) -> passive_win1_mline_b3.npz (+ .png)
+[3/15] C000000004 win1: drawing on buffer 3 frame 13
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (35.4 mm) -> passive_win1_mline_b3.npz (+ .png)
+[4/15] C000000008 win2: drawing on buffer 3 frame 17
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (42.7 mm) -> passive_win2_mline_b3.npz (+ .png)
+[5/15] C000000018 win0: drawing on buffer 3 frame 23
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (30.5 mm) -> passive_win0_mline_b3.npz (+ .png)
+[6/15] C000000019 win1: drawing on buffer 3 frame 18
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (35.6 mm) -> passive_win1_mline_b3.npz (+ .png)
+[7/15] C000000020 win1: drawing on buffer 3 frame 14
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (43.2 mm) -> passive_win1_mline_b3.npz (+ .png)
+[8/15] C000000022 win1: drawing on buffer 3 frame 14
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (31.6 mm) -> passive_win1_mline_b3.npz (+ .png)
+[9/15] C000000027 win0: drawing on buffer 3 frame 15
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (37.1 mm) -> passive_win0_mline_b3.npz (+ .png)
+[10/15] C000000029 win1: drawing on buffer 3 frame 30
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (22.2 mm) -> passive_win1_mline_b3.npz (+ .png)
+[11/15] C000000037 win1: drawing on buffer 3 frame 18
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (35.3 mm) -> passive_win1_mline_b3.npz (+ .png)
+[12/15] C000000039 win0: drawing on buffer 3 frame 4
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (40.7 mm) -> passive_win0_mline_b3.npz (+ .png)
+[13/15] C000000040 win2: drawing on buffer 3 frame 10
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (32.3 mm) -> passive_win2_mline_b3.npz (+ .png)
+[14/15] C000000042 win0: drawing on buffer 3 frame 17
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (29.3 mm) -> passive_win0_mline_b3.npz (+ .png)
+[15/15] C000000045 win0: drawing on buffer 3 frame 19
+
+>>> M-LINE (still frame): left-click points along the anatomy
+>>> in ANY order; the cyan line updates live once you have >= 2 points. Drag a point to move it,
+>>> right-click to delete one. Press ENTER (figure focused) to finish.
+
+>>> ENTER without clicking = keep the dashed reference line; close window = skip.
+
+  [M-line] drawn (37.1 mm) -> passive_win0_mline_b3.npz (+ .png)
+
+15 of 15 windows have a buffer-3 line -> study/logs/passive_mlines_b3.csv

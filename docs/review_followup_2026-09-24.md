@@ -60,7 +60,7 @@ What changed:
 - New beamforms store the corrected `t_reference` plus `custom/push_gap_s`.
 - `scripts/retrofit_push_gap.py` corrects old files in place and keeps the original as
   `custom/t_reference_v0`. It was applied to the four in-vivo folders under D:, not yet to the
-  Z: study (TODO 11).
+  Z: study (TODO 13).
 - A phantom re-beamform gives bit-identical IQ.
 
 ### A new finding: in vivo, the blocks decorrelate across the push

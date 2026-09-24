@@ -1,0 +1,280 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,landscape,margin=1.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\newcommand{\atlas}[1]{\begin{center}\includegraphics[width=\linewidth,height=0.72\textheight,keepaspectratio]{figures/#1}\end{center}}
+
+\title{Passive cardiac shear-wave elastography, part 2:\\ smoothing, M-line averaging, SVD and CFWI on the velocity 15--150\,Hz default}
+\author{shearWaveProcessing -- \texttt{study/analysis/passive\_methods\_atlas.py --set v2}}
+\date{24 September 2026}
+
+\begin{document}
+\maketitle
+
+\section*{What changed since part 1}
+
+Part 1 (\texttt{passive\_methods.pdf}) compared the processing choices on a displacement base
+(view A). It pointed to \textbf{velocity with a band-pass starting at $\sim$15\,Hz} as the most
+readable space-time. This part makes that the default and re-evaluates, one at a time:
+\begin{itemize}
+  \item spatial smoothing;
+  \item temporal smoothing;
+  \item M-line averaging, and the three together;
+  \item the SVD clutter filter;
+  \item clutter filter wave imaging (CFWI).
+\end{itemize}
+
+\textbf{New default for this part.} Loupas lag-1 frame-to-frame \textbf{velocity}; zero-phase
+Butterworth band-pass \textbf{15--150\,Hz}; Gaussian $\sigma$ = 0.6\,mm axial $\times$ 1.2\,mm
+lateral; moving mean 3; 5 M-lines 0.5\,mm apart; no directional filter.
+
+The same seven in-vivo windows and panel conventions as part 1 are used:
+\begin{itemize}
+  \item x = time relative to the detected event peak (ms), y = distance along the analysed part
+    of the M-line (mm);
+  \item colour scaled per panel;
+  \item six windows scored \emph{clear} (three AVC, three MVC), and the last column scored
+    \emph{none}, which shows what a setting makes of a window without a visible wave;
+  \item no automatic speeds.
+\end{itemize}
+
+\subsection*{Auxiliary numbers (not a speed)}
+Each recipe also gets two numbers (\texttt{study/logs/passive\_atlas\_v2.csv}):
+\begin{itemize}
+  \item \textbf{Hand-line tracking} (median and minimum over the six clear windows): the mean
+    $|$signal$|$ sampled along your hand-drawn velocity wavefront, divided by the panel RMS.
+    About 1 means the line is no better than noise; higher means the wavefront stands out.
+  \item \textbf{No-wave best line}: the same score for the \emph{strongest} straight line the
+    no-wave panel offers (normalised Radon). It measures how much line-like structure a setting
+    invents where there is no wave.
+\end{itemize}
+Two caveats:
+\begin{itemize}
+  \item Smoothing raises \emph{both} numbers, so only the gap between them is informative.
+  \item The hand lines were drawn on velocity panels (view C, 15--90\,Hz), which favours recipes
+    close to that. They are a guide, not a verdict; the plots are the evidence.
+\end{itemize}
+
+\begin{center}
+\small
+\begin{tabular}{llccc}
+\toprule
+family & recipe & hand line, median & hand line, min & no-wave best line \\
+\midrule
+spatial & none & 2.00 & 1.59 & 1.02 \\
+ & Gaussian 0.3 $\times$ 0.6\,mm & 2.14 & 1.84 & 1.22 \\
+ & \textbf{Gaussian 0.6 $\times$ 1.2\,mm (default)} & 2.24 & 2.03 & 1.52 \\
+ & Gaussian 1.0 $\times$ 2.0\,mm & 2.30 & 2.09 & 1.92 \\
+ & Gaussian 1.5 $\times$ 3.0\,mm & 2.41 & 2.14 & 2.00 \\
+ & Gaussian 2.0 $\times$ 4.0\,mm & 2.48 & 2.18 & 1.86 \\
+ & median 1.0 $\times$ 2.0\,mm & 2.21 & 1.88 & 1.37 \\
+\midrule
+temporal & none & 2.22 & 1.99 & 1.52 \\
+ & \textbf{moving mean 3 (default)} & 2.24 & 2.03 & 1.52 \\
+ & moving mean 5 & 2.26 & 2.08 & 1.48 \\
+ & moving mean 7 & 2.28 & 2.15 & 1.38 \\
+ & moving mean 9 & 2.22 & 2.01 & 1.29 \\
+ & moving median 5 & 2.22 & 2.02 & 1.48 \\
+ & Savitzky--Golay 9, order 3 & 2.25 & 2.02 & 1.51 \\
+\midrule
+M-lines & 1 line & 2.19 & 1.97 & 1.39 \\
+ & 3 lines $\times$ 0.5\,mm & 2.21 & 2.00 & 1.45 \\
+ & \textbf{5 lines $\times$ 0.5\,mm (default)} & 2.24 & 2.03 & 1.52 \\
+ & 9 lines $\times$ 0.5\,mm & 2.28 & 2.06 & 1.57 \\
+ & 9 lines $\times$ 0.8\,mm & 2.33 & 2.10 & 1.52 \\
+ & 15 lines $\times$ 0.5\,mm & 2.33 & 2.10 & 1.52 \\
+ & 15 lines $\times$ 0.8\,mm & 2.32 & 2.16 & 1.47 \\
+\midrule
+combined & none (no spatial, no temporal, 1 line) & 1.73 & 1.13 & 0.88 \\
+ & light (Gauss 0.3 $\times$ 0.6, mean 3, 3 lines) & 2.07 & 1.74 & 1.21 \\
+ & \textbf{default} & 2.24 & 2.03 & 1.52 \\
+ & medium (Gauss 1.0 $\times$ 2.0, mean 5, 9 lines) & 2.37 & 2.15 & 1.80 \\
+ & heavy (Gauss 2.0 $\times$ 4.0, mean 9, 15 lines) & 2.39 & 2.22 & 1.95 \\
+\midrule
+SVD & \textbf{none (default)} & 2.24 & 2.03 & 1.52 \\
+ & IQ SVD, 1 component & 2.23 & 2.16 & 1.40 \\
+ & IQ SVD, 2 components & 2.22 & 1.89 & 1.84 \\
+ & IQ SVD, 3 components & 2.23 & 1.94 & 1.96 \\
+ & velocity-field SVD, 1 component & 2.20 & \textbf{0.38} & 1.49 \\
+ & IQ SVD 2 instead of the high-pass & 1.60 & 1.26 & 1.54 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+CFWI is left out of the table: its map does not follow the velocity wavefront your lines were
+drawn on (hand-line scores 0.45--0.75), so the score does not apply. It is judged on the plots.
+
+\clearpage
+\section{Spatial smoothing}
+
+Per-frame smoothing of the velocity field before the M-line is sampled.
+\begin{itemize}
+  \item \textbf{None}: the fronts are there but carry speckle texture, and the no-wave window is
+    pure speckle.
+  \item \textbf{Gaussian 0.3 $\times$ 0.6\,mm} removes part of it.
+  \item \textbf{Gaussian 0.6 $\times$ 1.2\,mm (default)} gives clean fronts in all six windows.
+  \item \textbf{Gaussian 1.0 $\times$ 2.0\,mm} is slightly cleaner again (003, 019, 002).
+  \item \textbf{From 1.5 $\times$ 3\,mm}, the real fronts hardly improve while the no-wave window
+    turns into long, clean-looking tilted and vertical bands. The no-wave best line rises from
+    1.5 to 2.0 and closes most of the gap to the real fronts.
+  \item \textbf{Median 1 $\times$ 2\,mm} keeps more texture than the Gaussian of the same size.
+\end{itemize}
+\textbf{Reading:} Gaussian between 0.6 $\times$ 1.2 and 1.0 $\times$ 2.0\,mm; beyond that,
+smoothing starts to create the structure it is supposed to reveal.
+
+\atlas{v2_spatial.png}
+
+\clearpage
+\section{Temporal smoothing}
+
+A moving mean, median or Savitzky--Golay filter over 3--9 frames (3--10\,ms).
+\begin{itemize}
+  \item Up to a mean of 5 the panels barely change. Median 5 and Savitzky--Golay 9 look like the
+    default.
+  \item Means of 7 and 9 visibly widen the fronts (019, 002, 039). They also make the no-wave
+    window coarser but not more line-like (best line 1.52 $\rightarrow$ 1.29): unlike spatial
+    smoothing, temporal smoothing does not invent straight lines here.
+\end{itemize}
+\textbf{Reading:} mean 3--5; longer windows cost front sharpness for little gain.
+
+\atlas{v2_temporal.png}
+
+\clearpage
+\section{M-line averaging}
+
+Parallel copies of the M-line along its normal, averaged. The wall is about 8--12\,mm thick: 9
+lines $\times$ 0.5\,mm span 4\,mm, and 15 lines $\times$ 0.8\,mm span 11\,mm.
+\begin{itemize}
+  \item 1 to 5 lines look alike.
+  \item 9 lines $\times$ 0.5\,mm clean the fronts a little further (003, 002).
+  \item Wider spans (9 $\times$ 0.8, 15 lines) smooth further. In the no-wave window they start to
+    form diagonal stripes, as the averaging band reaches the wall edges and blood.
+\end{itemize}
+\textbf{Reading:} 5--9 lines at 0.5\,mm, a band of 2--4\,mm kept inside the wall.
+
+\atlas{v2_mline.png}
+
+\clearpage
+\section{The three together}
+
+The same three settings changed together, from none to heavy.
+\begin{itemize}
+  \item \textbf{None} is speckle-dominated (hand-line minimum 1.13).
+  \item \textbf{Light} is still noisy.
+  \item \textbf{Default} is clean.
+  \item \textbf{Medium} (Gauss 1.0 $\times$ 2.0, mean 5, 9 lines) gives the cleanest fronts while the
+    no-wave window stays irregular.
+  \item \textbf{Heavy} makes everything smooth, widens the fronts and turns the no-wave window
+    into broad bands.
+\end{itemize}
+\textbf{Reading:} default to medium. Medium is the best-looking setting on these seven windows.
+Its no-wave score is higher (1.80 vs 1.52), so it should be checked on more windows before it
+becomes the default.
+
+\atlas{v2_combined.png}
+
+\clearpage
+\section{SVD clutter filtering}
+
+Singular-value decomposition removing the dominant slow-time components: on the IQ (Demen\'e
+et al.\ 2015) before estimation, or on the velocity field. Part 1 found it inert on a displacement
+base. Re-tested on velocity:
+\begin{itemize}
+  \item \textbf{1 IQ component}: no visible change. The worst window improves slightly (hand-line
+    minimum 2.03 $\rightarrow$ 2.16) and the no-wave score drops (1.52 $\rightarrow$ 1.40).
+    Harmless, possibly marginally useful.
+  \item \textbf{2--3 IQ components}: fronts intact, but more background texture (003, 020) and a
+    more line-like no-wave window (1.84--1.96). This starts removing tissue signal.
+  \item \textbf{SVD on the velocity field}: \textbf{destroys the wave in 020} (replaced by noise;
+    hand-line minimum 0.38) and distorts 002. Reject.
+  \item \textbf{IQ SVD instead of the high-pass}: broad slow drifts dominate every panel. SVD does
+    not replace the 15\,Hz high-pass, as part 1 found for displacement.
+\end{itemize}
+\textbf{Reading:} not needed. If used, IQ only, 1 component, and never on the field or instead of
+the band-pass.
+
+\atlas{v2_svd.png}
+
+\clearpage
+\section{Clutter filter wave imaging (CFWI)}
+
+Espeland et al.\ (2024): slow-time IQ high-pass at a cutoff velocity, envelope, temporal
+derivative, then the default smoothing. 10 frames are dropped at each window end (filter
+transient). At our 3.9\,MHz demodulation and 926\,Hz frame rate, 1--4\,cm/s is a 51--203\,Hz cutoff
+against a 9.1\,cm/s aliasing limit.
+\begin{itemize}
+  \item At every cutoff the map is a streaky, vertically striped texture.
+  \item The event shows as a front in 002, 027 and 039 (clearest at 3--4\,cm/s), faintly in 019,
+    and hardly in 003 and 020.
+  \item The no-wave window has the same streak texture as the real ones, which makes a real front
+    harder to tell apart.
+  \item Band-passing the CFWI map (last row) adds a large end artifact.
+  \item In the benchmark on 15 windows its automatic direction agreed with the hand picks only at
+    chance level.
+\end{itemize}
+\textbf{Reading:} on these acquisitions CFWI does not approach the velocity map (first row).
+Why is not established. One untested hypothesis is the frame rate: at 926\,Hz the 51--203\,Hz
+cutoffs above take up a large part of the 463\,Hz slow-time bandwidth, so the filter's transition
+band covers much of the tissue-velocity range rather than sitting at its edge.
+
+\atlas{v2_cfwi.png}
+
+\clearpage
+\section{Summary}
+
+\begin{center}
+\small
+\begin{tabular}{p{3.4cm}p{12.4cm}p{8.2cm}}
+\toprule
+choice & what the plots and numbers show & suggested default \\
+\midrule
+spatial smoothing & none: speckle; 0.6--1.0\,mm Gaussian: clean fronts; $\geq$1.5\,mm: the
+  no-wave window turns into bands & \textbf{Gaussian 0.6 $\times$ 1.2 to 1.0 $\times$ 2.0\,mm} \\
+temporal smoothing & little change up to mean 5; mean 7--9 widen fronts; no invented lines &
+  \textbf{moving mean 3--5} \\
+M-line averaging & 1--5 lines alike; 9 $\times$ 0.5\,mm slightly cleaner; wide bands reach the
+  wall edges & \textbf{5--9 lines $\times$ 0.5\,mm} \\
+combined & medium (1.0 $\times$ 2.0, mean 5, 9 lines) looks best but raises the no-wave score &
+  default now; medium after checking more windows \\
+SVD & 1 IQ component harmless; more components or field SVD damage the wave; cannot replace the
+  high-pass & \textbf{off} (or IQ, 1 component) \\
+CFWI & streaky; front visible in 3--4 of 6 windows; worse than velocity & \textbf{not used} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{A concrete candidate for \texttt{configs/passive.yaml} view A:}
+\begin{itemize}
+  \item velocity, band-pass 15--150\,Hz;
+  \item Gaussian 0.6--1.0\,mm $\times$ 1.2--2.0\,mm;
+  \item moving mean 3--5;
+  \item 5--9 M-lines $\times$ 0.5\,mm;
+  \item no directional filter, no SVD.
+\end{itemize}
+This is close to the current view C (velocity, 15--90\,Hz, Gauss 1.0 $\times$ 2.0, mean 5, 9 lines
+$\times$ 0.8\,mm) with a wider band and a narrower M-line band.
+
+\textbf{Caveats.}
+\begin{itemize}
+  \item Seven windows, labelled by one observer; the hand lines come from view C panels.
+  \item Colour is scaled per panel.
+  \item The fronts are nearly vertical on 19--22\,mm lines, so ``cleaner'' partly means ``more
+    uniform along the line'' -- the no-wave column is there to keep that in check.
+  \item Before changing the default, run the candidate on the full labelled set (15 windows) and
+    have a second observer read it (\texttt{docs/TODO.md}, items 4 and 11).
+\end{itemize}
+
+\textbf{Reproduce.}
+\begin{itemize}
+  \item \texttt{python study/analysis/passive\_methods\_atlas.py --set v2} ($\sim$20\,min,
+    reads \texttt{Z:/raw\_data}); \texttt{--figures} re-renders from the cache.
+  \item \texttt{tectonic passive\_methods\_v2.tex}.
+\end{itemize}
+
+\end{document}

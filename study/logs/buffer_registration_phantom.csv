@@ -1,0 +1,22 @@
+# swp_version: 0.1.0
+# swp_git_commit: ec851caf33f9a4502c4de0590c177ca6098e638b
+# swp_git_branch: main
+# swp_git_dirty: 5 modified: .gitignore, docs/TODO.md, docs/review_followup_2026-09-24.md, report/README.md, study/analysis/passive_methods_atlas.py
+# swp_git_diff_sha256: 9d5f975a3be58fc10b4ca23ba2dcca4221ff4790c960f1860233678e8efea46d
+# zea_version: 0.1.1
+# zea_source: D:/Luuk van Knippenberg/Github/zea
+# zea_git_commit: 8c2699fd32b969582049d0f704ac3edb862910be
+# zea_git_branch: verasonics-multibuffer-clean
+# zea_git_dirty: 
+# numpy: 2.5.0
+# scipy: 1.18.0
+# python: 3.12.13
+# host: EEMATLAB-OP02
+# created_utc: 2026-09-24T12:55:00+00:00
+# keras_backend: 
+# command: buffer_registration_phantom.py
+# config_sha256: ddb6e6313fd3cddaa2865908146c52bba3c81fd82bec308cbcb55274547cf008
+buffer,n,dx_median_um,dx_iqr_um,dz_median_um,dz_iqr_um,dz_per_depth_pct,dx_per_lateral_pct,dx_per_depth_um_per_cm
+buffer 1 (widebeam),25,6.9927345685179,99.60055300567383,7.726084784358989,103.0438313796509,0.06540754423137984,0.7027505787797981,8.112461953579114
+"buffer 3 (focused, standard)",23,-34.43713617454769,129.74138464246198,10.298994916752235,44.62548842596625,0.21496072275667505,0.21281888300850302,-20.99302885627151
+"buffer 3 (focused, REFoCUS adjoint)",21,5.834915417959774,78.4965224526033,4.818026705763145,13.36638048933736,0.05482904728329569,0.4209992740297945,7.166086011462945

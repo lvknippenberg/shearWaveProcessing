@@ -1,0 +1,63 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+C000000003 win1 full
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000003/VIS_03_SW_data_16-June-2026_10-09-42\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/values, 133.5 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:/raw_data/C000000003/VIS_03_SW_data_16-June-2026_10-09-42\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+   38 panels -> C000000003_win1_full.npz
+C000000019 win1 left
+   38 panels -> C000000019_win1_left.npz
+C000000020 win1 left
+   38 panels -> C000000020_win1_left.npz
+C000000002 win0 right
+   38 panels -> C000000002_win0_right.npz
+C000000027 win0 right
+   38 panels -> C000000027_win0_right.npz
+C000000039 win0 right
+   38 panels -> C000000039_win0_right.npz
+C000000008 win2 right
+   38 panels -> C000000008_win2_right.npz
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_spatial.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_temporal.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_mline.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_combined.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_svd.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\report\passive_methods\figures\v2_cfwi.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\passive_atlas_v2.csv
+family    recipe                                                    hand line med / min  n  none: best
+spatial   none                                                           2.00 /  1.59   6       1.02
+spatial   Gaussian 0.3 x 0.6 mm                                          2.14 /  1.84   6       1.22
+spatial   Gaussian 0.6 x 1.2 mm (default)                                2.24 /  2.03   6       1.52
+spatial   Gaussian 1.0 x 2.0 mm                                          2.30 /  2.09   6       1.92
+spatial   Gaussian 1.5 x 3.0 mm                                          2.41 /  2.14   6       2.00
+spatial   Gaussian 2.0 x 4.0 mm                                          2.48 /  2.18   6       1.86
+spatial   median 1.0 x 2.0 mm                                            2.21 /  1.88   6       1.37
+temporal  none                                                           2.22 /  1.99   6       1.52
+temporal  moving mean 3 (default)                                        2.24 /  2.03   6       1.52
+temporal  moving mean 5                                                  2.26 /  2.08   6       1.48
+temporal  moving mean 7                                                  2.28 /  2.15   6       1.38
+temporal  moving mean 9                                                  2.22 /  2.01   6       1.29
+temporal  moving median 5                                                2.22 /  2.02   6       1.48
+temporal  Savitzky-Golay 9, order 3                                      2.25 /  2.02   6       1.51
+mline     1 line                                                         2.19 /  1.97   6       1.39
+mline     3 lines x 0.5 mm                                               2.21 /  2.00   6       1.45
+mline     5 lines x 0.5 mm (default)                                     2.24 /  2.03   6       1.52
+mline     9 lines x 0.5 mm                                               2.28 /  2.06   6       1.57
+mline     9 lines x 0.8 mm                                               2.33 /  2.10   6       1.52
+mline     15 lines x 0.5 mm                                              2.33 /  2.10   6       1.52
+mline     15 lines x 0.8 mm                                              2.32 /  2.16   6       1.47
+combined  none: no spatial, no temporal, 1 line                          1.73 /  1.13   6       0.88
+combined  light: Gauss 0.3 x 0.6, mean 3, 3 lines                        2.07 /  1.74   6       1.21
+combined  default: Gauss 0.6 x 1.2, mean 3, 5 lines                      2.24 /  2.03   6       1.52
+combined  medium: Gauss 1.0 x 2.0, mean 5, 9 lines                       2.37 /  2.15   6       1.80
+combined  heavy: Gauss 2.0 x 4.0, mean 9, 15 lines                       2.39 /  2.22   6       1.95
+svd       no SVD (default)                                               2.24 /  2.03   6       1.52
+svd       IQ SVD, 1 component removed                                    2.23 /  2.16   6       1.40
+svd       IQ SVD, 2 components removed                                   2.22 /  1.89   6       1.84
+svd       IQ SVD, 3 components removed                                   2.23 /  1.94   6       1.96
+svd       velocity-field SVD, 1 component                                2.20 /  0.38   6       1.49
+svd       IQ SVD 2 + low-pass 150 only (SVD as motion filter)            1.60 /  1.26   6       1.54
+cfwi      velocity 15-150 (default, reference)                           2.24 /  2.03   6       1.52
+cfwi      CFWI 1 cm/s                                                    0.75 /  0.27   6       1.52
+cfwi      CFWI 2 cm/s (Espeland)                                         0.65 /  0.37   6       1.62
+cfwi      CFWI 3 cm/s                                                    0.62 /  0.47   6       1.69
+cfwi      CFWI 4 cm/s                                                    0.72 /  0.47   6       1.84
+cfwi      CFWI 2 cm/s + band-pass 15-150                                 0.45 /  0.13   6       3.51

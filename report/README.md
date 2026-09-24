@@ -17,6 +17,15 @@ GUI, scoring experiments, the phantom/Caenen successes, and the in-vivo acquisit
   seven in-vivo windows, no automatic speeds (2026-09-24). Figures from
   `study/analysis/passive_methods_atlas.py`; compiled with `tectonic` (in the zea env:
   `tectonic passive_methods.tex`).
+- `passive_methods/passive_methods_v2.pdf` (+ `.tex`) — part 2: spatial / temporal smoothing,
+  M-line averaging, SVD and CFWI re-evaluated on the **velocity 15-150 Hz** default, same seven
+  windows, with an auxiliary hand-line / no-wave score table (`study/logs/passive_atlas_v2.csv`).
+  Figures `figures/v2_*.png` from `passive_methods_atlas.py --set v2`.
+- `passive_methods/passive_methods_v3.pdf` (+ `.tex`, `figures15/`) — part 3: all 15 labelled
+  windows grouped by velocity-panel score; M-lines redrawn on buffer 3 and why they differ
+  (timing, phantom registration, beat-to-beat motion); every recipe family on the new lines
+  (appendix) and a score table on both line sets. From `study/analysis/passive_atlas_all15.py`,
+  `draw_labelled_mlines_b3.py`, `mline_difference_check.py`, `buffer_registration_phantom.py`.
 - `figures/` — all figures referenced by both documents (copied from `docs/figures/` and the
   per-dataset `analysis/` outputs; kept here so the reports are self-contained).
 

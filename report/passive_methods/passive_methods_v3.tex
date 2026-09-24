@@ -1,0 +1,247 @@
+\documentclass[10pt]{article}
+\usepackage[a4paper,landscape,margin=1.4cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{parskip}
+\setlist{itemsep=2pt,topsep=3pt}
+
+\newcommand{\fig}[1]{\begin{center}\includegraphics[width=\linewidth,height=0.80\textheight,keepaspectratio]{figures15/#1}\end{center}}
+
+\title{Passive cardiac shear-wave elastography, part 3:\\ all 15 labelled windows, and M-lines redrawn on the focused-beam buffer}
+\author{shearWaveProcessing -- \texttt{study/analysis/passive\_atlas\_all15.py}, \texttt{draw\_labelled\_mlines\_b3.py}, \texttt{mline\_difference\_check.py}, \texttt{buffer\_registration\_phantom.py}}
+\date{24 September 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Summary}
+\begin{itemize}
+  \item \textbf{All 15 hand-labelled windows} are now used, grouped by their velocity-panel
+    confidence score (treated as blind): 6 \emph{clear}, 7 \emph{plausible}, 2
+    \emph{guess/none}. Parts 1 and 2 used 7 of them.
+  \item \textbf{M-lines were redrawn on buffer 3} (focused beams, REFoCUS) on the frame at the
+    event's cardiac phase.
+  \item \textbf{The new lines are not better.} The buffer-3 frames come from a heartbeat 2--3
+    beats (1.7--3.2\,s) before the buffer-4 event. The heart has moved by a median of
+    \textbf{3.1\,mm} relative to buffer 4 at the event, against 0.8\,mm for the buffer-1 frames
+    (1--2 beats earlier).
+  \item \textbf{Ruled out as causes:} the reconstructions themselves (phantom: buffers agree to
+    $<$\,35\,\si{\micro\metre}) and the phase offset of the chosen frame (0.2\,mm).
+  \item \textbf{In the data that is processed}, the old lines lie slightly more in coherent tissue.
+    Several windows lose their wavefront on the new line (C000000002, 039, 004).
+  \item \textbf{The recipe conclusions of parts 1--2 hold on all 15 windows and both line sets}:
+    velocity; low band corner at 15\,Hz (15--90/100\,Hz separates best); light Gaussian; no
+    directional filter; no SVD beyond one IQ component; no CFWI.
+\end{itemize}
+
+\section{The redrawn M-lines, and why they differ}
+
+\subsection*{Timing: every drawing frame is from another heartbeat}
+Only buffers 4, 2(+5) and 6 are R-peak triggered. The trigger log places the frames drawn on,
+relative to the buffer-4 event:
+\begin{itemize}
+  \item buffer 1: 0.8--2.2\,s before, 1--2 beats earlier;
+  \item buffer 3: 1.7--3.2\,s before, 2--3 beats earlier.
+\end{itemize}
+The nearest-phase buffer-3 frame is 0--20\,ms off the event phase: buffer 3 has only 26--32
+frames per acquisition. For buffer 1 the offset is 5\,ms or less.
+
+\subsection*{Reconstruction offsets: ruled out on the resolution phantom}
+In a static phantom there is no motion, so any displacement of a point between buffers is a
+reconstruction or geometry offset. Wire targets were located with sub-pixel precision in each
+buffer and matched to buffer 4 (21--25 wires, all $\ge$\,20\,dB above background):
+
+\begin{center}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+buffer vs buffer 4 & $dx$ median [\si{\micro\metre}] & $dz$ median [\si{\micro\metre}] & $dz$ IQR [\si{\micro\metre}] & depth scaling & lateral scaling \\
+\midrule
+buffer 1 (widebeam) & 7 & 8 & 103 & 0.07\,\% & 0.70\,\% \\
+buffer 3 (focused, standard) & $-34$ & 10 & 45 & 0.21\,\% & 0.21\,\% \\
+buffer 3 (focused, REFoCUS) & 6 & 5 & 13 & 0.05\,\% & 0.42\,\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+All offsets are a tenth of a pixel (394\,\si{\micro\metre}) or less. At most 0.15\,mm at 20\,mm
+off-axis comes from scaling. \textbf{The buffers map the same point to the same place.}
+
+\fig{buffer_registration_phantom.png}
+
+\clearpage
+\subsection*{In vivo: what moves, and by how much}
+For each window, the anatomy was registered between the frames by phase correlation. The images
+were band-passed to 1--6\,mm structure, and a known-shift self-test was run on every window.
+
+\begin{center}
+\small
+\begin{tabular}{lrl}
+\toprule
+quantity (median over 15 windows) & value & meaning \\
+\midrule
+phase offset alone (buffer 4 at event vs event + offset, same beat) & 0.2\,mm & negligible \\
+buffer-1 frame vs buffer 4 at the event & 0.8\,mm & 1--2 beats apart \\
+buffer-3 frame vs buffer 4 at the event & \textbf{3.1\,mm} & 2--3 beats apart; larger than buffer 1 in 12/15 \\
+new vs old line, where they overlap & 1.8\,mm & only $\sim$50\,\% overlap; angle 1--28\si{\degree} \\
+\quad after removing the anatomy shift between the two frames & 1.7\,mm & the remaining part is interpretation \\
+buffer-4 coherence along the line (tissue $\approx$ 1) & 0.90 old / 0.88 new & new higher in 3/15 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Reading.} The difference is partly beat-to-beat motion and partly interpretation. Where
+the buffer-3 anatomy moved most, removing the shift brings the lines together:
+\begin{itemize}
+  \item C000000018: 7.4 $\rightarrow$ 3.5\,mm;
+  \item C000000019: 2.5 $\rightarrow$ 0.5\,mm;
+  \item C000000040: 2.5 $\rightarrow$ 0.5\,mm.
+\end{itemize}
+Elsewhere the new lines cover a different stretch or run at a different angle. The in-vivo
+registrations are cross-modality (correlation 0.48--0.86), so single large values are
+approximate; C000000020's 11.7\,mm (correlation 0.56) is the least certain.
+
+\fig{mline_difference_check.png}
+
+\clearpage
+\section{Old versus new M-line: the space-time plots}
+Default recipe (velocity 15--150\,Hz, Gaussian 0.6 $\times$ 1.2\,mm, mean 3, 5 lines) on the old
+buffer-1 segment and on the new buffer-3 line. Top row: the buffer-3 frame with both lines.
+\begin{itemize}
+  \item Most windows look alike on both lines (019, 020, 027, 029, 037, 040, 042).
+  \item Some lose their front on the new line: C000000002 (whose buffer-3 anatomy is 4.8\,mm
+    off), 039 and 004.
+  \item None becomes clearly better.
+  \item The new lines are longer (27--43\,mm vs 16--22\,mm), which helps a slope reading only
+    where the line stays in the wall.
+\end{itemize}
+
+\fig{line_comparison_clear.png}
+\fig{line_comparison_rest.png}
+
+\clearpage
+\section{Recipe scores on all 15 windows, both line sets}
+Per panel: the tracking score of the strongest straight line (mean $|$signal$|$ on it / panel
+RMS). No hand line is needed, so it works on both line sets. Medians per group; the separation
+is clear minus guess/none.
+\begin{itemize}
+  \item A recipe that separates waves from noise has a high separation.
+  \item A recipe that invents structure raises the guess/none group too.
+  \item The guess/none group has only two windows, so small differences are noise.
+\end{itemize}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lrrrrrrrr}
+\toprule
+ & \multicolumn{4}{c}{old lines (buffer 1)} & \multicolumn{4}{c}{new lines (buffer 3)} \\
+recipe & clear & plaus. & g/n & sep. & clear & plaus. & g/n & sep. \\
+\midrule
+v1 displacement 10--150 (old view A) & 2.41 & 1.97 & 1.80 & 0.61 & 2.09 & 1.88 & 1.60 & 0.49 \\
+v1 velocity 10--150 & 2.39 & 2.19 & 1.90 & 0.49 & 2.17 & 2.01 & 1.64 & 0.53 \\
+v1 acceleration & 2.19 & 1.71 & 1.95 & 0.24 & 2.35 & 1.58 & 1.06 & 1.29 \\
+v1 displacement 15--100 & 2.57 & 2.33 & 1.86 & 0.70 & 2.33 & 2.00 & 1.58 & 0.75 \\
+v1 displacement 5--150 & 1.95 & 1.70 & 1.63 & 0.32 & 1.80 & 1.53 & 1.62 & 0.17 \\
+v1 velocity 15--100 & 2.47 & 2.25 & 1.87 & 0.61 & 2.28 & 2.15 & 1.64 & 0.64 \\
+v1 directional, displacement toward low $r$ & 2.27 & 1.72 & 1.68 & 0.59 & 1.91 & 1.79 & 1.68 & 0.23 \\
+v1 polynomial detrend + low-pass & 2.19 & 1.99 & 2.04 & 0.15 & 1.86 & 1.81 & 1.72 & 0.14 \\
+v1 view C (velocity 15--90, Gauss 1.0, mean 5, 9 lines) & 2.57 & 2.49 & 1.88 & 0.69 & 2.47 & 2.23 & 1.76 & 0.72 \\
+v1 Petrescu/Santos acceleration & 2.74 & 1.87 & 1.67 & 1.08 & 2.31 & 1.79 & 1.53 & 0.79 \\
+\midrule
+\textbf{v2 default} (velocity 15--150, Gauss 0.6, mean 3, 5 lines) & 2.40 & 2.24 & 1.90 & 0.50 & 2.25 & 2.17 & 1.60 & 0.64 \\
+v2 Gaussian 1.0 $\times$ 2.0 & 2.56 & 2.37 & 2.15 & 0.42 & 2.41 & 2.21 & 1.76 & 0.66 \\
+v2 Gaussian 2.0 $\times$ 4.0 & 2.65 & 2.57 & 2.17 & 0.48 & 2.45 & 2.35 & 1.82 & 0.63 \\
+v2 moving mean 9 & 2.43 & 2.23 & 1.65 & 0.78 & 2.22 & 2.07 & 1.64 & 0.59 \\
+v2 9 lines $\times$ 0.8\,mm & 2.47 & 2.31 & 1.91 & 0.56 & 2.44 & 2.16 & 1.64 & 0.80 \\
+v2 combined medium & 2.58 & 2.43 & 2.06 & 0.53 & 2.43 & 2.20 & 1.77 & 0.66 \\
+v2 IQ SVD, 1 component & 2.39 & 2.29 & 1.81 & 0.58 & 2.30 & 2.10 & 1.75 & 0.55 \\
+v2 IQ SVD, 3 components & 2.44 & 2.37 & 2.13 & 0.30 & 2.17 & 2.04 & 1.77 & 0.41 \\
+v2 IQ SVD instead of the high-pass & 1.77 & 1.66 & 1.83 & $-0.05$ & 1.57 & 1.65 & 1.79 & $-0.22$ \\
+v2 CFWI 2\,cm/s & 2.33 & 2.06 & 1.83 & 0.50 & 1.86 & 1.97 & 1.87 & $-0.01$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Reading.}
+\begin{itemize}
+  \item \textbf{Consistent on both line sets:}
+    \begin{itemize}
+      \item a 15\,Hz low corner separates better than 5--10\,Hz;
+      \item view C is the best production view;
+      \item the 5\,Hz high-pass, polynomial detrending, SVD as the motion filter and CFWI
+        separate poorly;
+      \item more than one SVD component lowers the separation.
+    \end{itemize}
+  \item \textbf{Acceleration} separates well by this score, because noise panels offer no
+    straight line. Visually it is still the noisiest quantity (part 1).
+  \item \textbf{The new lines} lower the clear-window scores for most recipes. They also lower
+    the guess/none scores, so the separation is similar -- no gain in wave visibility.
+  \item The full table (all 83 recipes $\times$ 2 line sets) is in
+    \texttt{study/logs/passive\_atlas15\_scores.csv}.
+\end{itemize}
+
+\clearpage
+\section{Conclusions}
+\begin{enumerate}
+  \item \textbf{Keep the buffer-1 lines for now}, or motion-correct the buffer-3 lines: shift
+    each by its measured buffer-3 $\rightarrow$ buffer-4 anatomy offset. The focused image is
+    sharper, but it is 2--3 beats away from the data being processed, and that costs more than
+    the sharper image gains.
+  \item \textbf{For future acquisitions}, acquire the focused buffer directly before or after
+    buffer 4, in the same or the adjacent beat, so the M-line image and the passive data share
+    the heart position.
+  \item \textbf{The default-pipeline candidate from part 2 stands on all 15 windows}:
+    \begin{itemize}
+      \item velocity, band-pass from 15\,Hz (15--90 to 15--150\,Hz);
+      \item Gaussian 0.6--1.0\,mm;
+      \item moving mean 3--5;
+      \item 5--9 M-lines;
+      \item no directional filter, no SVD, no CFWI.
+    \end{itemize}
+  \item \textbf{Caveats.}
+    \begin{itemize}
+      \item The scores are from one observer.
+      \item The guess/none group has two windows.
+      \item The best-line score is a proxy that rewards any straight structure, which is why the
+        plots, not the numbers, carry the decision.
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Reproduce.}
+\begin{itemize}
+  \item \texttt{draw\_labelled\_mlines\_b3.py} (interactive);
+  \item \texttt{buffer\_registration\_phantom.py};
+  \item \texttt{mline\_difference\_check.py};
+  \item \texttt{passive\_atlas\_all15.py} ($\sim$70\,min; \texttt{--figures} re-renders from
+    the cache);
+  \item \texttt{tectonic passive\_methods\_v3.tex}.
+\end{itemize}
+
+\clearpage
+\appendix
+\section{All recipe families on the new (buffer-3) lines}
+Each family is shown twice: the six \emph{clear} windows, then the seven \emph{plausible} and two
+\emph{guess/none} windows. The recipes and their meaning are as in parts 1 (v1: view-A
+displacement base) and 2 (v2: velocity 15--150\,Hz base).
+
+\newcommand{\familypage}[2]{\clearpage\subsection*{#2}\fig{b3_#1_clear.jpg}\clearpage\fig{b3_#1_rest.jpg}}
+\familypage{v1_quantity}{v1 -- quantity: displacement, velocity, acceleration}
+\familypage{v1_band_displacement}{v1 -- band-pass, displacement}
+\familypage{v1_band_velocity}{v1 -- band-pass, velocity}
+\familypage{v1_directional}{v1 -- directional filter}
+\familypage{v1_spatial}{v1 -- spatial smoothing (displacement)}
+\familypage{v1_temporal}{v1 -- temporal smoothing (displacement)}
+\familypage{v1_mline}{v1 -- M-line averaging (displacement)}
+\familypage{v1_motion}{v1 -- motion and clutter handling}
+\familypage{v1_literature}{v1 -- literature recipes}
+\familypage{v1_views}{v1 -- production views A, B, C}
+\familypage{v2_spatial}{v2 -- spatial smoothing (velocity 15--150)}
+\familypage{v2_temporal}{v2 -- temporal smoothing}
+\familypage{v2_mline}{v2 -- M-line averaging}
+\familypage{v2_combined}{v2 -- spatial, temporal and M-lines together}
+\familypage{v2_svd}{v2 -- SVD}
+\familypage{v2_cfwi}{v2 -- CFWI}
+
+\end{document}

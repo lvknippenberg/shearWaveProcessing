@@ -1,0 +1,45 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+phantom b3 standard  z=45 applied    (+0.0,+0.0,+0deg): line error median 0.11 max 0.11 mm (est -0.08,-0.08,+0.00deg, corr 0.91, spread 0.00)
+phantom b3 standard  z=45 applied    (+2.0,-1.5,+0deg): line error median 0.12 max 0.12 mm (est -2.09,+1.42,+0.00deg, corr 0.92, spread 0.04)
+phantom b3 standard  z=45 applied    (-3.0,+2.0,+0deg): line error median 0.14 max 0.14 mm (est +2.96,-2.13,+0.00deg, corr 0.93, spread 0.04)
+phantom b3 standard  z=45 applied    (+1.0,+1.0,+3deg): line error median 0.14 max 0.31 mm (est -1.06,-1.10,-2.00deg, corr 0.92, spread 0.00)
+phantom b3 standard  z=70 applied    (+0.0,+0.0,+0deg): line error median 0.09 max 0.09 mm (est -0.04,-0.08,+0.00deg, corr 0.87, spread 0.00)
+phantom b3 standard  z=70 applied    (+2.0,-1.5,+0deg): line error median 0.12 max 0.12 mm (est -2.09,+1.42,+0.00deg, corr 0.90, spread 0.00)
+phantom b3 standard  z=70 applied    (-3.0,+2.0,+0deg): line error median 0.09 max 0.09 mm (est +3.07,-2.05,+0.00deg, corr 0.85, spread 0.04)
+phantom b3 standard  z=70 applied    (+1.0,+1.0,+3deg): line error median 0.16 max 0.30 mm (est -1.06,-1.14,-2.25deg, corr 0.86, spread 0.00)
+phantom b3 standard  z=95 applied    (+0.0,+0.0,+0deg): line error median 0.11 max 0.11 mm (est +0.08,+0.08,+0.00deg, corr 0.88, spread 0.06)
+phantom b3 standard  z=95 applied    (+2.0,-1.5,+0deg): line error median 0.13 max 0.13 mm (est -1.89,+1.58,+0.00deg, corr 0.88, spread 0.06)
+phantom b3 standard  z=95 applied    (-3.0,+2.0,+0deg): line error median 0.08 max 0.08 mm (est +3.03,-1.93,+0.00deg, corr 0.86, spread 0.04)
+phantom b3 standard  z=95 applied    (+1.0,+1.0,+3deg): line error median 0.15 max 0.24 mm (est -0.91,-0.98,-2.00deg, corr 0.87, spread 0.05)
+phantom b3 REFoCUS   z=45 applied    (+0.0,+0.0,+0deg): line error median 0.11 max 0.11 mm (est -0.08,-0.08,+0.00deg, corr 0.91, spread 0.00)
+phantom b3 REFoCUS   z=45 applied    (+2.0,-1.5,+0deg): line error median 0.10 max 0.10 mm (est -2.09,+1.46,+0.00deg, corr 0.93, spread 0.04)
+phantom b3 REFoCUS   z=45 applied    (-3.0,+2.0,+0deg): line error median 0.10 max 0.10 mm (est +2.96,-2.09,+0.00deg, corr 0.93, spread 0.04)
+phantom b3 REFoCUS   z=45 applied    (+1.0,+1.0,+3deg): line error median 0.14 max 0.27 mm (est -1.06,-1.06,-2.00deg, corr 0.92, spread 0.00)
+phantom b3 REFoCUS   z=70 applied    (+0.0,+0.0,+0deg): line error median 0.04 max 0.04 mm (est +0.00,-0.04,+0.00deg, corr 0.92, spread 0.04)
+phantom b3 REFoCUS   z=70 applied    (+2.0,-1.5,+0deg): line error median 0.10 max 0.10 mm (est -2.05,+1.42,+0.00deg, corr 0.92, spread 0.04)
+phantom b3 REFoCUS   z=70 applied    (-3.0,+2.0,+0deg): line error median 0.09 max 0.09 mm (est +3.07,-2.05,+0.00deg, corr 0.91, spread 0.08)
+phantom b3 REFoCUS   z=70 applied    (+1.0,+1.0,+3deg): line error median 0.14 max 0.30 mm (est -0.99,-1.14,-2.25deg, corr 0.90, spread 0.09)
+phantom b3 REFoCUS   z=95 applied    (+0.0,+0.0,+0deg): line error median 0.16 max 0.16 mm (est +0.00,+0.16,+0.00deg, corr 0.88, spread 0.04)
+phantom b3 REFoCUS   z=95 applied    (+2.0,-1.5,+0deg): line error median 0.17 max 0.17 mm (est -1.93,+1.65,+0.00deg, corr 0.88, spread 0.06)
+phantom b3 REFoCUS   z=95 applied    (-3.0,+2.0,+0deg): line error median 0.15 max 0.15 mm (est +2.99,-1.85,+0.00deg, corr 0.87, spread 0.04)
+phantom b3 REFoCUS   z=95 applied    (+1.0,+1.0,+3deg): line error median 0.14 max 0.29 mm (est -0.95,-0.87,-2.25deg, corr 0.88, spread 0.09)
+phantom: line error median over all cases 0.12 mm, worst max 0.31 mm
+C000000002 w0 MVC: b3->b4 (+4.5,-4.1) mm (corr 0.18->0.32, spread 0.98 mm, agree 56% UNRELIABLE, known-shift err 10.96 mm (unmodelled +3 deg: 9.78); regularised rotation -9.8 deg moves the line 10.3 mm); b1/b3 lines 9.3 -> 5.0 mm apart; coherence b1 0.76 b3 0.62 b3to4 0.76 b1to4 0.77
+C000000003 w1 AVC: b3->b4 (-1.5,-1.7) mm (corr 0.47->0.57, spread 0.64 mm, agree 67% UNRELIABLE, known-shift err 2.57 mm (unmodelled +3 deg: 0.44); regularised rotation +0.0 deg moves the line 0.5 mm); b1/b3 lines 1.6 -> 1.6 mm apart; coherence b1 0.93 b3 0.92 b3to4 0.92 b1to4 0.94
+C000000004 w1 AVC: b3->b4 (+0.3,+0.7) mm (corr 0.76->0.76, spread 0.32 mm, agree 100%, known-shift err 0.42 mm (unmodelled +3 deg: 0.82); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 1.9 -> 2.6 mm apart; coherence b1 0.97 b3 0.95 b3to4 0.95 b1to4 0.97
+C000000008 w2 AVC: b3->b4 (+1.3,+2.3) mm (corr 0.49->0.57, spread 0.14 mm, agree 100%, known-shift err 0.25 mm (unmodelled +3 deg: 0.56); regularised rotation -5.0 deg moves the line 1.0 mm); b1/b3 lines 1.7 -> 4.1 mm apart; coherence b1 0.92 b3 0.91 b3to4 0.90 b1to4 0.91
+C000000018 w0 MVC: b3->b4 (+6.0,+0.2) mm (corr 0.14->0.63, spread 0.39 mm, agree 89%, known-shift err 0.38 mm (unmodelled +3 deg: 0.55); regularised rotation -9.2 deg moves the line 1.5 mm); b1/b3 lines 7.4 -> 2.7 mm apart; coherence b1 0.95 b3 0.91 b3to4 0.94 b1to4 0.95
+C000000019 w1 AVC: b3->b4 (-4.7,+2.3) mm (corr 0.37->0.65, spread 0.44 mm, agree 67% UNRELIABLE, known-shift err 1.97 mm (unmodelled +3 deg: 0.84); regularised rotation -5.0 deg moves the line 1.3 mm); b1/b3 lines 2.5 -> 0.5 mm apart; coherence b1 0.92 b3 0.91 b3to4 0.91 b1to4 0.92
+C000000020 w1 AVC: b3->b4 (+4.2,-1.4) mm (corr 0.37->0.61, spread 9.86 mm, agree 0% UNRELIABLE, known-shift err 9.67 mm (unmodelled +3 deg: 0.57); regularised rotation -9.2 deg moves the line 5.2 mm); b1/b3 lines 1.8 -> 1.7 mm apart; coherence b1 0.89 b3 0.86 b3to4 0.86 b1to4 0.90
+C000000022 w1 AVC: b3->b4 (-4.0,+1.5) mm (corr 0.16->0.39, spread 0.47 mm, agree 78% UNRELIABLE, known-shift err 4.41 mm (unmodelled +3 deg: 3.88); regularised rotation +10.0 deg moves the line 2.4 mm); b1/b3 lines 3.8 -> 2.8 mm apart; coherence b1 0.88 b3 0.86 b3to4 0.89 b1to4 0.87
+C000000027 w0 MVC: b3->b4 (-0.4,-2.2) mm (corr 0.66->0.77, spread 0.39 mm, agree 100%, known-shift err 0.38 mm (unmodelled +3 deg: 0.54); regularised rotation +0.0 deg moves the line 0.1 mm); b1/b3 lines 0.4 -> 2.0 mm apart; coherence b1 0.87 b3 0.91 b3to4 0.92 b1to4 0.87
+C000000029 w1 AVC: b3->b4 (-3.2,-0.6) mm (corr 0.44->0.81, spread 0.11 mm, agree 100%, known-shift err 0.22 mm (unmodelled +3 deg: 0.29); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 2.2 -> 0.5 mm apart; coherence b1 0.85 b3 0.83 b3to4 0.84 b1to4 0.85
+C000000037 w1 MVC: b3->b4 (-0.2,-0.4) mm (corr 0.87->0.86, spread 0.25 mm, agree 67%, known-shift err 0.21 mm (unmodelled +3 deg: 0.47); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 0.9 -> 0.4 mm apart; coherence b1 0.89 b3 0.84 b3to4 0.86 b1to4 0.87
+C000000039 w0 MVC: b3->b4 (-0.4,+3.9) mm (corr 0.24->0.71, spread 1.06 mm, agree 44% UNRELIABLE, known-shift err 1.14 mm (unmodelled +3 deg: 1.93); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 1.1 -> 1.8 mm apart; coherence b1 0.82 b3 0.85 b3to4 0.81 b1to4 0.78
+C000000040 w2 MVC: b3->b4 (+4.7,-0.5) mm (corr 0.43->0.76, spread 0.16 mm, agree 67%, known-shift err 0.36 mm (unmodelled +3 deg: 0.42); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 2.5 -> 0.5 mm apart; coherence b1 0.91 b3 0.92 b3to4 0.92 b1to4 0.87
+C000000042 w0 MVC: b3->b4 (+0.7,-2.5) mm (corr 0.60->0.72, spread 3.79 mm, agree 33% UNRELIABLE, known-shift err 0.93 mm (unmodelled +3 deg: 0.50); regularised rotation +2.0 deg moves the line 0.3 mm); b1/b3 lines 1.6 -> 1.8 mm apart; coherence b1 0.83 b3 0.77 b3to4 0.80 b1to4 0.83
+C000000045 w0 MVC: b3->b4 (+0.6,-0.9) mm (corr 0.83->0.85, spread 0.21 mm, agree 100% UNRELIABLE, known-shift err 5.84 mm (unmodelled +3 deg: 0.83); regularised rotation +0.0 deg moves the line 0.0 mm); b1/b3 lines 0.6 -> 1.3 mm apart; coherence b1 0.90 b3 0.86 b3to4 0.88 b1to4 0.89
+
+reliable (>= 60 % of the ensemble within 1 mm): 7/15
+medians over 15 windows: shift 3.3 mm, regularised |angle| 0.0 deg, corr 0.44->0.71, spread 0.39 mm, known-motion error 0.93 mm; b1/b3 line distance 1.8 -> 1.8 mm after mapping both; coherence b3 0.86 -> b3to4 0.89 (higher in 67%), b1 0.89 -> b1to4 0.87
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\map_mlines_b3_to_b4.csv and D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\montages\map_mlines_b3_to_b4.png
