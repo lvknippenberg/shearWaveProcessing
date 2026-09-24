@@ -31,7 +31,7 @@ now auto-selects `PhantomSweep/BaseConfig_10frames_<cyc>cycles_<el>elements_<pri
 `(pushCycle, nb_push_elmts, PRI_us)`. **Base configs must be saved as v7.3 (HDF5)** — zea's reader is
 h5py-only; v7 (“MATLAB 5.0”) files fail.
 
-## Analysis (`scripts/sweep_params.py`)
+## Analysis (`scripts/archive/sweep_params.py`)
 
 Per push: **focal displacement** (peak |disp| at the ARF focus vs the pre-push reference, a push-strength
 proxy) + wavefront **ROI-contrast** (locked 50 V V-template) + **mirror-symmetry** + **best-fit speed**.
@@ -115,7 +115,7 @@ wavefront ROI-contrast/symmetry + r0 localization (Verasonics `TX.Apod`).
 ```bash
 # beamform each folder (auto-selects the per-config v7.3 base by pushCycle/elements/PRI)
 SWP_BASE_CONFIG_DIR="…/Base config files" python run.py beamform "<folder>" --no-gifs
-python scripts/sweep_params.py            # -> sweep_params.csv + sweep_params.png (+ montage)
+python scripts/archive/sweep_params.py            # -> sweep_params.csv + sweep_params.png (+ montage)
 ```
 
 ## Caveats

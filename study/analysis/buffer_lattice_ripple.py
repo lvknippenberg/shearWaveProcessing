@@ -23,7 +23,7 @@ import os
 import sys
 
 os.environ.setdefault("KERAS_BACKEND", "torch")
-sys.path.insert(0, r"D:/Luuk van Knippenberg/Github/shearWaveProcessing/src")
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")), "src"))
 
 import h5py
 import numpy as np

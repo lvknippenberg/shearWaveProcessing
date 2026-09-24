@@ -46,6 +46,9 @@ class PipelineConfig:
     mline_offset_step_m: Optional[float] = None
     mline_agg: str = "mean"                  # combine offset M-line copies: "mean" | "median"
     push_x_m: Optional[float] = None         # vertical push at this lateral x: r0 = M-line crossing there
+    continuous_record: bool = False          # frame-to-frame only: filter reference + tracking as one
+                                             # uniformly-sampled record, then crop to tracking
+                                             # (swp.viz.slowtime; needed by giannantonio_motion_filter)
 
     def label(self) -> str:
         ff = "+".join(s.name for s in self.field_filters) or "none"
@@ -106,15 +109,24 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
         kwargs["reference"] = acq.ref_iq
     res = est(iq, **kwargs)
 
-    if cfg.quantity == "velocity":
-        f_all, t_all = res.velocity, 0.5 * (acq.t[:-1] + acq.t[1:])
-    elif cfg.quantity == "acceleration":
-        f_all = np.diff(res.velocity, axis=0) * acq.prf   # d(velocity)/dt [m/s^2]
-        t_all = acq.t[1:-1]
+    first_tracking = 0
+    if cfg.continuous_record:
+        if cfg.mode != "frame_to_frame" or cfg.iq_filters:
+            raise ValueError("continuous_record needs mode=frame_to_frame and no IQ filters")
+        from .slowtime import continuous_record
+        est_kw = {k: v for k, v in kwargs.items() if k not in ("mode", "reference")}
+        rec = continuous_record(acq, est, est_kw, quantity=cfg.quantity, drop_first=cfg.drop_first)
+        fld, times, first_tracking = rec.field, rec.t, rec.first_tracking
     else:
-        f_all, t_all = res.displacement, acq.t
-    k = cfg.drop_first
-    fld, times = f_all[k:], t_all[k:]
+        if cfg.quantity == "velocity":
+            f_all, t_all = res.velocity, 0.5 * (acq.t[:-1] + acq.t[1:])
+        elif cfg.quantity == "acceleration":
+            f_all = np.diff(res.velocity, axis=0) * acq.prf   # d(velocity)/dt [m/s^2]
+            t_all = acq.t[1:-1]
+        else:
+            f_all, t_all = res.displacement, acq.t
+        k = cfg.drop_first
+        fld, times = f_all[k:], t_all[k:]
 
     # --- push focus (auto) ---
     if focus is None:
@@ -122,7 +134,9 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
 
     # --- field-space filters ---
     ctx = FilterCtx(dz=acq.dz, dx=acq.dx, prf=acq.prf, t=times, x=acq.x, z=acq.z,
-                    focus_ix=focus.ix, focus_x=focus.x, f_demod=acq.f_demod, c=acq.c)
+                    focus_ix=focus.ix,
+                    focus_x=cfg.push_x_m if cfg.push_x_m is not None else focus.x,
+                    f_demod=acq.f_demod, c=acq.c)
     # per-pixel quality maps for optional quality masking: reference B-mode (dB) + slow-time coherence.
     _env = np.abs(acq.ref_iq.mean(axis=0)) if acq.ref_iq is not None else np.abs(acq.iq[0])
     ctx.bmode_db = 20.0 * np.log10(_env / (_env.max() + 1e-12) + 1e-6)
@@ -143,6 +157,8 @@ def run_pipeline(acq: Acquisition, mline: MLine, cfg: PipelineConfig,
             ctx.t_ref = (np.arange(n_ref) - n_ref) / acq.prf
     for step in cfg.field_filters:
         fld = FIELD_FILTERS[step.name](fld, ctx, **step.params)
+    if first_tracking:                      # continuous record: keep the tracking window only
+        fld, times = fld[first_tracking:], times[first_tracking:]
 
     # --- M-line sampling -> space-time ---
     step_m = cfg.mline_offset_step_m if cfg.mline_offset_step_m is not None else acq.dz * 4

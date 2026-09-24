@@ -12,7 +12,7 @@ import sys
 
 os.environ.setdefault("KERAS_BACKEND", "torch")
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-REPO = r"D:\Luuk van Knippenberg\Github\shearWaveProcessing"
+REPO = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 sys.path.insert(0, os.path.join(REPO, "src"))
 
 import h5py

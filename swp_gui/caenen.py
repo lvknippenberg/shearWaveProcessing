@@ -1,7 +1,7 @@
 """Caenen pig ARF-SWE data adapter for the GUI.
 
 The Caenen data is not in the zea buffer-2 layout: it is the MATLAB-exported polar/Cartesian IQ in
-``_h5_tmp/push_<p>.h5`` (see docs/caenen_vs_invivo_acquisition.md, scripts/sweep_caenen.py). This module
+``_h5_tmp/push_<p>.h5`` (see docs/caenen_vs_invivo_acquisition.md, scripts/archive/sweep_caenen.py). This module
 loads the **Cartesian** grid via swp_bridge and crops it to the drawn M-line ROI (so the GUI runs at
 interactive speed, like sweep_caenen). The push is on-axis (x=0), so r0 is the M-line crossing of x=0.
 """
@@ -13,8 +13,10 @@ import sys
 
 import numpy as np
 
-H5DIR = r"D:/Luuk van Knippenberg/Claude/Data Caenen/SWE_results/_h5_tmp"
-SWE = r"D:/Luuk van Knippenberg/Claude/Data Caenen/SWE_results"
+from swp import paths as P                                # noqa: E402
+
+H5DIR = os.path.join(P.CAENEN_SWE, "_h5_tmp")
+SWE = P.CAENEN_SWE
 if SWE not in sys.path:
     sys.path.insert(0, SWE)                              # for swp_bridge (load_push/build_acq)
 

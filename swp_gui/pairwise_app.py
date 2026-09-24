@@ -3,12 +3,13 @@
 Shows two space-time plots stacked top/bottom (so the same quantity - displacement / velocity /
 acceleration - lines up vertically); you pick which shows the shear wave more clearly (or 'no
 preference'). Comparisons save to pairs.csv and are later ranked (Bradley-Terry) and
-correlated with the recipe parameters to pin the optimum (scripts/pairwise_analyze.py). Blind: recipes
+correlated with the recipe parameters to pin the optimum (scripts/archive/pairwise_analyze.py). Blind: recipes
 and metric hidden. Reads the active dataset (current_round.txt) or pick one in the sidebar.
 
     KERAS_BACKEND=torch  <zea-python>  -m streamlit run swp_gui/pairwise_app.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
@@ -16,8 +17,10 @@ import os
 import random
 
 import streamlit as st
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")), "src"))
+from swp import paths as P                                # noqa: E402
 
-BASE = r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep/metric_experiment"
+BASE = P.METRIC_EXPERIMENT
 PASSES = 6          # each item appears in ~PASSES pairs
 
 st.set_page_config(page_title="SWE pairwise", layout="wide")
@@ -92,7 +95,7 @@ if st.sidebar.button("undo last") and pos > 0:
     st.session_state["pw_pos"] = len(rows); st.rerun()
 
 if pos >= total:
-    st.success(f"All {total} comparisons done ✔ — run scripts/pairwise_analyze.py")
+    st.success(f"All {total} comparisons done ✔ — run scripts/archive/pairwise_analyze.py")
     st.stop()
 
 a, b = sched[pos]

@@ -150,6 +150,10 @@ def append_scan_params_to_iq(iq_path, converted_path=None):
     _retry_on_lock(File.create, str(tmp), data={"beamformed_data": bdata}, custom=keep + new,
                    description="beamformed shear-wave IQ + scan parameters",
                    compression="lzf", overwrite=True, ignore_warnings=True)
+    # the rebuild drops every group it does not know, including the provenance stamp - re-stamp
+    from ..provenance import stamp_h5
+    stamp_h5(str(tmp), extra={"stage": "beamform + scan params", "description":
+                              "beamformed shear-wave IQ + scan parameters"})
     # os.replace is atomic and overwrites in one step. The previous unlink()+rename()
     # left a window in which the IQ file did not exist at all, so a failure between the
     # two would have lost the beamformed data outright.

@@ -1,9 +1,21 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-09-17.
+for the full passive-SWE investigation record. Last updated 2026-09-24.
 
-## 0. LATEST (2026-09-17): passive M-lines on buffer 1, ECG timing, Linux server
+## 0. LATEST (2026-09-24): review follow-up - see `docs/review_followup_2026-09-24.md`
+
+- **The in-vivo ARF wave is still not there with the literature recipe** (frame-to-frame velocity,
+  75-750 Hz; Caenen 11.7x push/control, our 4 acquisitions 0.86-1.01x), nor in a screen of all
+  1552 study pushes (median 0.89x; 7 candidates for review). Harness: `scripts/invivo_recipe_contrast.py`.
+- Reference timestamps now include the push (0.97 / 1.17 ms, was 0.27 ms); **in vivo the blocks
+  decorrelate across the push** (0.8 vs 0.95) - reference-relative methods start handicapped.
+- Automatic active speed is biased by the directional filter and `radon` (tests, strict xfails).
+- New: `tests/`, `swp.paths`, `swp.provenance` (stamps every HDF5), `scripts/archive/`,
+  continuous record + Giannantonio filter + CFWI + normalised Radon (all tested, none adopted).
+- Open actions for Luuk: `docs/TODO.md`.
+
+## 0. (2026-09-17): passive M-lines on buffer 1, ECG timing, Linux server
 
 Detail: `docs/passive_mlines.md`, `docs/ecg_timing.md`, `docs/linux_server.md`; history in
 `study/SESSION_LOG.md`.
@@ -180,12 +192,12 @@ So at a typical ~70 bpm: **MVC ≈ push 0–1, AVC ≈ push 7** (t ≈ 350 ms). 
 **acquisition-limited (push-strength-limited)** — while the Caenen pig data does, and the fix is a
 **stronger push (larger aperture)**. Key results and where they live:
 
-- **In-vivo 40 V speed-scan sweep** (`scripts/sweep_invivo40.py`, per-lobe: each lobe its own best-fit
+- **In-vivo 40 V speed-scan sweep** (`scripts/archive/sweep_invivo40.py`, per-lobe: each lobe its own best-fit
   tilt 1–5 m/s since the oblique septum is not mirror-symmetric — user's point). All 24 pushes, 700
   recipes. **No credible wave:** best-fit speeds pile up at the **fast/boundary end (median 4.5 m/s, 32 %
   pinned at 5)** = near-simultaneous bulk wall motion, not propagation; high ROI comes with low symmetry.
   Quietest (diastasis-proxy) pushes: m22,m5,m6,m23. Analyzer: `invivo40_analyze.py`.
-- **Caenen pig ARF-SWE, full 52-push sweep DONE** (`scripts/sweep_caenen.py` + `caenen_analyze.py` +
+- **Caenen pig ARF-SWE, full 52-push sweep DONE** (`scripts/archive/sweep_caenen.py` + `caenen_analyze.py` +
   `caenen_methods.py`; ~40 min/push, ~24 h; supports **resume**). **A clean symmetric V is recovered at
   every push** (52/52 ROI > 0.25; ROI∧symmetry cluster high together) — a real wave, the clean opposite
   of the in-vivo bulk-motion pile-up. **CAVEAT (user):** SWS varies with cardiac phase (52 pushes span
@@ -203,13 +215,13 @@ So at a typical ~70 bpm: **MVC ≈ push 0–1, AVC ≈ push 7** (t ≈ 350 ms). 
   50–60 V, MI 2.2**; tracking 3.7 vs ≥5.6–8.8 kHz; free-running vs R-peak-triggered. We already use
   Loupas (paper's suggested upgrade over Kasai). **Finer beamforming grid does NOT help** (tested) and
   **REFoCUS is inapplicable** (needs multi-transmit; SWE tracking is single diverging-wave na=1).
-- **Phantom acquisition parameter sweep** `docs/phantom_parameter_sweep.md` (`scripts/sweep_params.py`):
+- **Phantom acquisition parameter sweep** `docs/phantom_parameter_sweep.md` (`scripts/archive/sweep_params.py`):
   11 configs × {20,30} V × 10 pushes. **Aperture (F#) is the dominant lever** (ROI 21→79 el 0.19→0.44 @
   30 V); pulse modest; PRF negligible on the static phantom; combos super-additive at low voltage. MI is
   ~linear in element count (**61 el +48 %, 79 el +90 %**; pulse length is free on MI). **RECOMMENDATION:
   61 push elements + ~800 µs pulse.** Pipeline fixes needed: `make_combined_data.m` no longer hardcodes
   Nframes=2 and auto-selects a per-config **v7.3** base (`PhantomSweep/BaseConfig_10frames_*`).
-- **Cardiac-motion-removal harness** (`scripts/motion_removal.py`; no-push control via split reference):
+- **Cardiac-motion-removal harness** (`scripts/archive/motion_removal.py`; no-push control via split reference):
   **reference-subspace projection AND SVD-clutter FABRICATE a false V from pure cardiac motion** (reject
   them); **optical flow (new `optical_flow_compensation`) is the best-behaved remover** (quiets no-push
   without fabricating); IQ-vs-displacement is technique-dependent (SVD→IQ, bulk→displacement). But on the
@@ -272,7 +284,7 @@ randomized/focused recipes across phantom 15/25/30/50 V + in-vivo 30/40 V. Findi
   robustly beat it. Ceiling ~0.5 is honest (discrete/near-tie human scores).
 - **`origin_coherence` did NOT break in-vivo** for ranking (ρ≈0.5) — the cardiac-fooling is specific to
   the *no-push reference* window, not to ranking recipes on the tracking window.
-- **All GUI options verified to affect the output** (`scripts/check_options.py`); no no-ops.
+- **All GUI options verified to affect the output** (`scripts/archive/check_options.py`); no no-ops.
 
 **The settled recipe — and it is SNR-ADAPTIVE (validated on phantom 30 V vs 50 V pairwise):**
 - **Universal:** Loupas · `relative_to_reference` · temporal band-pass · **OUTWARD directional (decisive:
@@ -303,7 +315,7 @@ randomized/focused recipes across phantom 15/25/30/50 V + in-vivo 30/40 V. Findi
    image without further context** — so removal (physics-based, using the reference) is the real lever,
    not a better image metric, and validation needs the no-push contrast (and ideally ECG phase / a
    simulated ground truth).
-   **STATUS (2026-08-07): harness built + first evaluation done (`scripts/motion_removal.py`).** No-push
+   **STATUS (2026-08-07): harness built + first evaluation done (`scripts/archive/motion_removal.py`).** No-push
    control = SPLIT reference (train filter on 1st half of the reference, apply to 2nd half = no push);
    scored by the per-lobe speed-scan + symmetry; pushes ranked by pre-push wall-motion RMS (data-driven
    diastasis proxy — ECG in the .mat is not usable, WaitForRpeak=0). **KEY FINDINGS:** (a) **reference-
@@ -336,7 +348,7 @@ randomized/focused recipes across phantom 15/25/30/50 V + in-vivo 30/40 V. Findi
    **RECOMMENDATION: 61 push elements + ~800 µs pulse** (most clarity-per-MI; 79 el buys +0.02 ROI for
    nearly double the MI). Pipeline fixes: `make_combined_data.m` no longer hardcodes Nframes=2 and
    auto-selects a per-config **v7.3** base config (PhantomSweep/BaseConfig_10frames_<cyc>c_<el>el_<pri>PRI).
-   Analysis: `scripts/sweep_params.py`.
+   Analysis: `scripts/archive/sweep_params.py`.
 3b. **(superseded original next-step) Acquisition-optimization phantom measurements.** Motivated by the
    Caenen-vs-our-in-vivo acquisition comparison (`docs/caenen_vs_invivo_acquisition.md`): the in-vivo gap
    is acquisition-limited (weak/loose-F# push, low PRF) more than processing-limited. Re-acquire phantom
@@ -391,7 +403,7 @@ importable for stages 1–2 (numpy/scipy/matplotlib/h5py suffice for stage 3).
 ## 3. Window labelling (invivo_sw) — settled
 
 Burst detection finds 4 windows. Cardiac cycle = 920 − 52 = **868 ms → 69 bpm** (matches ECG). By
-timing + same-recipe comparison (`scripts/passive_compare_windows.py`):
+timing + same-recipe comparison (`scripts/archive/passive_compare_windows.py`):
 
 | window | peak | event | notes |
 |---|---|---|---|
@@ -404,7 +416,7 @@ Earlier confusion (tuning to win2) came from win2 not being a valve-closure wave
 
 ## 4. Key passive findings (what the searches taught us)
 
-Two exhaustive searches (`scripts/search_passive.py` v1, `scripts/search_passive2.py` v2) + a MATLAB
+Two exhaustive searches (`scripts/archive/search_passive.py` v1, `scripts/archive/search_passive2.py` v2) + a MATLAB
 cross-check (`processIQ.m`, `ProcessDW=true`). Full detail in `docs/passive_search.md`.
 
 1. **Directional filter OFF.** The k-ω filter injected horizontal reverberation banding and biased the
@@ -492,11 +504,11 @@ measurement (3 clean symmetric-V panels, oc 0.89–0.98, SWS ~2.3–2.4 m/s).
 
 ## 8. Tooling index
 
-- `scripts/search_passive.py` — v1 exhaustive search (6 720/window, `passive_coherence`).
-- `scripts/search_passive2.py` — v2 (11 520/window, **all 7 axes**: directional on/off, N-line mean/median,
+- `scripts/archive/search_passive.py` — v1 exhaustive search (6 720/window, `passive_coherence`).
+- `scripts/archive/search_passive2.py` — v2 (11 520/window, **all 7 axes**: directional on/off, N-line mean/median,
   IQ pre-filter, band/SVD/poly, gauss/median spatial, mean/median temporal, disp/vel/acc), signed-Radon
   clarity score → top-16 + **per-axis marginal montages** (`--window i --label AVC/MVC`).
-- `scripts/passive_best_montage.py`, `passive_filter_variety.py`, `passive_slantstack.py`,
+- `scripts/archive/passive_best_montage.py`, `passive_filter_variety.py`, `passive_slantstack.py`,
   `passive_directional_test.py`, `passive_compare_windows.py` — targeted montages (see `passive_search.md`).
 - Metrics (`src/swp/viz/metrics.py`): `slant_stack_speed` (signed tau-p, **use for passive speed**),
   `passive_coherence` (envelope; do NOT trust its speed), `origin_coherence`/`wavefront_coherence` (active).
@@ -513,5 +525,5 @@ python run.py viz      "<folder>" --config configs/active.yaml --phantom    # ph
 python run.py passive  "<folder>"                               # passive -> 3 views x windows montage
 python run.py passive  "<folder>" --redraw                      # re-draw all passive M-lines
 # re-run a passive exhaustive search:
-python scripts/search_passive2.py --window 1 --label AVC
+python scripts/archive/search_passive2.py --window 1 --label AVC
 ```

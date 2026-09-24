@@ -3,6 +3,7 @@ from .loupas import loupas_displacement
 from .kasai import kasai_displacement
 from .xcorr import xcorr_displacement
 from .rf_ncc import rf_ncc_displacement
+from .cfwi import cfwi_envelope
 
 # registry: name -> callable(iq, dz, dx, c, f_demod, prf, mode, reference, **params)
 ESTIMATORS = {
@@ -10,9 +11,10 @@ ESTIMATORS = {
     "kasai": kasai_displacement,
     "xcorr": xcorr_displacement,
     "rf_ncc": rf_ncc_displacement,
+    "cfwi": cfwi_envelope,          # clutter filter wave imaging - NOT a displacement (see cfwi.py)
 }
 
 __all__ = [
     "DisplacementResult", "loupas_displacement", "kasai_displacement",
-    "xcorr_displacement", "rf_ncc_displacement", "ESTIMATORS",
+    "xcorr_displacement", "rf_ncc_displacement", "cfwi_envelope", "ESTIMATORS",
 ]

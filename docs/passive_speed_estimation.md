@@ -66,6 +66,15 @@ or peak velocity, this is the wrong objective.
 essentially maximising the tracking score above - would be matched to the task by construction.
 This is the single highest-value change to the passive speed path and has not been made yet.
 
+**Update 2026-09-24 - built and tested, and it does not win.** `metrics.normalized_radon_speed`
+(Vos 2017 / Keijzer: the mean signal along the line, i.e. exactly this objective) places its line
+on stronger signal than the hand lines (tracking 2.40 vs 2.24) but matches the hand speed *less*
+often than the slant stack: 38 % vs 62 % within 25 % on the clear panels, because the strongest
+line is often the near-synchronous bulk band (railed fast). Capping the speed at 8 m/s only moves
+the railing; removing the per-time spatial mean collapses the fit. The slant stack stays the
+reported estimator; see `docs/review_followup_2026-09-24.md` section 4 and
+`study/analysis/radon_benchmark.py`.
+
 ## Until then: read the speed by hand
 
 ```

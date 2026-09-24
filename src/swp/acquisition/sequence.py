@@ -16,6 +16,7 @@ carry. Three cohesive parts (formerly ``swi_config`` / ``swi_meta`` / ``swi_fram
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Optional
 from pathlib import Path
 
 import h5py
@@ -173,6 +174,31 @@ class SWGeometry:
     focus_z: float
     roi_xlims: tuple[float, float]
     roi_zlims: tuple[float, float]
+    push_cycles: float = 0.0  # SW.pushCycle
+    push_freq_hz: float = 0.0  # SW.PushFrequency (MHz in the struct)
+    switch_tpc: bool = False  # SW.SwitchTPCprofile: TPC switch + noops around the push
+
+    def push_gap_s(self) -> float:
+        """Time from the last reference transmit to the first tracking transmit, seconds.
+
+        From ``SetUp_SWI_Widebeam.m``: the last reference acquisition is followed by the usual
+        ``timeToNextAcq = PRI`` (SeqControl 11), then the push, whose ``timeToNextAcq`` is its
+        burst duration ``pushCycle / PushFrequency`` rounded **up** to 100 us (SeqControl 10).
+        1500 cycles at 2.25 MHz -> 270 + 700 us; 1900 cycles -> 270 + 900 us.
+
+        With ``SwitchTPCprofile`` the sequence also switches the TPC profile before and after the
+        push and waits ``noop`` 100000 x 200 ns (20 ms) and 1000 x 200 ns (0.2 ms). No acquisition
+        on record uses that; it is included so the number is right if one ever does.
+        Returns just ``pri`` (no push time) if the push parameters are missing.
+        """
+        if self.push_cycles <= 0 or self.push_freq_hz <= 0:
+            return self.pri
+        burst_us = self.push_cycles / (self.push_freq_hz * 1e-6)
+        ttna_push_us = float(np.ceil(burst_us / 100.0) * 100.0)
+        gap = self.pri + ttna_push_us * 1e-6
+        if self.switch_tpc:
+            gap += 20e-3 + 0.2e-3
+        return gap
 
     def prf(self, pi_mode: str = "sliding") -> float:
         """Effective tracking frame rate for a pulse-inversion recombination mode.
@@ -257,6 +283,9 @@ def _sw_geometry(f, wavelength_m):
         na=int(_scalar(sw, "na", 1)),
         harmonic=bool(_scalar(sw, "HarmonicImaging", 1)),
         pri=_scalar(sw, "PRI_us", 270.0) * 1e-6,
+        push_cycles=_scalar(sw, "pushCycle", 0.0),
+        push_freq_hz=_scalar(sw, "PushFrequency", 0.0) * 1e6,
+        switch_tpc=bool(_scalar(sw, "SwitchTPCprofile", 0)),
         focus_x=focus_x,
         focus_z=focus_z,
         roi_xlims=(focus_x - roi_w / 2, focus_x + roi_w / 2),
@@ -433,6 +462,7 @@ def assemble_tracking_frames(
     harmonic: bool = True,
     pri: float = 270e-6,
     pi_mode: str = "sliding",
+    push_gap_s: Optional[float] = None,
 ) -> TrackingFrames:
     """Split a raw SW buffer into recombined reference and tracking frames.
 
@@ -472,9 +502,17 @@ def assemble_tracking_frames(
     prf = 2.0 * base_prf if (pi_mode == "sliding" and harmonic and na == 1) else base_prf
 
     n_ref, n_trk = reference.shape[1], tracking.shape[1]
-    # t = 0 at the first tracking frame; reference frames are before the push.
-    t_tracking = np.arange(n_trk, dtype=np.float32) / prf
-    t_reference = (np.arange(n_ref, dtype=np.float32) - n_ref) / prf
+    # A frame is timed at its first transmit; t = 0 at the first tracking transmit.
+    # Sliding frames start at every transmit, accumulated ones at every detect position.
+    step_tx = 1 if (pi_mode == "sliding" and harmonic and na == 1) else per_pos
+    t_tracking = (np.arange(n_trk) * step_tx * pri).astype(np.float32)
+    # The last reference transmit is `push_gap_s` before the first tracking transmit - the push
+    # happens in between. Until 2026-09-24 this was taken as one frame interval, which put the
+    # reference block ~0.7-0.9 ms too close to the tracking block (and one frame off for
+    # sliding pairs). `SWGeometry.push_gap_s()` gives the real value; None keeps "no push time".
+    gap = pri if push_gap_s is None else float(push_gap_s)
+    first_tx = np.arange(n_ref) * step_tx
+    t_reference = ((first_tx - (n_ref_tx - 1)) * pri - gap).astype(np.float32)
 
     return TrackingFrames(
         reference=reference, tracking=tracking, prf=prf, pi_mode=pi_mode,

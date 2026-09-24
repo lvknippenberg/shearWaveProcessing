@@ -31,8 +31,15 @@ reads each acquisition once, and stores every panel as a small npz, after which 
 instant and re-scoring costs nothing.
 
     python study/analysis/score_panels.py --prepare   # one unattended pass, builds the cache
-    python study/analysis/score_panels.py             # scoring, instant
+    python study/analysis/score_panels.py             # BLIND scoring (default since 2026-09-24)
+    python study/analysis/score_panels.py --compare   # blind vs earlier non-blind scores
+    python study/analysis/score_panels.py --unblinded # the original, non-blind display
     python study/analysis/score_panels.py --redo      # re-score panels already scored
+
+**Blind by default (2026-09-24).** The first scoring pass showed the hand and automatic speeds in
+the title and drew the hand line, so anchoring could not be excluded. Blind mode shows only the
+panel: no subject, event label, speeds or hand line, in a seeded random order, and writes to
+``study/logs/panel_confidence_blind.csv`` so the non-blind scores stay available for ``--compare``.
 """
 from __future__ import annotations
 
@@ -51,7 +58,9 @@ import numpy as np
 VIEWS = {"disp bp10-150 gauss mean3": "displacement",
          "velocity bp15-90 gauss1.0 mean5": "velocity"}
 LEVELS = {"3": "clear", "2": "plausible", "1": "guess", "0": "none"}
-OUT = _REPO / "study" / "logs" / "panel_confidence.csv"
+OUT_UNBLINDED = _REPO / "study" / "logs" / "panel_confidence.csv"
+OUT_BLIND = _REPO / "study" / "logs" / "panel_confidence_blind.csv"
+OUT = OUT_BLIND
 CACHE = _REPO / "study" / "analysis" / "panel_cache"
 
 
@@ -107,10 +116,11 @@ def prepare_cache(panels, config, root, force=False):
     print(f"\n-> {CACHE}")
 
 
-def load_scores():
-    if not OUT.exists():
+def load_scores(path=None):
+    path = path or OUT
+    if not path.exists():
         return {}
-    with open(OUT) as fh:
+    with open(path) as fh:
         return {(r["subject"], int(r["window"]), r["part"], r["quantity"]): r
                 for r in csv.DictReader(fh)}
 
@@ -127,6 +137,38 @@ def save_scores(scores):
         w.writerows(rows)
 
 
+def compare_scores():
+    """Agreement between the blind and the earlier non-blind scores, and whether the estimator-
+    error-by-confidence trend (docs/passive_speed_estimation.md) survives blind scoring."""
+    blind, open_ = load_scores(OUT_BLIND), load_scores(OUT_UNBLINDED)
+    both = sorted(set(blind) & set(open_))
+    if not both:
+        print(f"no panels scored in both {OUT_BLIND.name} and {OUT_UNBLINDED.name}")
+        return
+    b = np.array([int(blind[k]["score"]) for k in both])
+    o = np.array([int(open_[k]["score"]) for k in both])
+    print(f"{len(both)} panels scored both ways: identical {np.mean(b == o):.0%}, within one level "
+          f"{np.mean(np.abs(b - o) <= 1):.0%}, mean blind - non-blind {np.mean(b - o):+.2f}")
+    print(f"{'level':<11}{'blind n':>8}{'non-blind n':>13}")
+    for lev, name in sorted(LEVELS.items(), reverse=True):
+        print(f"{name:<11}{np.sum(b == int(lev)):8d}{np.sum(o == int(lev)):13d}")
+    # the headline: automatic-fit bias by confidence, under both scorings
+    for tag, sc in (("non-blind", open_), ("blind", blind)):
+        print()
+        print(f"automatic |c|/hand by {tag} confidence:")
+        for lev, name in sorted(LEVELS.items(), reverse=True):
+            ratios = []
+            for k in both:
+                if sc[k]["score"] != lev:
+                    continue
+                z = np.load(_cache_path({"subject": k[0], "window": k[1], "part": k[2]}, k[3]))
+                h, au = float(z["hand"]), float(z["auto"])
+                if np.isfinite(h) and np.isfinite(au) and h:
+                    ratios.append(abs(au) / abs(h))
+            if ratios:
+                print(f"  {name:<10} n={len(ratios):2d}  median {np.median(ratios):.2f}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -137,7 +179,15 @@ def main():
     ap.add_argument("--prepare", action="store_true",
                     help="build the panel cache and exit (unattended, ~1 min per window)")
     ap.add_argument("--force", action="store_true", help="prepare: rebuild cached panels")
+    ap.add_argument("--unblinded", action="store_true",
+                    help="original display (speeds, hand line, subject) -> panel_confidence.csv")
+    ap.add_argument("--seed", type=int, default=20260924, help="blind mode: panel order")
+    ap.add_argument("--compare", action="store_true", help="blind vs non-blind agreement, then exit")
     a = ap.parse_args()
+    global OUT
+    OUT = OUT_UNBLINDED if a.unblinded else OUT_BLIND
+    if a.compare:
+        return compare_scores()
 
     # Import order matters. Several swp.viz.viz modules call matplotlib.use("Agg") at import
     # time, so the interactive backend must be selected AFTER they are loaded or the figures are
@@ -162,6 +212,9 @@ def main():
             if key in scores and not a.redo:
                 continue
             todo.append((c, view, quantity, key))
+    if not a.unblinded:
+        order = np.random.default_rng(a.seed).permutation(len(todo))
+        todo = [todo[k] for k in order]
     print(f"{len(todo)} panel(s) to score ({len(scores)} already done)\n"
           f"keys: 3 clear | 2 plausible | 1 guess | 0 none | s skip | b back | q quit\n")
 
@@ -187,12 +240,15 @@ def main():
         pts = z["points"]
 
         fig, ax = plt.subplots(figsize=(10, 6.5))
-        draw_panel(ax, st_obj,
-                   f"{c['subject']}  {c['label']}  win{c['window']} ({c['part']}, "
-                   f"{float(z['mline_mm']):.0f} mm)  -  {quantity}\n"
-                   f"hand {abs(hand):.2f} m/s, automatic {abs(auto_c):.2f} m/s   "
-                   f"[{i + 1}/{len(todo)}]")
-        if np.isfinite(hand) and np.any(pts):
+        if a.unblinded:
+            title = (f"{c['subject']}  {c['label']}  win{c['window']} ({c['part']}, "
+                     f"{float(z['mline_mm']):.0f} mm)  -  {quantity}\n"
+                     f"hand {abs(hand):.2f} m/s, automatic {abs(auto_c):.2f} m/s   "
+                     f"[{i + 1}/{len(todo)}]")
+        else:   # blind: nothing that could anchor the judgement
+            title = f"panel {i + 1}/{len(todo)}  -  {quantity}\nis a propagating wavefront visible?"
+        draw_panel(ax, st_obj, title)
+        if a.unblinded and np.isfinite(hand) and np.any(pts):
             (t1, r1), (t2, r2) = pts
             rl, rh = ax.get_ylim()
             rs = np.array([min(rl, rh), max(rl, rh)])

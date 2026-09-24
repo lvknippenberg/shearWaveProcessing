@@ -136,6 +136,10 @@ def _write_hdf5(path, m, r0, bands, base, store):
         f.attrs["directional"] = bool(base.directional)
         f.attrs["bands_hz"] = np.array(bands, float) if bands is not None else np.zeros((0, 2))
         f.attrs["created_utc"] = datetime.now(timezone.utc).isoformat()
+        # code / zea / config provenance (swp.provenance) - which run produced this file
+        from swp.provenance import stamp_h5
+        stamp_h5(f, config={"pipeline": base, "bands": bands},
+                 extra={"stage": "viz", "measurement": int(m)})
         f.create_dataset("r_m", data=next(iter(store.values()))[0].st.r.astype(np.float64))
         for (quantity, tag), (res, oc, band) in store.items():
             g = f.require_group(quantity)

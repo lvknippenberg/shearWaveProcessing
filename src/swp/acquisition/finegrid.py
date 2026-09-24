@@ -87,7 +87,8 @@ def finegrid_acquisition(folder, meas: int, points_xz=None, ppw: float = 8.0,
     raw, params = _read_active_buffer(mat_path, folder, spec.index)
 
     tf = assemble_tracking_frames(raw, n_reference=sw.n_reference, n_tracking=sw.n_tracking,
-                                  na=sw.na, harmonic=sw.harmonic, pri=sw.pri, pi_mode=pi_mode)
+                                  na=sw.na, harmonic=sw.harmonic, pri=sw.pri, pi_mode=pi_mode,
+                                  push_gap_s=sw.push_gap_s())
     if not 0 <= meas < tf.n_meas:
         raise IndexError(f"meas {meas} out of range (0..{tf.n_meas - 1})")
 

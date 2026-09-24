@@ -26,3 +26,7 @@ gui = ["streamlit>=1.30", "plotly>=5.0"]   # method-exploration GUI (swp_gui/); 
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-rxX"

@@ -140,3 +140,43 @@ def axial_strain(field: np.ndarray, ctx: FilterCtx = None, smooth: int = 3) -> n
         from scipy.ndimage import uniform_filter1d
         g = uniform_filter1d(g, smooth, axis=1, mode="nearest")
     return g
+
+
+def giannantonio_motion_filter(field: np.ndarray, ctx: FilterCtx = None, order: int = 2,
+                               c_min: float = 1.5, t_wave: float = 3e-3,
+                               min_late: int = 3) -> np.ndarray:
+    """Physiological-motion filter as published: fit a low-order polynomial in time per pixel to
+    the samples the shear wave cannot have reached, and subtract it everywhere.
+
+    Giannantonio et al. 2011, as used for cardiac ARF by Hollender et al. 2012 and Bouchard et al.
+    2009: the fit uses the pre-push samples **and** the late post-push samples, so across the
+    push window the motion is *interpolated*. ``reference_motion_compensation`` only extrapolates
+    forward from the reference block, which is the variant found not to work here
+    (docs/reference_motion_findings.md in iq2sws) - a different method.
+
+    Excluded window per lateral column: ``0 <= t <= |x - x_push| / c_min + t_wave`` (the wave has
+    arrived and passed only after that). ``order=2`` on displacement (constant acceleration, as
+    published) is ``order=1`` on velocity.
+
+    Needs a record with pre-push samples at negative ``ctx.t`` - i.e. the continuous
+    reference + tracking record (``PipelineConfig.continuous_record``). A column with fewer than
+    ``min_late`` late samples is fitted on the pre-push samples only (extrapolation; unavoidable
+    far from the push in a ~16 ms record).
+    """
+    t = np.asarray(ctx.t, float)
+    if not np.any(t < 0):
+        raise ValueError("giannantonio_motion_filter needs pre-push samples (negative ctx.t); "
+                         "enable the continuous reference+tracking record")
+    x0 = ctx.focus_x if ctx.focus_x is not None else 0.0
+    scale = max(np.abs(t).max(), 1e-9)                 # condition the Vandermonde
+    V = np.vander(t / scale, order + 1)
+    out = np.empty_like(field)
+    for ix in range(field.shape[2]):
+        t_end = abs(ctx.x[ix] - x0) / c_min + t_wave
+        keep = (t < 0) | (t > t_end)
+        if np.count_nonzero(t > t_end) < min_late:
+            keep = t < 0
+        col = field[:, :, ix]
+        coef, *_ = np.linalg.lstsq(V[keep], col[keep], rcond=None)
+        out[:, :, ix] = col - V @ coef
+    return out

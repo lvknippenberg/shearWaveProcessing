@@ -1,0 +1,30 @@
+# swp_version: 0.1.0
+# swp_git_commit: 5bd8c717c95bebc32a1c25562763a2ad57f6c3f4
+# swp_git_branch: review-followup
+# swp_git_dirty: 83 modified: README.md, configs/passive.yaml, docs/HANDOFF.md, docs/low_snr_extraction_sweep.md, docs/passive_search.md, docs/phantom_parameter_sweep.md, scripts/ablation.py -> scripts/archive/ablation.py, scripts/aperture_trend.py -> scripts/archive/aperture_trend.py, scripts/caenen_analyze.py -> scripts/archive/caenen_analyze.py, scripts/caenen_methods.py -> scripts/archive/caenen_methods.py, ... (+73)
+# swp_git_diff_sha256: aea29eae4ecf8823b49ef99d53c5b3a999200a6732f6369114a0bc647cc607e4
+# zea_version: 0.1.1
+# zea_source: D:/Luuk van Knippenberg/Github/zea
+# zea_git_commit: 8c2699fd32b969582049d0f704ac3edb862910be
+# zea_git_branch: verasonics-multibuffer-clean
+# zea_git_dirty: 
+# numpy: 2.5.0
+# scipy: 1.18.0
+# python: 3.12.13
+# host: EEMATLAB-OP02
+# created_utc: 2026-09-24T09:55:25+00:00
+# keras_backend: torch
+# command: caenen_speed_comparison.py
+# config_sha256: 0e1687feadd59ace1976de3d14d95f83a4c1f1b0fd33bb96e8fa6c9ff7bfedae
+push,caenen_median,caenen_min,caenen_max,n_caenen,stored_L,stored_R,lit_L,lit_R
+1,1.82,1.64,2.1,5,1.611,2.325,0.966078697421981,0.8
+5,5.06,4.45,5.59,3,0.866,4.538,0.8081725312145289,0.842603550295858
+15,1.33,1.21,1.4,3,1.475,2.987,0.8,0.81651376146789
+18,1.89,1.74,1.93,3,1.037,1.903,0.8081725312145289,1.165302782324059
+20,1.58,1.37,1.67,4,1.36,1.475,0.966078697421981,0.9902642559109875
+21,1.23,1.17,1.42,3,1.204,1.017,0.8337236533957846,1.0156918687589158
+22,1.34,1.25,1.45,3,1.326,1.08,0.842603550295858,0.978021978021978
+23,1.575,1.49,1.66,2,1.017,1.837,0.8,1.115987460815047
+24,1.43,1.08,1.8,3,1.435,1.435,1.1827242524916943,0.8
+25,1.25,1.1,1.36,3,1.518,1.103,0.8,0.8
+27,2.1,1.8,2.4,2,1.611,1.151,0.943046357615894,0.8

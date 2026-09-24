@@ -31,12 +31,12 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "src"))
 sys.path.insert(0, os.path.join(_ROOT, "swp_gui"))
 sys.path.insert(0, os.path.join(_ROOT, "scripts"))
+from swp import paths as P                                # noqa: E402
 
 import core                                              # noqa: E402
 from swp.viz.core.geometry import robust_clim           # noqa: E402
-from pairwise_analyze import bradley_terry              # noqa: E402
 
-BASE = r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep/metric_experiment"
+BASE = P.METRIC_EXPERIMENT
 Q = ["displacement", "velocity", "acceleration"]
 
 
@@ -138,6 +138,8 @@ def ranking(rn):
     if os.path.exists(pp):
         comps = [(int(r["a"]), int(r["b"]), r["winner"]) for r in csv.DictReader(open(pp, encoding="utf-8"))]
         present = sorted({c[0] for c in comps} | {c[1] for c in comps})
+        sys.path.insert(0, os.path.join(_ROOT, "scripts", "archive"))
+        from pairwise_analyze import bradley_terry    # archived experiment; only needed here
         bt = bradley_terry(present, comps)
         order = sorted(present, key=lambda i: bt[i], reverse=True)
         return items, order, man

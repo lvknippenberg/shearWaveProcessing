@@ -6,7 +6,8 @@ return a filtered field of the same shape (except transforms like strain).
 """
 from .clutter import svd_clutter
 from .motion import (polynomial_drift, temporal_highpass, axial_strain,
-                     reference_motion_compensation, adaptive_highpass)
+                     reference_motion_compensation, adaptive_highpass,
+                     giannantonio_motion_filter)
 from .directional import directional_spacetime, outward_spacetime, directional_field
 from .spatial import (spatial_smooth, spatial_median, temporal_bandpass,
                       temporal_moving_mean, temporal_moving_median)
@@ -35,6 +36,7 @@ FIELD_FILTERS = {
     "polynomial_drift": polynomial_drift,
     "temporal_highpass": temporal_highpass,
     "reference_motion_comp": reference_motion_compensation,
+    "giannantonio_motion_filter": giannantonio_motion_filter,
     "adaptive_highpass": adaptive_highpass,
     "reference_subspace_projection": reference_subspace_projection,
     "svd_clutter_field": svd_clutter_field,
@@ -57,7 +59,7 @@ FIELD_FILTERS = {
 
 __all__ = [
     "svd_clutter", "polynomial_drift", "temporal_highpass", "axial_strain",
-    "reference_motion_compensation", "adaptive_highpass",
+    "reference_motion_compensation", "adaptive_highpass", "giannantonio_motion_filter",
     "iq_spatial_lowpass", "iq_slowtime_lowpass", "svd_clutter_field",
     "reference_subspace_projection", "phase_unwrap_temporal", "bulk_motion_compensation",
     "aniso_diffusion", "coherence_diffusion", "bilateral_denoise", "nlm_denoise",

@@ -23,7 +23,7 @@ from pathlib import Path
 os.environ.setdefault("KERAS_BACKEND", "torch")
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
-_REPO = Path("D:/Luuk van Knippenberg/Github/shearWaveProcessing")
+_REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(_REPO / "src"))
 
 import numpy as np

@@ -23,7 +23,7 @@ the optimal processing settings shift with SNR**? Two constraints set earlier dr
 Both operate on the outward-directional space-time image; neither fits or reports a speed.
 
 - **ROI-contrast** (`scripts/detect_v.py::roi_contrast`) — a **locked V-template** was drawn **once**
-  on the clean 50 V velocity image (`scripts/draw_v_roi.py`, saved to `v_roi_template.json`:
+  on the clean 50 V velocity image (`scripts/archive/draw_v_roi.py`, saved to `v_roi_template.json`:
   r0 = 19.7 mm, c = 2.39 m/s, t0 = 0.088 ms). For every column on both lobes it compares the mean
   envelope on the template band `t = t0 + |r−r0|/c ± band` to that column's whole-column mean
   (background). Contrast `(ROI−bg)/(ROI+bg) ∈ [−1,1]`; >0 means a wavefront rides the template.
@@ -36,7 +36,7 @@ Both operate on the outward-directional space-time image; neither fits or report
 The template's r0/c/t0 are physical, so the same template applies to every voltage (same phantom,
 same push) and to the fine-grid images below.
 
-### Sweep space (`scripts/sweep_extract.py`)
+### Sweep space (`scripts/archive/sweep_extract.py`)
 
 **Fixed winners** (settled in earlier rounds): Loupas estimator, `relative_to_reference` mode,
 outward directional filter, mean M-line aggregation.
@@ -59,7 +59,7 @@ That is **700 × 8 × 3 = 16 800 pipeline evaluations**. The Loupas estimator is
 run per recipe; the cached path was verified to reproduce `core.run_recipe` exactly (0.3952 = 0.3952).
 Total runtime ≈ **72 min**.
 
-### RF-NCC probe (`scripts/sweep_rfncc_probe.py`)
+### RF-NCC probe (`scripts/archive/sweep_rfncc_probe.py`)
 
 A **limited** probe: 4 near-optimal field-filter recipes run with the fine-grid **RF-NCC** estimator
 (re-beamformed fine axial grid) instead of coarse-IQ Loupas, on 50/30/25/20/15 V, same detectors —
@@ -156,11 +156,11 @@ RF-NCC run** for this extraction task.
 
 ```bash
 # from repo root, with the zea env + KERAS_BACKEND=torch
-python scripts/draw_v_roi.py --voltage 50V --quantity velocity   # (once) locks v_roi_template.json
-python scripts/sweep_extract.py --n 700 --seed 0                  # ~72 min -> sweep_results.csv
-python scripts/sweep_analyze.py --k 12                            # leaderboards + sweep_snr_trends.png
-python scripts/sweep_top_montage.py                               # sweep_top_montage.png
-python scripts/sweep_rfncc_probe.py                               # rfncc_probe.csv
+python scripts/archive/draw_v_roi.py --voltage 50V --quantity velocity   # (once) locks v_roi_template.json
+python scripts/archive/sweep_extract.py --n 700 --seed 0                  # ~72 min -> sweep_results.csv
+python scripts/archive/sweep_analyze.py --k 12                            # leaderboards + sweep_snr_trends.png
+python scripts/archive/sweep_top_montage.py                               # sweep_top_montage.png
+python scripts/archive/sweep_rfncc_probe.py                               # rfncc_probe.csv
 ```
 
 ## Caveats

@@ -1,0 +1,42 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+C000000003 win1 full
+    window #1 by quantity: disp +4.76, velo +3.96, acce +2.49
+C000000004 win1 right
+    window #1 by quantity: disp +2.87, velo +2.87, acce +2.14
+C000000008 win2 right
+    window #2 by quantity: disp -2.10, velo +1.00, acce +1.00
+C000000019 win1 left
+    window #1 by quantity: disp +12.19, velo +9.67, acce +9.67
+C000000020 win1 left
+    window #1 by quantity: disp +3.16, velo +4.76, acce +4.76
+C000000022 win1 full
+    window #1 by quantity: disp +1.04, velo +1.08, acce +1.71
+C000000029 win1 left
+    window #1 by quantity: disp +2.96, velo +4.76, acce +4.76
+C000000002 win0 right
+    window #0 by quantity: disp -8.02, velo +10.79, acce +8.02
+C000000018 win0 left
+    window #0 by quantity: disp +9.67, velo +2.36, acce +1.57
+C000000027 win0 right
+    window #0 by quantity: disp +2.78, velo +2.87, acce +2.87
+C000000037 win1 left
+    window #1 by quantity: disp +3.80, velo +5.62, acce -4.53
+C000000039 win0 right
+    window #0 by quantity: disp +3.80, velo +3.96, acce +2.96
+C000000040 win2 right
+    window #2 by quantity: disp +4.13, velo +3.80, acce +2.49
+C000000042 win0 left
+    window #0 by quantity: disp +1.00, velo +2.10, acce +4.53
+C000000045 win0 right
+    window #0 by quantity: disp +20.00, velo -20.00, acce -8.77
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\quantity_speeds.csv
+
+14 of 15 windows with no railed fit
+median |speed|: displacement 3.48, velocity 3.88, acceleration 2.91 m/s
+Traceback (most recent call last):
+  File "D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\analysis\quantity_speeds.py", line 82, in <module>
+    main()
+  File "D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\analysis\quantity_speeds.py", line 77, in main
+    print(f"ordering disp <= vel <= acc holds in {np.mean((a['disp'] <= a['vel']) & (a['vel'] <= a['acc'])[ok]):.0%}")
+                                                          ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ValueError: operands could not be broadcast together with shapes (15,) (14,) 

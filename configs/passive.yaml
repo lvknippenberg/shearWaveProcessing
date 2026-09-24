@@ -35,7 +35,7 @@ focus:
                                             # anchors the directional (outward) filter. TODO: a more
                                             # physical passive origin (valve-plane anchor per window).
 
-# --- processing pipeline (TUNED by scripts/search_passive2.py on invivo_sw; see docs/passive_search.md) ---
+# --- processing pipeline (TUNED by scripts/archive/search_passive2.py on invivo_sw; see docs/passive_search.md) ---
 # Optimal passive recipe from the v2 exhaustive search + the MATLAB comparison. The two decisive
 # changes vs the earlier config: (1) quantity = DISPLACEMENT (cleanest wavefront for visualisation;
 # velocity/acceleration are noisier and their auto-speed degrades), and (2) directional filter OFF

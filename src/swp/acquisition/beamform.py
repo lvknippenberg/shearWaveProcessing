@@ -211,6 +211,8 @@ def read_buffer(vf: VerasonicsFile, buffer_index: int, converted_path=None,
             description="Verasonics data", compression=compression,
             overwrite=True, ignore_warnings=True,
         )
+        from ..provenance import stamp_h5
+        stamp_h5(str(converted_path), extra={"stage": "convert", "buffer_index": int(buffer_index)})
 
     params = _build_params(scan_dict, probe_dict["probe_geometry"],
                            raw.shape[2], raw.shape[3], raw.shape[1])
@@ -446,6 +448,8 @@ def _save_beamformed(path, iq, coords, fps=None, timestamps=None, extra_custom=N
         overwrite=True,
         ignore_warnings=True,
     )
+    from ..provenance import stamp_h5
+    stamp_h5(str(path), extra={"stage": "beamform", "description": description})
 
 
 # ---------------------------------------------------------------------------
@@ -495,6 +499,7 @@ def process_active_buffer(vf, spec, out_dir, grid, sw, stem, compression,
     tf = assemble_tracking_frames(
         raw, n_reference=sw.n_reference, n_tracking=sw.n_tracking,
         na=sw.na, harmonic=sw.harmonic, pri=sw.pri, pi_mode=spec.pi_mode,
+        push_gap_s=sw.push_gap_s(),
     )
     print(f"  buffer {spec.matlab} ({spec.name}): {tf.n_meas} measurement(s), "
           f"reference {tf.reference.shape[1]} + tracking {tf.tracking.shape[1]} frames "
@@ -523,7 +528,12 @@ def process_active_buffer(vf, spec, out_dir, grid, sw, stem, compression,
                           description="pre-push reference IQ (n_ref, z, x, 2=[I,Q])",
                           unit="unitless"),
             CustomElement(name="t_reference", data=tf.t_reference.astype(np.float32),
-                          description="reference frame times, s, rel. to first tracking frame",
+                          description="reference frame times, s, rel. to first tracking frame "
+                                      "(includes the push interval, see push_gap_s)",
+                          unit="s"),
+            CustomElement(name="push_gap_s", data=np.float32(sw.push_gap_s()),
+                          description="last reference transmit -> first tracking transmit (s): "
+                                      "PRI + push burst rounded up to 100 us",
                           unit="s"),
             # ARF push focal point (metres, imaging-plane coordinates). Persisted here
             # so downstream shear-wave processing can anchor the wave origin r0 from the

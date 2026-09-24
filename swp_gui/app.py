@@ -26,6 +26,7 @@ os.environ.setdefault("KERAS_BACKEND", "torch")
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(_ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from swp import paths as P                                # noqa: E402
 
 import numpy as np
 import yaml
@@ -73,7 +74,7 @@ def _save_speed_measurement(folder, is_caenen, data_kind, meas, quantity, cell, 
     return stem + ".png", stem + ".json"
 
 st.set_page_config(page_title="SWE method explorer", layout="wide")
-_SWEEP = r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep"
+_SWEEP = P.VOLTAGE_SWEEP
 DATA_ROOTS = {"In-vivo": _SWEEP + "/Invivo", "Phantom": _SWEEP + "/Phantom"}
 
 

@@ -3,19 +3,22 @@
 Shows each randomized 3-column space-time plot (displacement / velocity / acceleration) one at a
 time; click 1-5 for how clearly a shear wave is visible and it **auto-advances** to the next plot.
 Recipe and metric are HIDDEN (blind). Scores save to scores.csv after every click and resume where
-you left off. When done, run scripts/metric_experiment_analyze.py.
+you left off. When done, run scripts/archive/metric_experiment_analyze.py.
 
     KERAS_BACKEND=torch  <zea-python>  -m streamlit run swp_gui/score_app.py
 """
 from __future__ import annotations
+import sys
 
 import csv
 import json
 import os
 
 import streamlit as st
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")), "src"))
+from swp import paths as P                                # noqa: E402
 
-BASE = r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep/metric_experiment"
+BASE = P.METRIC_EXPERIMENT
 RUBRIC = {1: "1 · noise", 2: "2 · unclear", 3: "3 · weak wave", 4: "4 · clear", 5: "5 · very clear"}
 
 st.set_page_config(page_title="SWE metric scoring", layout="wide")
@@ -45,7 +48,7 @@ def save_scores(sp, scores):
 
 rounds = available_rounds()
 if not rounds:
-    st.error(f"No datasets under {BASE}. Run scripts/metric_experiment_generate.py first.")
+    st.error(f"No datasets under {BASE}. Run scripts/archive/metric_experiment_generate.py first.")
     st.stop()
 
 # ---- dataset selector: score each dataset independently (scores are relative within a dataset) ----
@@ -98,7 +101,7 @@ st.sidebar.caption("Click 1-5 for how clearly a shear wave (an outward ∧ from 
                    "visible in ANY of the three columns; it auto-advances. Recipe & metric are hidden.")
 
 if pos >= n:
-    st.success(f"All {n} plots scored ✔  — run scripts/metric_experiment_analyze.py to compare.")
+    st.success(f"All {n} plots scored ✔  — run scripts/archive/metric_experiment_analyze.py to compare.")
     if st.button("re-review from start"):
         st.session_state["pos"] = 0; st.rerun()
     st.stop()

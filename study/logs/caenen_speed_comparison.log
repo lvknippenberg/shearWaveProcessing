@@ -1,0 +1,20 @@
+push  1: Caenen 1.82 [1.64-2.10]  stored L/R 1.61/2.33  literature L/R 0.97/0.80
+push  5: Caenen 5.06 [4.45-5.59]  stored L/R 0.87/4.54  literature L/R 0.81/0.84
+push 15: Caenen 1.33 [1.21-1.40]  stored L/R 1.48/2.99  literature L/R 0.80/0.82
+push 18: Caenen 1.89 [1.74-1.93]  stored L/R 1.04/1.90  literature L/R 0.81/1.17
+push 20: Caenen 1.58 [1.37-1.67]  stored L/R 1.36/1.48  literature L/R 0.97/0.99
+push 21: Caenen 1.23 [1.17-1.42]  stored L/R 1.20/1.02  literature L/R 0.83/1.02
+push 22: Caenen 1.34 [1.25-1.45]  stored L/R 1.33/1.08  literature L/R 0.84/0.98
+push 23: Caenen 1.57 [1.49-1.66]  stored L/R 1.02/1.84  literature L/R 0.80/1.12
+push 24: Caenen 1.43 [1.08-1.80]  stored L/R 1.44/1.44  literature L/R 1.18/0.80
+push 25: Caenen 1.25 [1.10-1.36]  stored L/R 1.52/1.10  literature L/R 0.80/0.80
+push 27: Caenen 2.10 [1.80-2.40]  stored L/R 1.61/1.15  literature L/R 0.94/0.80
+
+ratio ours / Caenen per push (median over pushes; push 5 excluded as their outlier):
+  stored_L  median 0.93  within 25% 80%  (n=10)
+  stored_R  median 0.97  within 25% 70%  (n=10)
+  lit_L     median 0.61  within 25% 10%  (n=10)
+  lit_R     median 0.62  within 25% 10%  (n=10)
+  stored    mean of sides: median ratio 0.90, Pearson r 0.15 across pushes
+  lit       mean of sides: median ratio 0.61, Pearson r 0.22 across pushes
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\montages\caenen_speed_comparison.png

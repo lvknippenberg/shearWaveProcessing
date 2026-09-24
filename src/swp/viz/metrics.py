@@ -367,3 +367,81 @@ def wavefront_visibility(st: SpaceTime, r0: float, demean: bool = True) -> float
     e_out = float((pos[:, right] ** 2).sum() + (neg[:, left] ** 2).sum())
     e_in = float((neg[:, right] ** 2).sum() + (pos[:, left] ** 2).sum())
     return e_out / (e_out + e_in + 1e-20)
+
+
+def normalized_radon_speed(st: SpaceTime, cmin: float = 1.0, cmax: float = 20.0,
+                           n_speeds: int = 241, polarity: str = "abs", min_cover: float = 0.6,
+                           t_window: tuple | None = None, demean: bool = True):
+    """Signed speed of the strongest straight wavefront by **normalised Radon** (Vos et al. 2017,
+    as used by Keijzer et al. 2019/2020 on septal M-modes).
+
+    The Radon sum of the panel along the line ``t = t0 + (r - r_mid) / c`` is divided by the Radon
+    sum of an all-ones panel along the same line - i.e. it is the **mean signal along the line**, so
+    long and short lines compete fairly. The best line is the one on which the signal is strongest,
+    which is exactly the objective the hand-drawn benchmark asked for
+    (``docs/passive_speed_estimation.md``: "an estimator whose objective is the amplitude sampled
+    along the fitted line"), unlike ``slant_stack_speed``, which maximises a global semblance that
+    nothing forces through the wave.
+
+    ``polarity`` selects which extremum is a wavefront: ``"pos"`` (maximum), ``"neg"`` (minimum -
+    Keijzer picked the sign for motion away from the transducer) or ``"abs"`` (whichever is larger).
+    Lines covering less than ``min_cover`` of the M-line are ignored (a short corner line through a
+    single blob otherwise wins). ``t_window`` = (t_lo, t_hi) restricts the intercept ``t0`` (the
+    line's time at the M-line centre), e.g. to an event window.
+
+    Returns ``dict(speed, t0, score, tracking, polarity)``: ``speed`` in m/s, signed (+ = toward
+    increasing r); ``score`` the normalised Radon value; ``tracking`` = mean |signal| on the line /
+    panel RMS (1 = a line through noise, the hand-drawn lines average ~2).
+    """
+    d = np.asarray(st.data, float)
+    if demean:
+        d = d - d.mean(axis=0, keepdims=True)
+    t, r = np.asarray(st.t, float), np.asarray(st.r, float)
+    nt, nr = d.shape
+    dt = float(t[1] - t[0])
+    r_mid = 0.5 * (r[0] + r[-1])
+    p_pos = np.linspace(1.0 / cmax, 1.0 / cmin, n_speeds // 2)
+    slow = np.concatenate([-p_pos[::-1], p_pos])
+    t0_idx = np.arange(nt, dtype=float)
+    if t_window is not None:
+        t0_idx = t0_idx[(t >= t_window[0]) & (t <= t_window[1])]
+    cols = np.arange(nr)
+    best = dict(speed=float("nan"), t0=float("nan"), score=-np.inf, tracking=float("nan"),
+                polarity="")
+    signs = {"pos": (1.0,), "neg": (-1.0,), "abs": (1.0, -1.0)}[polarity]
+    for p in slow:
+        fi = t0_idx[:, None] + p * (r - r_mid)[None, :] / dt        # fractional time index
+        valid = (fi >= 0) & (fi <= nt - 1)
+        cover = valid.mean(axis=1)
+        i0 = np.clip(np.floor(fi).astype(np.intp), 0, nt - 2)
+        w = np.clip(fi - i0, 0.0, 1.0)
+        vals = d[i0, cols] * (1 - w) + d[i0 + 1, cols] * w
+        vals = np.where(valid, vals, 0.0)
+        mean = vals.sum(axis=1) / np.maximum(valid.sum(axis=1), 1)
+        mean = np.where(cover >= min_cover, mean, np.nan)
+        for s in signs:
+            m = s * mean
+            if np.all(np.isnan(m)):
+                continue
+            k = int(np.nanargmax(m))
+            if m[k] > best["score"]:
+                best.update(speed=float(1.0 / p), t0=float(t[0] + t0_idx[k] * dt), score=float(m[k]),
+                            polarity="pos" if s > 0 else "neg")
+    if np.isfinite(best["speed"]):
+        best["tracking"] = line_tracking(st, best["t0"], best["speed"], demean=demean)
+    return best
+
+
+def line_tracking(st: SpaceTime, t0: float, speed: float, demean: bool = True) -> float:
+    """Mean |signal| sampled along ``t = t0 + (r - r_mid)/speed`` divided by the panel RMS - the
+    tracking score of ``docs/passive_speed_estimation.md`` (1 ~ a line through noise)."""
+    d = np.asarray(st.data, float)
+    if demean:
+        d = d - d.mean(axis=0, keepdims=True)
+    t, r = np.asarray(st.t, float), np.asarray(st.r, float)
+    tl = t0 + (r - 0.5 * (r[0] + r[-1])) / speed
+    ok = (tl >= t[0]) & (tl <= t[-1])
+    if not ok.any():
+        return float("nan")
+    vals = [np.interp(tl[j], t, d[:, j]) for j in np.nonzero(ok)[0]]
+    return float(np.mean(np.abs(vals)) / (np.sqrt(np.mean(d ** 2)) + 1e-30))

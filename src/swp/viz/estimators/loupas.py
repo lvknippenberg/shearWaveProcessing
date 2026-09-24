@@ -22,7 +22,19 @@ from .common import (
 )
 
 
-def _axial_smooth_complex(prod, kz, kx):
+def _axial_smooth_complex(prod, kz, kx, shape="box"):
+    """Average the complex correlation over a (kz, kx)-sample kernel before taking its angle.
+
+    ``shape="box"`` is a moving average of that length. ``shape="gaussian"`` treats the length
+    as the full width at half maximum of a Gaussian - the smoothing Caenen et al. (2023) and
+    Keijzer et al. (2019) apply to the autocorrelation frames.
+    """
+    if shape == "gaussian":
+        from scipy.ndimage import gaussian_filter
+        fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0))
+        sig = (0.0, kz / fwhm if kz > 1 else 0.0, kx / fwhm if kx > 1 else 0.0)
+        return (gaussian_filter(prod.real, sig, mode="nearest")
+                + 1j * gaussian_filter(prod.imag, sig, mode="nearest"))
     p = complex_uniform_filter1d(prod, kz, axis=1)
     if kx > 1:
         p = complex_uniform_filter1d(p, kx, axis=2)
@@ -41,6 +53,7 @@ def loupas_displacement(
     local_frequency: bool = True,
     adaptive_kernel: bool = False,
     kernel_z_max_m: float = 2.0e-3,
+    kernel_shape: str = "box",
     mode: str = "frame_to_frame",
     reference: Optional[np.ndarray] = None,
 ) -> DisplacementResult:
@@ -67,6 +80,8 @@ def loupas_displacement(
         computed at the base kernel; the displacement is blended ``C·d(small) + (1-C)·d(large)``.
     kernel_z_max_m : float
         Maximum axial kernel for the adaptive mode (used where coherence is low).
+    kernel_shape : {"box", "gaussian"}
+        Moving average (default) or a Gaussian whose FWHM is the kernel length.
     mode : {"frame_to_frame", "relative_to_reference"}
         Differential (cumulative velocity) or absolute vs a reference frame/ensemble.
     reference : (nz, nx) or (n_ref, nz, nx) complex, optional
@@ -108,8 +123,8 @@ def loupas_displacement(
         from scipy.ndimage import uniform_filter1d
         kz_max = samples_for_length(kernel_z_max_m, dz) if kernel_z_max_m > 0 else kz
         kz_max = max(kz_max, kz)
-        p_small = _axial_smooth_complex(prod, kz, kx)
-        p_large = _axial_smooth_complex(prod, kz_max, kx)
+        p_small = _axial_smooth_complex(prod, kz, kx, kernel_shape)
+        p_large = _axial_smooth_complex(prod, kz_max, kx, kernel_shape)
         # local coherence in [0,1] at the base kernel: magnitude of the averaged correlation
         # over the average of the magnitudes (1 = fully coherent, 0 = noise).
         num = np.abs(p_small)
@@ -119,7 +134,7 @@ def loupas_displacement(
         d_large = phase_to_displacement(np.angle(p_large), fc[None, :, :], c)
         disp_step = coh * d_small + (1.0 - coh) * d_large
     else:
-        prod = _axial_smooth_complex(prod, kz, kx)
+        prod = _axial_smooth_complex(prod, kz, kx, kernel_shape)
         disp_step = phase_to_displacement(np.angle(prod), fc[None, :, :], c)
 
     if mode == "frame_to_frame":

@@ -264,10 +264,28 @@ band-pass bands side by side (a line present in all three is real). The wave ori
 on the **stored push location** (`focus.mode: stored`), not a hard-coded assumption.
 
 **Passive SWE is an experimental framework**: same core, `frame_to_frame` displacement (no reference),
-and a band-pass recipe in `configs/passive.yaml` tuned by `scripts/search_passive2.py`. Unlike the
+and a band-pass recipe in `configs/passive.yaml` tuned by `scripts/archive/search_passive2.py`. Unlike the
 active path it has **no symmetric origin** — a valve-closure wave enters the M-line at one end and
 crosses in one direction — so the passive montage draws a single fitted wavefront and no `r0`
 marker (`spacetime_montage(..., show_r0=False)`).
+
+## Tests, data locations, provenance
+
+```
+python -m pytest            # ~30 s, synthetic data only (tests/)
+python -m swp.paths         # where the data roots point, and which are missing (PYTHONPATH=src)
+```
+
+* **Tests** use synthetic data with a known answer (estimators, filters, timing across the push,
+  speed estimators, end-to-end pipeline, provenance). Four strict xfails record known biases of
+  the automatic active speed (directional filter, `radon`, band-pass) and the directional filter's
+  energy loss - see `tests/test_pipeline.py` and [docs/review_followup_2026-09-24.md](docs/review_followup_2026-09-24.md).
+* **Data locations** come from `swp.paths` (`SWP_DATA_ROOT`, `SWP_VOLTAGE_SWEEP`, `SWP_CAENEN_DIR`,
+  `SWP_INVIVO_SW`, `SWP_INVIVO_0818`, `SWP_RAW_DATA`), never from hard-coded paths in scripts.
+* **Provenance**: every HDF5 the pipeline writes carries a `/provenance` group (repo commit +
+  dirty state, zea version/commit, config hash + JSON, host, command); CSV logs start with the
+  same as `# ` lines. `swp.provenance.read_h5(path)` reads it back.
+* **Open actions** that need a person or an acquisition: [docs/TODO.md](docs/TODO.md).
 
 ## Layout
 
@@ -286,7 +304,14 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        draw_passive_mlines.py (legacy: buffer-4 cine general M-lines),
                        gif_montage.py (synchronised montage of several GIFs),
                        phantom_voltage_montage.py (cross-folder voltage-sweep montage),
-                       check_push_voltage.py (delivered push-voltage sweep check)
+                       check_push_voltage.py (delivered push-voltage sweep check),
+                       invivo_recipe_contrast.py (push vs its own no-push control, any recipe,
+                         with the phantom and Caenen data as positive controls),
+                       study_active_screen.py (the same screen over every study push),
+                       retrofit_push_gap.py (correct reference timestamps of old IQ files),
+                       swe_lib.py / detect_v.py / auto_mline.py (shared helpers)
+scripts/archive/       finished campaigns, kept runnable (see its README)
+tests/                 pytest, synthetic
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
                        widebeam_bmode_reconstruction.md (buffer-1: which pixels each transmit
@@ -296,7 +321,9 @@ docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-
                          why the slant stack misses the wave and what to change),
                        ecg_timing.md (what is gated, trigger log, buffer phases, MVC/AVC/AK labels),
                        linux_server.md (Docker setup, validation and batch runs on the GPU server),
-                       phantom_voltage_sweep.md (phantom sweep runbook)
+                       phantom_voltage_sweep.md (phantom sweep runbook),
+                       review_followup_2026-09-24.md (literature recipe, timing, study screen,
+                         Caenen comparison, estimator benchmarks), TODO.md (open actions)
 study/analysis/        passive_split_study.py (full/left/right split over a whole tree, --jobs N),
                        manual_slope.py (draw the wavefront by hand, read off the speed),
                        collect_passive_montages.py (flatten every folder's montages for review)

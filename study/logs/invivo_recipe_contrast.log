@@ -1,0 +1,48 @@
+iv0804_30V: 24 pushes in 86s
+iv0804_40V: 24 pushes in 87s
+iv0818_41el: 24 pushes in 104s
+iv0818_61el: 24 pushes in 102s
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+phantom: 16 pushes in 81s
+caenen: 52 pushes in 558s
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\invivo_recipe_contrast.csv
+
+dataset      recipe          n  amp ratio  frac>1        p    dOC  frac>0        p
+iv0804_30V   current        24       0.61    0.38  1.1e-01  0.012    0.62  2.1e-01
+iv0804_30V   f2f_current    24       0.83    0.33  1.3e-01  0.036    0.67  2.0e-01
+iv0804_30V   caenen         24       0.88    0.46  6.2e-01  0.008    0.50  3.3e-01
+iv0804_30V   caenen_dir     24       0.91    0.38  3.9e-01  0.015    0.62  4.5e-01
+iv0804_30V   caenen_cont    24       0.83    0.29  1.3e-01 -0.025    0.33  5.2e-01
+iv0804_30V   caenen_cont_gian  24       0.81    0.33  1.1e-01 -0.019    0.33  4.8e-01
+iv0804_40V   current        24       0.54    0.33  1.3e-01 -0.004    0.50  5.6e-01
+iv0804_40V   f2f_current    24       0.80    0.38  3.4e-01  0.008    0.54  6.0e-01
+iv0804_40V   caenen         24       0.91    0.42  4.7e-01 -0.005    0.50  9.4e-01
+iv0804_40V   caenen_dir     24       0.90    0.46  4.6e-01  0.018    0.62  4.6e-01
+iv0804_40V   caenen_cont    24       1.23    0.58  5.6e-01  0.016    0.54  8.8e-01
+iv0804_40V   caenen_cont_gian  24       1.12    0.58  8.6e-01  0.019    0.54  8.8e-01
+iv0818_41el  current        24       0.67    0.38  4.9e-02 -0.043    0.33  2.5e-01
+iv0818_41el  f2f_current    24       0.96    0.29  1.4e-01 -0.027    0.42  3.9e-01
+iv0818_41el  caenen         24       0.82    0.21  2.5e-02 -0.009    0.50  1.0e+00
+iv0818_41el  caenen_dir     24       0.86    0.29  6.0e-02 -0.002    0.46  6.4e-01
+iv0818_41el  caenen_cont    24       1.00    0.50  6.0e-01  0.016    0.50  9.0e-01
+iv0818_41el  caenen_cont_gian  24       0.92    0.29  1.1e-01  0.012    0.54  9.9e-01
+iv0818_61el  current        24       0.78    0.29  1.4e-01 -0.007    0.42  7.3e-01
+iv0818_61el  f2f_current    24       0.88    0.38  1.4e-01 -0.005    0.46  9.0e-01
+iv0818_61el  caenen         24       0.99    0.50  5.1e-01 -0.015    0.33  8.4e-02
+iv0818_61el  caenen_dir     24       1.01    0.50  5.3e-01  0.005    0.54  9.2e-01
+iv0818_61el  caenen_cont    24       0.89    0.42  3.9e-01  0.029    0.62  1.7e-01
+iv0818_61el  caenen_cont_gian  24       0.87    0.38  2.6e-01  0.027    0.62  2.1e-01
+phantom      current        16       2.43    0.81  1.7e-03  0.079    0.81  3.4e-03
+phantom      f2f_current    16       1.36    0.69  2.5e-02  0.106    0.81  5.8e-04
+phantom      caenen         16       1.14    0.69  1.0e-01  0.140    0.88  7.6e-04
+phantom      caenen_dir     16       1.44    0.75  1.3e-02  0.137    0.94  6.1e-05
+phantom      caenen_cont    16       2.08    0.88  4.3e-04  0.080    0.88  1.0e-03
+phantom      caenen_cont_gian  16       2.08    0.88  4.3e-04  0.080    0.88  1.0e-03
+caenen       current        52       1.47    0.75  2.2e-04  0.076    0.73  6.9e-06
+caenen       f2f_current    52       3.54    1.00  3.5e-10  0.163    0.88  2.9e-09
+caenen       caenen         52       9.96    1.00  3.5e-10  0.104    0.81  2.8e-08
+caenen       caenen_dir     52      11.71    1.00  3.5e-10  0.118    0.87  2.9e-09
+caenen       caenen_cont    52       1.14    0.56  7.2e-01  0.094    0.79  5.3e-07
+caenen       caenen_cont_gian  52       1.13    0.56  4.4e-01  0.072    0.77  9.1e-07
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\montages\invivo_recipe_contrast.png
+wrote D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\montages\invivo_recipe_contrast_montage.png

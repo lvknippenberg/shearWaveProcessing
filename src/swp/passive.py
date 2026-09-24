@@ -507,6 +507,34 @@ def _single_wave_speed(st, sem, c, line):
                        r, np.asarray(t_line, float), np.full(r.size, np.nan))
 
 
+QUANTITIES = ("displacement", "velocity", "acceleration")
+
+
+def _speeds_by_quantity(acq_w, ml, view, i, w):
+    """The first view's recipe re-run as displacement, velocity and acceleration, same slant stack.
+
+    The wave is dispersive (guided mode in the wall), so the three quantities weight different
+    frequencies and give systematically different speeds (disp < vel < acc,
+    docs/passive_speed_estimation.md). The literature reports velocity (Keijzer et al. 2019/2020,
+    15-100 Hz) or acceleration (Petrescu 2019/2020, Santos 2019, Espeland 2024), never cumulative
+    displacement, so these are the numbers to compare against published values.
+    """
+    vname, vcfg = view
+    out = []
+    for q in QUANTITIES:
+        try:
+            res = run_pipeline(acq_w, ml, dataclasses.replace(vcfg, quantity=q), focus=None)
+            sem, c = slant_stack_speed(res.st, res.r0, cmin=1.0, cmax=SPEED_CMAX, remove_flat=False)
+        except Exception as exc:                                  # noqa: BLE001
+            print(f"    window #{i} [{q}]: {exc}")
+            continue
+        out.append(dict(window=i, label=w.label, t_peak_ms=w.t_peak * 1e3, recipe=vname,
+                        quantity=q, speed_m_s=float(c), semblance=float(sem),
+                        mline_length_mm=float(ml.r[-1] * 1e3)))
+    print(f"    window #{i} by quantity: " + ", ".join(f"{d['quantity'][:4]} {d['speed_m_s']:+.2f}" for d in out))
+    return out
+
+
 def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad_ms=20.0):
     """Unattended phase: process every drawn window with every view -> montage path (or None)."""
     cfg, p = _paths(folder, config)
@@ -529,6 +557,7 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
     print(f"  {len(views)} view(s) per window: " + " | ".join(n for n, _ in views))
     pad_s = pad_ms * 1e-3
     results, titles, speeds, row_bmodes = [], [], [], []
+    by_quantity = []
     for i, w in todo:
         ml = _load_line(_window_npz(p["mlines"], i), n_samples)
         row_bmodes.append(_row_bmode(p, st, i, w, ml, acq))
@@ -564,6 +593,7 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
                                speed_m_s=float(c), semblance=float(sem),
                                mline_length_mm=float(ml.r[-1] * 1e3)))
             print(f"    window #{i} [{vname}]: space-time {res.st.data.shape} c={c:.2f} sem={sem:.3f}")
+        by_quantity += _speeds_by_quantity(acq_w, ml, views[0], i, w)
 
     # --- montage: rows = windows, cols = views ---
     for row, k in zip(row_bmodes, range(0, len(results), len(views))):
@@ -577,6 +607,9 @@ def process_passive_windows(folder, config="configs/passive.yaml", acq=None, pad
                                f"left: B-mode + M-line, yellow = r 0)")
     with open(os.path.join(p["outdir"], "passive_speeds.json"), "w") as f:
         json.dump(speeds, f, indent=1)
+    from .provenance import provenance
+    with open(os.path.join(p["outdir"], "passive_speeds_by_quantity.json"), "w") as f:
+        json.dump({"provenance": provenance(config=cfg), "speeds": by_quantity}, f, indent=1)
     print(f"done -> {p['montage']}")
     return p["montage"]
 

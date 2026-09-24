@@ -43,6 +43,10 @@ def load_acquisition(path: str) -> Acquisition:
         t_ref = None
         if "custom/t_reference" in f:
             t_ref = np.array(f["custom/t_reference"]).astype(np.float64)
+        # Present only once the reference timing includes the push interval (beamformed after
+        # 2026-09-24, or corrected by scripts/retrofit_push_gap.py). Without it t_ref places the
+        # reference block ~0.7-0.9 ms too close to the tracking block.
+        push_gap = _scalar(f, "custom/push_gap_s")
 
         prf = _scalar(f, "custom/prf")
         f_demod = _scalar(f, "custom/demodulation_frequency")
@@ -92,7 +96,7 @@ def load_acquisition(path: str) -> Acquisition:
         prf=prf, f_demod=f_demod, f0=f0, c=c, dz=dz, dx=dx,
         grid=grid, source=source, t_ref=t_ref, coords=coords,
         push_x=push_x, push_z=push_z,
-        meta={"path": path},
+        meta={"path": path, "push_gap_s": push_gap},
     )
 
 

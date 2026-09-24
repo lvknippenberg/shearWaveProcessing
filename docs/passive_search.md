@@ -11,10 +11,10 @@ were artefacts of the metric and are corrected in pass 2.
 Mirror of the active-SWE optimisation (iq2sws `archive/search.py`), for the natural
 (valve-closure) shear waves in the buffer-4 ultrafast stream. Tooling:
 
-- `scripts/search_passive.py` — sweeps **6 720 combos/window** and scores each by
+- `scripts/archive/search_passive.py` — sweeps **6 720 combos/window** and scores each by
   `metrics.passive_coherence` (one-sided origin coherence in [0, 1]; higher = a clearer
   propagating wavefront). Also reports the best-fit shear-wave speed `c`.
-- `scripts/passive_best_montage.py` — renders the two summary montages from the saved CSVs.
+- `scripts/archive/passive_best_montage.py` — renders the two summary montages from the saved CSVs.
 
 Run on `D:\Luuk van Knippenberg\Claude\invivo_sw` (in-vivo PLAX, 1112 frames @ ~925.9 Hz), which
 has 4 detected valve-closure windows (@ 52, 377, 549, 920 ms), a fresh M-line drawn per window.
@@ -103,11 +103,11 @@ metric chasing the flat band. Expected SWS ~2–3 m/s; the pc~0.9 / c~6–8 m/s 
 locking onto the **spatially-uniform bulk-motion band**, not a real wave.
 
 Tools added:
-- `scripts/passive_filter_variety.py` — quantity×band grid for one window, direction fixed leftward,
+- `scripts/archive/passive_filter_variety.py` — quantity×band grid for one window, direction fixed leftward,
   with 2 & 3 m/s reference slopes and pc restricted to a physiological band.
 - `metrics.slant_stack_speed` — **signed tau-p slant-stack** with **per-time spatial-mean removal**
   (kills the uniform bulk band, the decisive fix) → semblance-based speed + travel direction.
-- `scripts/passive_slantstack.py` — refined **low-band** grid (disp/velo × bp{5-80..20-120}) in the
+- `scripts/archive/passive_slantstack.py` — refined **low-band** grid (disp/velo × bp{5-80..20-120}) in the
   **reference M-mode orientation** (x=time, y=along-line), overlaying the band slant-stack fit, an
   optional leading-edge (Theil–Sen) fit, and 2 & 3 m/s references. Outputs `slantstack_win{0,2}_*.png`,
   `filtervariety_win{0,2}_*.png`.
@@ -171,7 +171,7 @@ Findings:
    the thin septum; Vos found only mild dispersion, so a single group speed is defensible.
 6. **Validate on a cleaner/gated AVC case** (stronger wave) once the Radon pipeline is in.
 
-## Exhaustive search v2 (`scripts/search_passive2.py`) — all 7 requested axes
+## Exhaustive search v2 (`scripts/archive/search_passive2.py`) — all 7 requested axes
 
 11 520 combos/window over: quantity (disp/vel/**acc**) · IQ pre-filter (none / low-pass 250 Hz) ·
 SVD rank (0/1) · motion (none / bp 5-150,10-150,10-80 / poly1) · spatial (none / gauss 0.6,1.0 /
@@ -224,7 +224,7 @@ high vs AVC 2.7 — plausibly a phase/alignment effect; revisit once win labelli
 
 ### Window labelling by same-recipe comparison + cardiac timing (2026-08-04)
 
-`scripts/passive_compare_windows.py` runs the **config-default recipe** (disp / no-dir / bp10-150 /
+`scripts/archive/passive_compare_windows.py` runs the **config-default recipe** (disp / no-dir / bp10-150 /
 gauss0.6 / mean3 / 5-line) identically on all four windows (`search2/compare_windows.png`):
 
 | window | t_peak | Δ from win0 | signed-Radon c | appearance |
@@ -277,7 +277,7 @@ Major differences (passive branch):
 | M-line | **anatomical spline along the septum**, median of **11** parallel lines | manual line, mean of 5 offsets | medium (alignment) |
 | bulk motion | band-pass only (no spatial-mean removal) | band-pass (+ spatial-mean removal in the metric) | — |
 
-**Empirical confirmation** (`scripts/passive_directional_test.py`, `directional_test_win2_AVC.png`):
+**Empirical confirmation** (`scripts/archive/passive_directional_test.py`, `directional_test_win2_AVC.png`):
 on win2 (AVC) velocity bp10–150, a **signed Radon fit with NO directional filter gives c ≈ 4.0 m/s**
 — matching the literature (Vos pig AVC 4.2 m/s, human 3.5 m/s). The **leftward directional filter
 steepens the band to 6.0 m/s** (toward vertical); rightward gives 3.2 m/s. **The k-ω directional
@@ -317,14 +317,14 @@ message for the linked sources.
 
 ```
 # exhaustive search + summary montages
-python scripts/search_passive.py "D:\Luuk van Knippenberg\Claude\invivo_sw" --config configs/passive.yaml
-python scripts/passive_best_montage.py
+python scripts/archive/search_passive.py "D:\Luuk van Knippenberg\Claude\invivo_sw" --config configs/passive.yaml
+python scripts/archive/passive_best_montage.py
 
 # domain-review montages (fixed direction, reference orientation, speed fits)
-python scripts/passive_filter_variety.py --window 2 --label AVC
-python scripts/passive_filter_variety.py --window 0 --label MVC
-python scripts/passive_slantstack.py     --window 2 --label AVC
-python scripts/passive_slantstack.py     --window 0 --label MVC
+python scripts/archive/passive_filter_variety.py --window 2 --label AVC
+python scripts/archive/passive_filter_variety.py --window 0 --label MVC
+python scripts/archive/passive_slantstack.py     --window 2 --label AVC
+python scripts/archive/passive_slantstack.py     --window 0 --label MVC
 ```
 
 All outputs land in `<folder>/output/swp_passive/search/`.

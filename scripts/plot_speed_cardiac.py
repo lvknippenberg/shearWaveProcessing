@@ -10,6 +10,7 @@ after the first push / R-peak).
 If ``--folder`` is omitted it defaults to the 40 V in-vivo folder.
 """
 from __future__ import annotations
+import sys
 
 import argparse
 import glob
@@ -20,9 +21,10 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+sys.path.insert(0, os.path.join(os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")), "src"))
+from swp import paths as P                                # noqa: E402
 
-DEFAULT_FOLDER = (r"D:/Luuk van Knippenberg/Claude/2026_08_04 voltage sweep/Invivo/"
-                  r"Luuk40V_SW_data_04-August-2026_13-36-07")
+DEFAULT_FOLDER = os.path.join(P.VOLTAGE_SWEEP, "Invivo", "Luuk40V_SW_data_04-August-2026_13-36-07")
 
 
 def load_records(folder):

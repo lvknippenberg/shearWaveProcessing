@@ -150,6 +150,7 @@ def build_pipeline_config(cfg: dict, overrides: Optional[dict] = None,
         directional_mode=p.get("directional_mode", "outward"),
         speed=p.get("speed", "ttp_ransac"),
         drop_first=p.get("drop_first", 1),
+        continuous_record=bool(p.get("continuous_record", False)),
         mline_offsets=mc.get("offsets", 5),
         mline_offset_step_m=mc.get("offset_step_mm", None) and mc["offset_step_mm"] * 1e-3,
         push_x_m=resolve_push_x_m(cfg, acq),
@@ -205,7 +206,8 @@ def build_views(cfg: dict, acq: Optional[Acquisition] = None):
     out = []
     for v in views_cfg:
         ov = {k: v[k] for k in ("quantity", "field_filters", "directional", "directional_mode",
-                                "estimator", "mode", "drop_first") if k in v}
+                                "estimator", "estimator_params", "mode", "drop_first",
+                                "continuous_record") if k in v}
         vc = build_pipeline_config(cfg, overrides=ov, acq=acq)
         if "offsets" in v or "offset_step_mm" in v:
             vc = replace(vc, mline_offsets=int(v.get("offsets", vc.mline_offsets)),

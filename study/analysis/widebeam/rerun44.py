@@ -20,8 +20,8 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = Path("D:/Luuk van Knippenberg/Github/shearWaveProcessing")
-PYTHON = Path("D:/Luuk van Knippenberg/envs/zea_latest/python.exe")
+REPO = Path(__file__).resolve().parents[3]
+PYTHON = Path(sys.executable)
 LIST = HERE / "folders44.txt"
 LOGS = HERE / "logs"
 

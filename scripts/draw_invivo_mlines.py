@@ -127,7 +127,7 @@ def main():
             print(f"    push {m:2d}: saved {len(ml.points)} points -> {os.path.basename(out)}")
 
     print(f"\ndrew/kept {done} of {total} M-lines.")
-    print("Next: python scripts/task4_invivo_compare.py --root <root> --outdir <root>/analysis")
+    print("Next: python scripts/archive/task4_invivo_compare.py --root <root> --outdir <root>/analysis")
 
 
 if __name__ == "__main__":
