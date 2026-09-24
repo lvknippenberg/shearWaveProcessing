@@ -172,6 +172,14 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
 13. Correct the reference timestamps of the study's buffer-2 files (only the timing arrays change;
     the originals are kept as `custom/t_reference_v0`):
     `python scripts/retrofit_push_gap.py --root "Z:/raw_data"` (dry run), then `--apply`.
-14. Per-quantity passive speeds for the whole study (~4.5 min/folder, ~3 h):
-    `python scripts/passive_study.py reprocess --root "Z:/raw_data"` - writes
-    `output/swp_passive/passive_speeds_by_quantity.json` next to each montage.
+14. Reprocess the study with the new passive default (~4 min/folder, ~2.5 h) - RUNNING 2026-09-24:
+    `python scripts/passive_study.py reprocess --root "Z:/raw_data"` - rewrites each montage,
+    `passive_speeds.json` and `passive_speeds_by_quantity.json` on the EXISTING windows and lines
+    (no detection). The v1 (displacement) outputs are kept in `swp_passive/v1_displacement/`.
+    **Note:** the stored windows were detected in energy mode, before `detect_mode` entered the
+    cache key, so any re-detection (`process`, `reprocess --redetect`) now stops with
+    StaleWindowsError in folders with hand-drawn lines rather than archiving them. The first run
+    of this reprocess (before that guard) re-detected C000000001-4 and archived their lines;
+    they were restored with `scripts/restore_redetected_windows.py` (all 14 windows reproduced to
+    0.1 ms and checked against the v1 record). Moving the study to phase-mode windows still needs
+    the per-event lines redrawn.

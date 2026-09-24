@@ -74,6 +74,9 @@ detect:
   # [5, 150]. A narrowing to [5, 45] was applied on 2026-09-22 and REVERTED the same day - see
   # the note on the view band below before proposing it again.
   band: [5, 150]                            # Hz, for the along-line energy used to place windows
+  quantity: displacement                    # overview quantity used to place windows - fixed,
+                                            # independent of pipeline.quantity (all stored windows
+                                            # were detected on displacement)
 
   # Event SELECTION. "energy" keeps the max_events largest bursts and labels them afterwards;
   # "phase" searches the windows label_event labels with (MVC within 150 ms of an R-peak, AVC

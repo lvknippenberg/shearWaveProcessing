@@ -269,7 +269,11 @@ def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, o
     ov_filters = [Step("temporal_bandpass", dict(f_lo=detect_band[0], f_hi=detect_band[1]))] + smoothing
     print("  computing displacement overview for burst detection "
           f"({detect_band[0]}-{detect_band[1]} Hz, spatial stride {overview_stride}) ...")
-    ov_cfg = replace(base, directional=False, field_filters=ov_filters)
+    # The overview QUANTITY is fixed too (detect.quantity, default displacement - what every stored
+    # window was detected with). Taking it from the pipeline meant that switching the processing
+    # default to velocity (2026-09-24) would silently move the detected windows.
+    ov_cfg = replace(base, directional=False, field_filters=ov_filters,
+                     quantity=str(cfg.get("detect", {}).get("quantity", "displacement")))
     ov = run_pipeline(_stride_acq(acq, overview_stride), gen_mline, ov_cfg, focus=None)
     D_st = np.asarray(ov.st.data).T                    # (n_s, n_t) as the burst detector expects
     t_s = np.asarray(ov.st.t)
@@ -684,9 +688,19 @@ def _mline_source(p):
     return f"buffer{s['buffer']}_frame{s['frame']}"
 
 
+class StaleWindowsError(RuntimeError):
+    """Cached windows no longer match the detection settings, and hand-drawn lines depend on them."""
+
+
 def process_single_line(folder, config="configs/passive.yaml", acq=None, window_ms=100.0,
-                        max_events=4, overview_stride=2, pad_ms=20.0):
-    """Unattended: detect bursts along the single line, reuse it for every window, process."""
+                        max_events=4, overview_stride=2, pad_ms=20.0, redetect=False):
+    """Unattended: detect bursts along the single line, reuse it for every window, process.
+
+    If the cached windows were detected with other settings (key mismatch) and per-event lines were
+    drawn for them, re-detecting would archive those hand-drawn lines and replace them with the
+    general line. That raises :class:`StaleWindowsError` unless ``redetect=True``; to apply a new
+    processing recipe to the existing windows use :func:`process_passive_windows` instead.
+    """
     cfg, p = _paths(folder, config)
     n_samples = cfg["mline"].get("n_samples", 250)
     gen = _load_line(p["general"], n_samples)
@@ -695,6 +709,16 @@ def process_single_line(folder, config="configs/passive.yaml", acq=None, window_
     key = dict(_detect_key(gen, cfg, window_ms, max_events, overview_stride),
                mline_source=_mline_source(p))
     st, windows = _cached_windows(p, gen, cfg, key)
+    if st is None and not redetect:
+        old, _ = read_windows(p["windows_json"])
+        if old is not None and old.get("window_mlines"):
+            ok = old.get("key", {})
+            diff = sorted(k for k in set(ok) | set(key) if ok.get(k) != key.get(k))
+            raise StaleWindowsError(
+                f"{folder}: cached windows differ from the current detection settings ({', '.join(diff)}) "
+                f"and {len(old['window_mlines'])} hand-drawn per-event line(s) depend on them. Re-detecting "
+                f"would archive those lines. Reprocess the existing windows with process_passive_windows "
+                f"(passive_study.py reprocess), or pass redetect=True and redraw the lines.")
     if st is None:
         _archive_window_lines(p["mlines"])
         windows = detect_windows(acq, gen, cfg, p["outdir"], window_ms, max_events,

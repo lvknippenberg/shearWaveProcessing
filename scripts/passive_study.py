@@ -166,12 +166,16 @@ def cmd_draw_events(folders, a):
 
 
 def cmd_reprocess(folders, a):
-    """Reprocess folders regardless of status - for per-event lines drawn with --defer-process.
+    """Reprocess folders regardless of status: the EXISTING windows and M-lines with the current views.
 
-    ``status()`` compares the montage against the *general* line, so it cannot see that
-    ``draw-events`` has replaced the per-window lines; this forces the run.
+    For a new processing recipe, or per-event lines drawn with --defer-process (``status()``
+    compares the montage against the *general* line, so it cannot see that ``draw-events`` has
+    replaced the per-window lines). No burst detection is run: the cached windows are used as they
+    are, even if they were detected with older settings, so hand-drawn per-event lines stay valid.
+    ``--redetect`` runs the detection instead (process_single_line), which refuses to archive
+    hand-drawn per-event lines of windows detected with other settings.
     """
-    from swp.passive import _paths, process_single_line, read_windows
+    from swp.passive import _paths, process_passive_windows, process_single_line, read_windows
 
     todo = []
     for f in folders:
@@ -187,7 +191,10 @@ def cmd_reprocess(folders, a):
         print(f"\n[{k + 1}/{len(todo)}] {_name(f)}", flush=True)
         t0 = time.perf_counter()
         try:
-            process_single_line(str(f), a.config)
+            if a.redetect:
+                process_single_line(str(f), a.config)
+            else:
+                process_passive_windows(str(f), a.config)
             print(f"  {time.perf_counter() - t0:.0f} s", flush=True)
         except Exception:                                 # noqa: BLE001
             failed.append(f)
@@ -278,6 +285,8 @@ def main():
                    help="process: keep polling for folders that finish drawing")
     p.add_argument("--defer-process", action="store_true",
                    help="draw-events: do not reprocess between folders (run `reprocess` after)")
+    p.add_argument("--redetect", action="store_true",
+                   help="reprocess: run burst detection first (default: reuse the cached windows)")
     p.add_argument("--only-event-lines", action="store_true",
                    help="reprocess: only folders that have per-event M-lines")
     p.add_argument("--trustworthy-only", action="store_true",

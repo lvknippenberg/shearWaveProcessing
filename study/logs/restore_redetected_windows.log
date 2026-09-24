@@ -1,0 +1,57 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+
+=== C000000001\SWE_01_SW_data_21-April-2026_12-12-54
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 50 ms, window [1, 100] ms
+    #1: peak 441 ms, window [391, 491] ms
+    #2: peak 610 ms, window [560, 660] ms
+    #3: peak 782 ms, window [732, 832] ms
+  win0: re-detected MVC @ 49.7 ms | v1 record MVC @ 49.7 ms OK
+  win1: re-detected AVC @ 440.6 ms | v1 record AVC @ 440.6 ms OK
+  win2: re-detected AK @ 610.2 ms | v1 record AK @ 610.2 ms OK
+  win3: re-detected MVC @ 781.9 ms | v1 record MVC @ 781.9 ms OK
+  archived lines for windows [0, 1, 2, 3]
+  restored: 4 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)
+
+=== C000000002\SWE02_SW_data_28-April-2026_10-09-45
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 64 ms, window [14, 114] ms
+    #1: peak 401 ms, window [351, 451] ms
+    #2: peak 613 ms, window [563, 663] ms
+  win0: re-detected MVC @ 63.7 ms | v1 record MVC @ 63.7 ms OK
+  win1: re-detected AVC @ 400.7 ms | v1 record AVC @ 400.7 ms OK
+  win2: re-detected other @ 613.4 ms | v1 record other @ 613.4 ms OK
+  archived lines for windows [0, 1, 2]
+  restored: 3 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)
+
+=== C000000003\VIS_03_SW_data_16-June-2026_10-09-42
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 148 ms, window [98, 198] ms
+    #1: peak 403 ms, window [353, 453] ms
+    #2: peak 586 ms, window [536, 636] ms
+    #3: peak 891 ms, window [841, 941] ms
+  win0: re-detected MVC @ 148.0 ms | v1 record MVC @ 148.0 ms OK
+  win1: re-detected AVC @ 402.8 ms | v1 record AVC @ 402.8 ms OK
+  win2: re-detected other @ 586.4 ms | v1 record other @ 586.4 ms OK
+  win3: re-detected AK @ 891.0 ms | v1 record AK @ 891.0 ms OK
+  archived lines for windows [0, 1, 2, 3]
+  restored: 4 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)
+
+=== C000000004\VIS_4_SW_data_16-June-2026_10-58-59
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 33 ms, window [1, 83] ms
+    #1: peak 403 ms, window [353, 453] ms
+    #2: peak 753 ms, window [703, 803] ms
+  win0: re-detected MVC @ 33.5 ms | v1 record MVC @ 33.5 ms OK
+  win1: re-detected AVC @ 402.8 ms | v1 record AVC @ 402.8 ms OK
+  win2: re-detected AK @ 752.8 ms | v1 record AK @ 752.8 ms OK
+  archived lines for windows [0, 1, 2]
+  restored: 3 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)
