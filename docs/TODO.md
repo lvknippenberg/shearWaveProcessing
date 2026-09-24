@@ -126,4 +126,3 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
 12. Per-quantity passive speeds for the whole study (~4.5 min/folder, ~3 h):
     `python scripts/passive_study.py reprocess --root "Z:/raw_data"` - writes
     `output/swp_passive/passive_speeds_by_quantity.json` next to each montage.
-13. Merge the `review-followup` branch after review (`python -m pytest` must stay green).
