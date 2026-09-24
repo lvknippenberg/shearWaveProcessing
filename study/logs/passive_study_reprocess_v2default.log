@@ -1,0 +1,654 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+=== reprocess 37 folder(s) ===
+
+[1/37] C000000001/SWE_01_SW_data_21-April-2026_12-12-54
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/values, 133.5 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\CombinedData_buffer1_iq.hdf5' [2m(/data/beamformed_data/coordinates, 2.2 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (110, 250) c=4.76 sem=0.625
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (110, 250) c=4.76 sem=0.529
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (110, 250) c=4.76 sem=0.586
+    window #0 by quantity: disp +6.38, velo +4.76, acce +4.76
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.65 sem=0.585
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.40 sem=0.314
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.65 sem=0.451
+    window #1 by quantity: disp +20.00, velo +1.65, acce -1.11
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.19 sem=0.532
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.03 sem=0.331
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.03 sem=0.441
+    window #2 by quantity: disp -1.18, velo -1.19, acce -1.25
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-20.00 sem=0.655
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-20.00 sem=0.544
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-20.00 sem=0.622
+    window #3 by quantity: disp -20.00, velo -20.00, acce +8.77
+done -> Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output\swp_passive\passive_windows_montage.png
+  223 s
+
+[2/37] C000000002/SWE02_SW_data_28-April-2026_10-09-45
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (123, 250) c=5.62 sem=0.694
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (123, 250) c=5.62 sem=0.541
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (123, 250) c=5.62 sem=0.641
+    window #0 by quantity: disp +10.79, velo +5.62, acce +5.62
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-16.48 sem=0.646
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-8.77 sem=0.486
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-16.48 sem=0.584
+    window #1 by quantity: disp -16.48, velo -16.48, acce -8.77
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=6.38 sem=0.491
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=4.76 sem=0.243
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=4.76 sem=0.356
+    window #2 by quantity: disp +6.85, velo +6.38, acce -6.85
+done -> Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45\output\swp_passive\passive_windows_montage.png
+  171 s
+
+[3/37] C000000003/VIS_03_SW_data_16-June-2026_10-09-42
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-20.00 sem=0.235
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-20.00 sem=0.088
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-20.00 sem=0.142
+    window #0 by quantity: disp +9.67, velo -20.00, acce -1.25
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.27 sem=0.508
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.27 sem=0.289
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.27 sem=0.396
+    window #1 by quantity: disp +5.01, velo +3.27, acce +2.49
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.71 sem=0.177
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.71 sem=0.062
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.71 sem=0.089
+    window #2 by quantity: disp +3.16, velo +1.71, acce +1.36
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.63 sem=0.162
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.63 sem=0.077
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.63 sem=0.094
+    window #3 by quantity: disp -2.63, velo -2.63, acce +4.76
+done -> Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42\output\swp_passive\passive_windows_montage.png
+  224 s
+
+[4/37] C000000004/VIS_4_SW_data_16-June-2026_10-58-59
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (95, 250) c=5.62 sem=0.597
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (95, 250) c=4.32 sem=0.439
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (95, 250) c=5.62 sem=0.548
+    window #0 by quantity: disp +16.48, velo +5.62, acce +4.32
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.87 sem=0.315
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.87 sem=0.118
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.87 sem=0.185
+    window #1 by quantity: disp -20.00, velo +2.87, acce +1.24
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.00 sem=0.429
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.193
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.00 sem=0.297
+    window #2 by quantity: disp +1.00, velo +1.00, acce +1.24
+done -> Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59\output\swp_passive\passive_windows_montage.png
+  160 s
+
+[5/37] C000000005/VIS-005_SW_data_19-June-2026_09-12-20
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-14.02 sem=0.342
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-12.19 sem=0.220
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-14.02 sem=0.275
+    window #0 by quantity: disp -4.76, velo -14.02, acce -16.48
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=16.48 sem=0.329
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-16.48 sem=0.172
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=16.48 sem=0.245
+    window #1 by quantity: disp -10.79, velo +16.48, acce +14.02
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=4.13 sem=0.724
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=4.13 sem=0.417
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=4.13 sem=0.567
+    window #2 by quantity: disp +2.78, velo +4.13, acce -4.13
+done -> Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20\output\swp_passive\passive_windows_montage.png
+  177 s
+
+[6/37] C000000007/VIS-007_SW_data_30-June-2026_11-45-50
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (97, 250) c=3.80 sem=0.585
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (97, 250) c=3.80 sem=0.287
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (97, 250) c=3.80 sem=0.440
+    window #0 by quantity: disp -20.00, velo +3.80, acce +1.65
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-8.02 sem=0.728
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-12.19 sem=0.427
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-8.02 sem=0.561
+    window #1 by quantity: disp -8.02, velo -8.02, acce +5.01
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-5.30 sem=0.320
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-7.39 sem=0.133
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-7.39 sem=0.206
+    window #2 by quantity: disp -14.02, velo -5.30, acce +20.00
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=20.00 sem=0.915
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=20.00 sem=0.776
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.855
+    window #3 by quantity: disp -20.00, velo +20.00, acce +20.00
+done -> Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50\output\swp_passive\passive_windows_montage.png
+  213 s
+
+[7/37] C000000008/VIS-010_SW_data_03-July-2026_10-36-33
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-3.38 sem=0.339
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-3.38 sem=0.163
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-3.96 sem=0.259
+    window #0 by quantity: disp -3.96, velo -3.38, acce +3.96
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.27 sem=0.728
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.70 sem=0.450
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.27 sem=0.631
+    window #1 by quantity: disp +3.27, velo +3.27, acce +3.27
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.63 sem=0.219
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.49 sem=0.056
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.55 sem=0.117
+    window #2 by quantity: disp -9.67, velo +2.63, acce -1.65
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=8.02 sem=0.425
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=5.62 sem=0.235
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=5.62 sem=0.326
+    window #3 by quantity: disp -20.00, velo +8.02, acce +3.38
+done -> Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33\output\swp_passive\passive_windows_montage.png
+  225 s
+
+[8/37] C000000010/vis-006_SW_data_30-June-2026_09-43-28
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (102, 250) c=14.02 sem=0.473
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (102, 250) c=9.67 sem=0.335
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (102, 250) c=9.67 sem=0.406
+    window #0 by quantity: disp +12.19, velo +14.02, acce -14.02
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=6.85 sem=0.394
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=6.85 sem=0.163
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=6.85 sem=0.238
+    window #1 by quantity: disp +5.62, velo +6.85, acce +3.51
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=20.00 sem=0.364
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=20.00 sem=0.203
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.271
+    window #2 by quantity: disp +7.39, velo +20.00, acce -20.00
+done -> Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28\output\swp_passive\passive_windows_montage.png
+  163 s
+
+[9/37] C000000011/VIS-11_SW_data_07-July-2026_08-40-05
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (95, 250) c=2.87 sem=0.714
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (95, 250) c=2.63 sem=0.627
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (95, 250) c=2.87 sem=0.677
+    window #0 by quantity: disp +2.63, velo +2.87, acce +4.32
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=5.62 sem=0.879
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=4.76 sem=0.801
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=5.62 sem=0.850
+    window #1 by quantity: disp +3.96, velo +5.62, acce +6.85
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.96 sem=0.468
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.63 sem=0.329
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.63 sem=0.401
+    window #2 by quantity: disp -2.25, velo -2.96, acce -4.76
+done -> Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05\output\swp_passive\passive_windows_montage.png
+  164 s
+
+[10/37] C000000012/VIS-014_SW_data_07-July-2026_11-41-37
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (121, 250) c=5.62 sem=0.692
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (121, 250) c=6.38 sem=0.424
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (121, 250) c=6.38 sem=0.573
+    window #0 by quantity: disp +4.32, velo +5.62, acce +2.96
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.78 sem=0.237
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.78 sem=0.095
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.78 sem=0.155
+    window #1 by quantity: disp -1.62, velo -2.78, acce -1.40
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.47 sem=0.735
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.36 sem=0.586
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.36 sem=0.663
+    window #2 by quantity: disp +1.96, velo +1.47, acce +1.27
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=4.32 sem=0.890
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=4.32 sem=0.759
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=4.32 sem=0.844
+    window #3 by quantity: disp +5.01, velo +4.32, acce +4.32
+done -> Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37\output\swp_passive\passive_windows_montage.png
+  228 s
+
+[11/37] C000000013/VIS-016_SW_data_10-July-2026_10-11-11
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (98, 250) c=5.97 sem=0.834
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (98, 250) c=5.62 sem=0.726
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (98, 250) c=5.97 sem=0.800
+    window #0 by quantity: disp +20.00, velo +5.97, acce +3.80
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-3.05 sem=0.503
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-3.05 sem=0.248
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-3.05 sem=0.387
+    window #1 by quantity: disp -2.05, velo -3.05, acce -4.32
+done -> Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11\output\swp_passive\passive_windows_montage.png
+  114 s
+
+[12/37] C000000014/VIS-008_SW_data_10-July-2026_08-36-06
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (114, 250) c=3.80 sem=0.864
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (114, 250) c=3.65 sem=0.799
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (114, 250) c=3.80 sem=0.843
+    window #0 by quantity: disp +4.53, velo +3.80, acce +3.80
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.85 sem=0.583
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.49 sem=0.345
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.65 sem=0.485
+    window #1 by quantity: disp -1.65, velo -1.85, acce -3.27
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.25 sem=0.749
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.25 sem=0.613
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.25 sem=0.704
+    window #2 by quantity: disp -2.14, velo -2.25, acce -2.30
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.27 sem=0.847
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.16 sem=0.771
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.27 sem=0.828
+    window #3 by quantity: disp +3.05, velo +3.27, acce +3.96
+done -> Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06\output\swp_passive\passive_windows_montage.png
+  227 s
+
+[13/37] C000000015/VIS-017_SW_data_10-July-2026_10-53-28
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (109, 250) c=6.38 sem=0.639
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (109, 250) c=5.01 sem=0.496
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (109, 250) c=6.38 sem=0.564
+    window #0 by quantity: disp +4.76, velo +6.38, acce +6.38
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.11 sem=0.609
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.04 sem=0.387
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.04 sem=0.514
+    window #1 by quantity: disp -1.29, velo -1.11, acce -1.00
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.51 sem=0.519
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.70 sem=0.343
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.51 sem=0.446
+    window #2 by quantity: disp +1.85, velo +3.51, acce +10.79
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (116, 250) c=-1.06 sem=0.509
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (116, 250) c=-1.00 sem=0.212
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (116, 250) c=-1.00 sem=0.389
+    window #3 by quantity: disp -1.43, velo -1.06, acce -6.38
+done -> Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28\output\swp_passive\passive_windows_montage.png
+  229 s
+
+[14/37] C000000016/VIS-015_SW_data_10-July-2026_09-24-32
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.01 sem=0.435
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.01 sem=0.293
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.01 sem=0.378
+    window #0 by quantity: disp -2.05, velo -2.01, acce +6.85
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=7.39 sem=0.962
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=7.39 sem=0.915
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=7.39 sem=0.946
+    window #1 by quantity: disp +5.97, velo +7.39, acce +8.02
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.96 sem=0.562
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.96 sem=0.433
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.96 sem=0.500
+    window #2 by quantity: disp +1.06, velo +3.96, acce +5.97
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.14 sem=0.603
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.14 sem=0.526
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.89 sem=0.577
+    window #3 by quantity: disp -3.51, velo -2.14, acce +4.53
+done -> Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32\output\swp_passive\passive_windows_montage.png
+  232 s
+
+[15/37] C000000018/VIS-012_SW_data_07-July-2026_09-21-31
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (120, 250) c=20.00 sem=0.486
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (120, 250) c=20.00 sem=0.280
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (120, 250) c=20.00 sem=0.402
+    window #0 by quantity: disp +8.77, velo +20.00, acce +8.77
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.36 sem=0.239
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.105
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.36 sem=0.174
+    window #1 by quantity: disp +1.00, velo +2.36, acce +16.48
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.45 sem=0.696
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.45 sem=0.457
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.45 sem=0.610
+    window #2 by quantity: disp +1.85, velo +1.45, acce +1.13
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (117, 250) c=2.49 sem=0.375
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (117, 250) c=2.14 sem=0.179
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (117, 250) c=2.49 sem=0.282
+    window #3 by quantity: disp +2.19, velo +2.49, acce +1.09
+done -> Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31\output\swp_passive\passive_windows_montage.png
+  221 s
+
+[16/37] C000000019/VIS-027_SW_data_21-July-2026_11-19-20
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.14 sem=0.440
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.75 sem=0.227
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.60 sem=0.338
+    window #0 by quantity: disp +6.85, velo +2.14, acce +20.00
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=9.67 sem=0.408
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=6.38 sem=0.200
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=6.38 sem=0.310
+    window #1 by quantity: disp +5.62, velo +9.67, acce +9.67
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.03 sem=0.203
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.077
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.00 sem=0.138
+    window #2 by quantity: disp +1.34, velo +1.03, acce -2.14
+done -> Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20\output\swp_passive\passive_windows_montage.png
+  177 s
+
+[17/37] C000000020/VIS-026_SW_data_21-July-2026_10-42-10
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=4.76 sem=0.710
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=4.32 sem=0.591
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=4.32 sem=0.659
+    window #0 by quantity: disp +3.80, velo +4.76, acce +3.80
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=6.38 sem=0.886
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=6.38 sem=0.749
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=6.38 sem=0.829
+    window #1 by quantity: disp +5.30, velo +6.38, acce +6.38
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.71 sem=0.343
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.60 sem=0.145
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.60 sem=0.250
+    window #2 by quantity: disp +1.85, velo +1.71, acce +1.52
+done -> Z:\raw_data\C000000020\VIS-026_SW_data_21-July-2026_10-42-10\output\swp_passive\passive_windows_montage.png
+  177 s
+
+[18/37] C000000021/VIS-024_SW_data_17-July-2026_09-35-47
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.10 sem=0.511
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.10 sem=0.323
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.10 sem=0.453
+    window #0 by quantity: disp +1.92, velo +2.10, acce +2.10
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.96 sem=0.774
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.49 sem=0.475
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.49 sem=0.655
+    window #1 by quantity: disp +2.96, velo +2.96, acce +2.14
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-4.76 sem=0.206
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.068
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.00 sem=0.134
+    window #2 by quantity: disp +1.00, velo -4.76, acce +2.96
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.51 sem=0.516
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.05 sem=0.382
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.05 sem=0.467
+    window #3 by quantity: disp +3.16, velo +3.51, acce +2.36
+done -> Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47\output\swp_passive\passive_windows_montage.png
+  227 s
+
+[19/37] C000000022/VIS-023_SW_data_17-July-2026_08-48-06
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-4.53 sem=0.158
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.053
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-4.53 sem=0.094
+    window #0 by quantity: disp -6.85, velo -4.53, acce -1.47
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.00 sem=0.428
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.00 sem=0.174
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.00 sem=0.282
+    window #1 by quantity: disp +1.06, velo +1.00, acce +1.71
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.65 sem=0.654
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.27 sem=0.338
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.34 sem=0.471
+    window #2 by quantity: disp +1.45, velo +1.65, acce +1.15
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=16.48 sem=0.857
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=10.79 sem=0.668
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=10.79 sem=0.788
+    window #3 by quantity: disp +20.00, velo +16.48, acce +5.62
+done -> Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06\output\swp_passive\passive_windows_montage.png
+  227 s
+
+[20/37] C000000023/VIS-022_SW_data_14-July-2026_11-41-10
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (104, 250) c=2.14 sem=0.841
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (104, 250) c=2.19 sem=0.777
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (104, 250) c=2.14 sem=0.817
+    window #0 by quantity: disp +2.96, velo +2.14, acce +2.96
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=20.00 sem=0.844
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=20.00 sem=0.710
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.804
+    window #1 by quantity: disp +20.00, velo +20.00, acce +16.48
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.49 sem=0.763
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.49 sem=0.728
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.49 sem=0.750
+    window #2 by quantity: disp +3.27, velo +2.49, acce +2.49
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (126, 250) c=-1.00 sem=0.121
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (126, 250) c=-1.00 sem=0.060
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (126, 250) c=-1.00 sem=0.096
+    window #3 by quantity: disp -1.00, velo -1.00, acce +3.51
+done -> Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10\output\swp_passive\passive_windows_montage.png
+  218 s
+
+[21/37] C000000025/VIS-025_SW_data_21-July-2026_09-53-09
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (99, 250) c=3.51 sem=0.866
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (99, 250) c=2.96 sem=0.703
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (99, 250) c=2.96 sem=0.809
+    window #0 by quantity: disp +3.80, velo +3.51, acce +2.96
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.96 sem=0.837
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.96 sem=0.666
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.96 sem=0.775
+    window #1 by quantity: disp +3.96, velo +3.96, acce +3.96
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.96 sem=0.856
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.96 sem=0.671
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.96 sem=0.785
+    window #2 by quantity: disp +3.51, velo +3.96, acce +3.96
+done -> Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09\output\swp_passive\passive_windows_montage.png
+  172 s
+
+[22/37] C000000026/VIS-020_SW_data_14-July-2026_10-03-40
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=6.38 sem=0.356
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=6.38 sem=0.142
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=6.38 sem=0.237
+    window #1 by quantity: disp -20.00, velo +6.38, acce +5.01
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.96 sem=0.548
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.96 sem=0.258
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.42 sem=0.422
+    window #2 by quantity: disp -3.65, velo -2.96, acce +6.85
+done -> Z:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-03-40\output\swp_passive\passive_windows_montage.png
+  128 s
+
+[23/37] C000000027/VIS-019_SW_data_14-July-2026_09-20-26
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (116, 250) c=3.05 sem=0.897
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (116, 250) c=2.87 sem=0.831
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (116, 250) c=3.05 sem=0.886
+    window #0 by quantity: disp +2.87, velo +3.05, acce +2.87
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.87 sem=0.609
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.87 sem=0.342
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.87 sem=0.481
+    window #1 by quantity: disp +3.51, velo +2.87, acce +20.00
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.70 sem=0.546
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.78 sem=0.316
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.70 sem=0.507
+    window #2 by quantity: disp +2.01, velo +2.70, acce +3.96
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=3.05 sem=0.907
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.87 sem=0.854
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.05 sem=0.894
+    window #3 by quantity: disp +2.63, velo +3.05, acce +3.38
+done -> Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26\output\swp_passive\passive_windows_montage.png
+  230 s
+
+[24/37] C000000028/VIS-018_SW_data_14-July-2026_08-30-41
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (109, 250) c=20.00 sem=0.820
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (109, 250) c=20.00 sem=0.746
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (109, 250) c=20.00 sem=0.787
+    window #0 by quantity: disp +10.79, velo +20.00, acce +5.30
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.52 sem=0.725
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.52 sem=0.416
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.34 sem=0.575
+    window #2 by quantity: disp -1.52, velo -1.52, acce -2.30
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (104, 250) c=5.30 sem=0.846
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (104, 250) c=5.30 sem=0.770
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (104, 250) c=5.30 sem=0.820
+    window #3 by quantity: disp +5.30, velo +5.30, acce +4.13
+done -> Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41\output\swp_passive\passive_windows_montage.png
+  166 s
+
+[25/37] C000000029/VIS-031_SW_data_24-July-2026_11-11-50
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=5.30 sem=0.657
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=5.30 sem=0.382
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=5.30 sem=0.530
+    window #0 by quantity: disp +2.78, velo +5.30, acce +3.65
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-9.67 sem=0.731
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-9.67 sem=0.632
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-9.67 sem=0.699
+    window #1 by quantity: disp -12.19, velo -9.67, acce -9.67
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.60 sem=0.534
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.60 sem=0.317
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.60 sem=0.452
+    window #2 by quantity: disp +1.71, velo +1.60, acce -20.00
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=10.79 sem=0.721
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=7.39 sem=0.441
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=10.79 sem=0.599
+    window #3 by quantity: disp +4.32, velo +10.79, acce +3.65
+done -> Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50\output\swp_passive\passive_windows_montage.png
+  254 s
+
+[26/37] C000000030/VIS-029_SW_data_24-July-2026_09-36-27
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (107, 250) c=-9.67 sem=0.892
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (107, 250) c=-9.67 sem=0.818
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (107, 250) c=-8.77 sem=0.865
+    window #0 by quantity: disp -16.48, velo -9.67, acce -9.67
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-5.30 sem=0.826
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-5.01 sem=0.754
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-5.30 sem=0.800
+    window #3 by quantity: disp -8.77, velo -5.30, acce -5.97
+done -> Z:\raw_data\C000000030\VIS-029_SW_data_24-July-2026_09-36-27\output\swp_passive\passive_windows_montage.png
+  128 s
+
+[27/37] C000000031/VIS-032_SW_data_24-July-2026_11-57-06
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=6.85 sem=0.650
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=6.85 sem=0.333
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=6.85 sem=0.471
+    window #0 by quantity: disp +20.00, velo +6.85, acce +2.87
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.49 sem=0.273
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.49 sem=0.110
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.193
+    window #1 by quantity: disp +1.29, velo -2.49, acce +1.71
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-4.13 sem=0.614
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-3.05 sem=0.388
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-4.13 sem=0.510
+    window #2 by quantity: disp -12.19, velo -4.13, acce +2.49
+done -> Z:\raw_data\C000000031\VIS-032_SW_data_24-July-2026_11-57-06\output\swp_passive\passive_windows_montage.png
+  181 s
+
+[28/37] C000000032/VIS-030_SW_data_24-July-2026_10-24-32
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (95, 250) c=20.00 sem=0.705
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (95, 250) c=-20.00 sem=0.438
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (95, 250) c=-20.00 sem=0.601
+    window #0 by quantity: disp -20.00, velo +20.00, acce +20.00
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.06 sem=0.263
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.06 sem=0.086
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.06 sem=0.174
+    window #1 by quantity: disp -1.31, velo -1.06, acce +1.00
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-14.02 sem=0.715
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-8.02 sem=0.454
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-8.02 sem=0.616
+    window #2 by quantity: disp -8.77, velo -14.02, acce +2.78
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.22 sem=0.212
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.22 sem=0.089
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.22 sem=0.147
+    window #3 by quantity: disp +1.07, velo +1.22, acce +1.22
+done -> Z:\raw_data\C000000032\VIS-030_SW_data_24-July-2026_10-24-32\output\swp_passive\passive_windows_montage.png
+  224 s
+
+[29/37] C000000033/VIS-028_SW_data_24-July-2026_08-43-33
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=20.00 sem=0.689
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=20.00 sem=0.557
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.633
+    window #0 by quantity: disp -20.00, velo +20.00, acce +9.67
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-14.02 sem=0.552
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-9.67 sem=0.423
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-14.02 sem=0.501
+    window #1 by quantity: disp +20.00, velo -14.02, acce -14.02
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-10.79 sem=0.261
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-10.79 sem=0.118
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-10.79 sem=0.186
+    window #2 by quantity: disp -12.19, velo -10.79, acce -4.76
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.78 sem=0.430
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.68 sem=0.252
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.78 sem=0.345
+    window #3 by quantity: disp +1.96, velo +1.78, acce -3.65
+done -> Z:\raw_data\C000000033\VIS-028_SW_data_24-July-2026_08-43-33\output\swp_passive\passive_windows_montage.png
+  235 s
+
+[30/37] C000000035/VIS-044_SW_data_07-August-2026_10-54-57
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (122, 250) c=3.65 sem=0.688
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (122, 250) c=3.65 sem=0.452
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (122, 250) c=3.65 sem=0.587
+    window #0 by quantity: disp +4.32, velo +3.65, acce +2.10
+done -> Z:\raw_data\C000000035\VIS-044_SW_data_07-August-2026_10-54-57\output\swp_passive\passive_windows_montage.png
+  82 s
+
+[31/37] C000000036/VIS-043_SW_data_07-August-2026_10-03-38
+  every window skipped - nothing to process
+  0 s
+
+[32/37] C000000037/VIS-042_SW_data_07-August-2026_08-39-39
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.63 sem=0.367
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.63 sem=0.178
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.63 sem=0.295
+    window #0 by quantity: disp +2.70, velo +2.63, acce +2.63
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (113, 250) c=5.97 sem=0.758
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (113, 250) c=4.53 sem=0.525
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (113, 250) c=4.53 sem=0.659
+    window #1 by quantity: disp +10.79, velo +5.97, acce +1.68
+done -> Z:\raw_data\C000000037\VIS-042_SW_data_07-August-2026_08-39-39\output\swp_passive\passive_windows_montage.png
+  121 s
+
+[33/37] C000000039/VIS-040_SW_data_04-August-2026_11-46-05
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=4.32 sem=0.599
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=3.51 sem=0.370
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=3.51 sem=0.489
+    window #0 by quantity: disp +8.77, velo +4.32, acce +2.96
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=1.65 sem=0.314
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.75 sem=0.110
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.75 sem=0.206
+    window #2 by quantity: disp +2.25, velo +1.65, acce -5.30
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.63 sem=0.485
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.96 sem=0.223
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.96 sem=0.358
+    window #3 by quantity: disp +2.25, velo +2.63, acce -1.34
+done -> Z:\raw_data\C000000039\VIS-040_SW_data_04-August-2026_11-46-05\output\swp_passive\passive_windows_montage.png
+  198 s
+
+[34/37] C000000040/VIS-039_SW_data_04-August-2026_10-57-58
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.96 sem=0.749
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=2.96 sem=0.494
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=2.96 sem=0.656
+    window #2 by quantity: disp +2.87, velo +2.96, acce +2.96
+done -> Z:\raw_data\C000000040\VIS-039_SW_data_04-August-2026_10-57-58\output\swp_passive\passive_windows_montage.png
+  94 s
+
+[35/37] C000000042/VIS-036_SW_data_28-July-2026_14-07-08
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (115, 250) c=2.10 sem=0.463
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (115, 250) c=1.96 sem=0.246
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (115, 250) c=2.01 sem=0.443
+    window #0 by quantity: disp +1.68, velo +2.10, acce -5.97
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-2.01 sem=0.511
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-2.01 sem=0.224
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-2.01 sem=0.375
+    window #1 by quantity: disp -2.42, velo -2.01, acce +2.96
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-1.38 sem=0.222
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-1.54 sem=0.102
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-1.75 sem=0.160
+    window #2 by quantity: disp -1.00, velo -1.38, acce +2.01
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=2.30 sem=0.592
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=1.96 sem=0.304
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=1.96 sem=0.522
+    window #3 by quantity: disp +1.60, velo +2.30, acce +1.96
+done -> Z:\raw_data\C000000042\VIS-036_SW_data_28-July-2026_14-07-08\output\swp_passive\passive_windows_montage.png
+  249 s
+
+[36/37] C000000044/VIS-034_SW_data_28-July-2026_11-02-22
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (105, 250) c=2.78 sem=0.488
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (105, 250) c=2.78 sem=0.238
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (105, 250) c=2.78 sem=0.413
+    window #0 by quantity: disp +3.16, velo +2.78, acce +3.38
+done -> Z:\raw_data\C000000044\VIS-034_SW_data_28-July-2026_11-02-22\output\swp_passive\passive_windows_montage.png
+  72 s
+
+[37/37] C000000045/VIS-033_SW_data_28-July-2026_09-25-55
+  3 view(s) per window: velocity bp15-150 gauss0.6 mean3 | velocity bp15-150 unsmoothed mean3 | velocity bp15-150 median1.0 mean3
+    window #0 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-14.02 sem=0.634
+    window #0 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-8.77 sem=0.376
+    window #0 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-8.77 sem=0.510
+    window #0 by quantity: disp -20.00, velo -14.02, acce -5.97
+    window #1 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=20.00 sem=0.134
+    window #1 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=5.30 sem=0.036
+    window #1 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=20.00 sem=0.074
+    window #1 by quantity: disp -20.00, velo +20.00, acce +20.00
+    window #2 [velocity bp15-150 gauss0.6 mean3]: space-time (129, 250) c=-20.00 sem=0.344
+    window #2 [velocity bp15-150 unsmoothed mean3]: space-time (129, 250) c=-20.00 sem=0.120
+    window #2 [velocity bp15-150 median1.0 mean3]: space-time (129, 250) c=-20.00 sem=0.183
+    window #2 by quantity: disp -14.02, velo -20.00, acce +20.00
+    window #3 [velocity bp15-150 gauss0.6 mean3]: space-time (104, 250) c=1.25 sem=0.164
+    window #3 [velocity bp15-150 unsmoothed mean3]: space-time (104, 250) c=-1.00 sem=0.053
+    window #3 [velocity bp15-150 median1.0 mean3]: space-time (104, 250) c=1.16 sem=0.130
+    window #3 by quantity: disp -1.03, velo +1.25, acce -2.01
+done -> Z:\raw_data\C000000045\VIS-033_SW_data_28-July-2026_09-25-55\output\swp_passive\passive_windows_montage.png
+  225 s
+
+reprocessed 37/37 in 112.6 min

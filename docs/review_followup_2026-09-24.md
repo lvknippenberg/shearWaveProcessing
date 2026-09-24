@@ -227,3 +227,53 @@ from the plot Caenen sent), `study/logs/caenen_speed_comparison.csv`,
   - 28 scripts hard-coded `D:/...`, and the voltage-sweep path they used no longer existed.
   - 42 finished campaign scripts moved to `scripts/archive/` (see its README); every script
     import-tested after the move.
+
+## 7. Passive default adopted, buffer-3 line mapping, study rerun (evening)
+
+**Default.** `configs/passive.yaml` now uses the report part-2 recipe: velocity, 15-150 Hz,
+Gaussian 0.6 x 1.2 mm, mean 3, 5 lines x 0.5 mm; no directional filter, SVD or CFWI. The three views
+differ only in the spatial filter (default / unsmoothed / median 1.0 x 2.0 mm). `manual_slope.py`
+shows them side by side with the line mirrored. The old config is frozen as `passive_v1.yaml`.
+Temporal smoothing and M-line count do act (`smoothing_effect_check.py`); they change little
+because the signal is slow (f50 29 Hz, f90 66 Hz).
+
+**Buffer-3 -> buffer-4 line mapping** (`swp.mline.transfer`, `map_mlines_b3_to_b4.py`):
+- The line is moved by the local translation between the frame it was drawn on and buffer 4 at
+  the event. Rotation is not identifiable in vivo, so it is not modelled.
+- A mapping is trusted only if the ensemble agrees and known shifts are recovered.
+- Phantom: <= 0.3 mm error. In vivo: 7/15 mappings reliable.
+- Mapped lines beat the unmapped buffer-3 lines (6/7) but not the buffer-1 lines (2/7).
+  Keep the buffer-1 lines.
+
+**Study rerun** (`passive_study.py reprocess`, 36 folders, 116 windows, same windows and lines;
+v1 outputs in `swp_passive/v1_displacement/`; `passive_v2_rerun_summary.py` ->
+`study/logs/passive_v2_rerun_windows.csv`, `study/montages/passive_v2_rerun_summary.png`):
+- **Population medians unchanged.** Median automatic |c| per event, v2 default vs v1 view A: MVC 4.4 vs
+  4.3, AVC 4.0 vs 4.0, AK 1.8 vs 1.8, other 2.1 vs 2.1 m/s. Railing at the 1/20 m/s bounds drops
+  from 16 % to 11 %.
+- **Per window the automatic speed is recipe-dependent.** Where neither run rails, v2 and v1 A agree
+  within 25 % in only 32 % of windows (same direction in 86 %). The automatic number is not a
+  per-window measurement; hand slopes stay the reference.
+- **The Gaussian 0.6 x 1.2 mm does steepen some fronts.** Against the unsmoothed view it gives the
+  same speed in 45 % of windows, >10 % faster in 36 % (median +30 % there), slower in 4 %. The
+  median 1.0 x 2.0 mm filter is nearly neutral (IQR of the ratio 1.00-1.05), and its semblance
+  (0.48) is between unsmoothed (0.34) and Gaussian (0.58). This supports the concern raised on
+  report part 2. When reading a speed by hand, check it against the median view.
+- View agreement rises from 5/116 (v1) to 91/116 (v2), but that is by design: the v2 views
+  differ only in the spatial filter. It is not a quality gain.
+- Only 4 windows have full-line hand slopes, too few for an accuracy comparison.
+
+**Re-detection accident, repaired.**
+- The study windows were detected in energy mode before `detect_mode` entered the cache key.
+  `process_single_line` therefore re-detected (in phase mode) C000000001-4 during the first rerun
+  attempt, and C000000023 during a single-folder reprocess that morning. In those folders the
+  hand-drawn per-event lines were archived.
+- `scripts/restore_redetected_windows.py` restored all five folders. The original windows were
+  reproduced to 0.1 ms and checked against the 09-18 split table or the v1 record. The re-detected
+  state is kept as `*.redetected_20260924`. C000000023's v1 outputs were regenerated on the
+  restored lines.
+- A scan of all 44 folders shows no other re-detected window files.
+- Prevention:
+  - `process_single_line` raises `StaleWindowsError` when hand-drawn lines depend on the cache;
+  - `reprocess` no longer detects;
+  - the detection overview quantity is pinned (`detect.quantity: displacement`).

@@ -103,6 +103,18 @@ and MVC displacement to 8 %, while an independent ridge-tracking fit landed 25 %
 *identical* on-wave score. Two clicks over a ~5 ms moveout is not a precise instrument: a 1 ms slip
 is a 25 % error. Quote speeds accordingly, not at the two decimals the tool prints.
 
+**Smoothing can steepen the front (2026-09-24 study rerun, velocity 15-150 Hz default).**
+- Across 116 windows, the default Gaussian 0.6 x 1.2 mm view gives the same automatic speed as the
+  unsmoothed view in 45 % of windows, but a >10 % faster one in 36 % (median +30 % there).
+- A median 1.0 x 2.0 mm filter is nearly neutral (ratio IQR 1.00-1.05).
+- `manual_slope.py` therefore shows the unsmoothed and median views next to the default, with the
+  drawn line mirrored. If the line only fits the Gaussian panel, the smoothing has steepened it.
+- The same rerun showed again that the automatic per-window speed depends on the recipe: v1
+  displacement and v2 velocity agree within 25 % in only 32 % of windows. The per-event medians do
+  not change (MVC 4.4 vs 4.3, AVC 4.0 vs 4.0, AK 1.8 vs 1.8 m/s).
+
+Details: `docs/review_followup_2026-09-24.md` section 7, `study/logs/passive_v2_rerun_windows.csv`.
+
 ## Speeds differ between cardiac events - but the ORDERING does not generalise
 
 C000000023 gives 2.89 m/s at MVC against 3.56 m/s at AVC in displacement, a ratio of about 1.2.

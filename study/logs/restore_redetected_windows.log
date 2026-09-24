@@ -55,3 +55,19 @@
   win2: re-detected AK @ 752.8 ms | v1 record AK @ 752.8 ms OK
   archived lines for windows [0, 1, 2]
   restored: 3 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+
+=== C000000023\VIS-022_SW_data_14-July-2026_11-41-10
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 43 ms, window [1, 93] ms
+    #1: peak 450 ms, window [400, 500] ms
+    #2: peak 654 ms, window [604, 704] ms
+    #3: peak 849 ms, window [799, 899] ms
+  win0: re-detected MVC @ 43.2 ms | pre-accident record MVC @ 43.2 ms OK
+  win1: re-detected AVC @ 450.4 ms | pre-accident record AVC @ 450.4 ms OK
+  win2: re-detected other @ 654.5 ms | pre-accident record other @ 654.5 ms OK
+  win3: re-detected AK @ 848.9 ms | pre-accident record AK @ 848.9 ms OK
+  archived lines for windows [0, 1, 2, 3]
+  restored: 4 hand-drawn lines, windows.json rebuilt (re-detected state in redetected_20260924)

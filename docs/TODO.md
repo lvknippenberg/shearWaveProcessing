@@ -149,7 +149,13 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
    signal is slow (f50 29 Hz, f90 66 Hz; mean 3 passes 94 % at f90) and varies little across the
    line. `tests/test_passive_default.py` pins the recipe. The old config is frozen as
    `configs/passive_v1.yaml` (the scored panels and manual slopes are keyed by its view names;
-   `score_panels.py` / `field_stage4.py` use it). Reprocess the study with the new default (item 14).
+   `score_panels.py` / `field_stage4.py` use it). Study reprocessed (item 14).
+   **Study-wide check of the steepening concern:**
+   - Against the unsmoothed view, the Gaussian 0.6 x 1.2 mm gives a >10 % faster automatic speed
+     in 36 % of 116 windows (median +30 % there). The median 1.0 x 2.0 mm is nearly neutral (ratio
+     IQR 1.00-1.05), with a semblance between unsmoothed and Gaussian.
+   - **Open decision:** make the median 1.0 x 2.0 mm the default view A? This would not change the
+     other views.
 
 12. **Which image to draw passive M-lines on.** Part 3 (`report/passive_methods/passive_methods_v3.pdf`):
    buffer-3 frames are 2-3 beats before buffer 4 and the heart has moved a median 3.1 mm (buffer 1:
@@ -172,14 +178,20 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
 13. Correct the reference timestamps of the study's buffer-2 files (only the timing arrays change;
     the originals are kept as `custom/t_reference_v0`):
     `python scripts/retrofit_push_gap.py --root "Z:/raw_data"` (dry run), then `--apply`.
-14. Reprocess the study with the new passive default (~4 min/folder, ~2.5 h) - RUNNING 2026-09-24:
-    `python scripts/passive_study.py reprocess --root "Z:/raw_data"` - rewrites each montage,
-    `passive_speeds.json` and `passive_speeds_by_quantity.json` on the EXISTING windows and lines
-    (no detection). The v1 (displacement) outputs are kept in `swp_passive/v1_displacement/`.
+14. **DONE 2026-09-24:** study reprocessed with the new passive default (37 folders, 113 min,
+    `python scripts/passive_study.py reprocess --root "Z:/raw_data"`, on the EXISTING windows and
+    lines, no detection). The v1 (displacement) outputs are kept in `swp_passive/v1_displacement/`.
+    Results: `study/analysis/passive_v2_rerun_summary.py`, and
+    `review_followup_2026-09-24.md` section 7. In short:
+    - the per-event medians are unchanged;
+    - the automatic per-window speed is recipe-dependent;
+    - the Gaussian steepens the front in about a third of windows, while the median filter is
+      neutral.
+
     **Note:** the stored windows were detected in energy mode, before `detect_mode` entered the
-    cache key, so any re-detection (`process`, `reprocess --redetect`) now stops with
-    StaleWindowsError in folders with hand-drawn lines rather than archiving them. The first run
-    of this reprocess (before that guard) re-detected C000000001-4 and archived their lines;
-    they were restored with `scripts/restore_redetected_windows.py` (all 14 windows reproduced to
-    0.1 ms and checked against the v1 record). Moving the study to phase-mode windows still needs
-    the per-event lines redrawn.
+    cache key. Re-detection (`process`, `reprocess --redetect`) now stops with StaleWindowsError
+    in folders with hand-drawn lines, rather than archiving them. Before that guard, C000000001-4
+    and C000000023 were re-detected; they were restored with
+    `scripts/restore_redetected_windows.py`. All 18 windows were reproduced to 0.1 ms, and all 44
+    folders were checked. Moving the study to phase-mode windows still needs the per-event lines
+    redrawn.
