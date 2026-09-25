@@ -76,6 +76,27 @@ def test_reorders_both_files_chronologically(tmp_path, fake):
     assert not list(out.rglob("*.unwrap_tmp"))
 
 
+def _variant(out, name="CombinedData_buffer3_refocus-adjoint_iq.hdf5"):
+    stored = (np.arange(N) - FIRST) % N
+    path = out / name
+    with h5py.File(path, "w") as f:
+        f.create_dataset(f"{U._BF}/values", data=np.broadcast_to(stored[:, None, None, None], (N, 3, 4, 2)).astype(np.float32))
+        f.create_dataset(f"{U._BF}/timestamps", data=(np.arange(N) * 0.039).astype(np.float32))
+    return path
+
+
+def test_variants_get_the_same_head(tmp_path, fake):
+    out, conv, iq = _files(tmp_path)
+    U.unwrap_buffer3(str(tmp_path), out, gif=False, log=lambda *_: None)
+    var = _variant(out)                              # e.g. a REFoCUS reconstruction made earlier
+    U.unwrap_buffer3(str(tmp_path), out, gif=False, log=lambda *_: None)
+    with h5py.File(var, "r") as f:
+        np.testing.assert_array_equal(f[f"{U._BF}/values"][:, 0, 0, 0], np.arange(N))
+    assert U.read_flag(var)["first_frame"] == FIRST
+    assert len(fake) == 1                            # head reused, not re-estimated
+    assert U.unwrap_variants(str(tmp_path), out, gif=False, log=lambda *_: None) == []   # idempotent
+
+
 def test_second_run_moves_nothing(tmp_path, fake):
     out, conv, iq = _files(tmp_path)
     U.unwrap_buffer3(str(tmp_path), out, gif=False, log=lambda *_: None)

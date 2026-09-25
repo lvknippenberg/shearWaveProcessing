@@ -150,6 +150,25 @@ python scripts/unwrap_buffer3.py --folder "<folder>"
   (C000000035) is one slot off, at margin 0.0036, below the acceptance threshold anyway.
 - The rest of the study: `docs/TODO.md` item 15.
 
+**Buffer-3 reconstruction variants.** Files such as REFoCUS adjoint, Tikhonov/TSVD, incoherent,
+deconvolution and pfield-normalised (`*_buffer3_<variant>_iq.hdf5`) come from the same stored-order
+RF, so they carry the same rotation. `unwrap_buffer3` then calls `unwrap_variants`, which applies
+the head stored in the main file (never re-estimated), with the same flags and frame times, and
+re-renders the variant's GIF. In the September folders: 42 reordered, 8 flagged only.
+
+**R-peak-aligned montage** (`study/analysis/buffer3_rpeak_montage.py` →
+`study/montages/all_buffer3_refocus_rpeak_aligned.gif`, stills `_R.png` / `_mid.png`). This
+replaces `all_buffer3_refocus_adaptive.gif`, which started every tile at stored slot 0.
+- **White (34 subjects):** resampled onto a common phase axis (fraction of each subject's RR),
+  so every tile starts at the R-peak and one loop is one beat.
+- **Orange (3):** unwrapped, but with no valid ECG. They play in chronological order and cannot
+  be phase-aligned.
+- **Red (7):** ambiguous, in stored order.
+
+Why the old montage looked roughly synchronised: in the 12 September folders with an exact trigger
+count, stored slot 0 fell at 0.14-0.71 of the RR, clustered mid-cycle (8 of 12 at 0.36-0.63). The
+tiles started within about half a beat of each other, not at one phase.
+
 ## Consumers
 
 - **M-line tool** (`swp.manual.frames`):
@@ -183,3 +202,4 @@ before the loop is left.
 | `study/analysis/buffer3_unwrap_calibration.py` → `study/logs/buffer3_unwrap_calibration.csv` | methods against the exact trigger count |
 | `study/analysis/buffer3_unwrap_validation.py` → `study/logs/buffer3_unwrap_validation.csv`, `study/montages/buffer3_unwrap/` | RF / IQ / buffer-1 on a stratified sample |
 | `study/analysis/buffer3_timing_fit.py`, `buffer3_frame_order.py` | the first evidence |
+| `study/analysis/buffer3_rpeak_montage.py` → `study/montages/all_buffer3_refocus_rpeak_aligned*` | R-peak-aligned montage of every subject from the unwrapped frame times |

@@ -397,6 +397,68 @@ def _extra(est, times, phases, when):
 
 
 def unwrap_buffer3(folder, output_dir=None, dry_run=False, gif=True, log=print):
+    """Unwrap buffer 3 of one folder: the converted RF and IQ files, then every other buffer-3 IQ
+    variant (REFoCUS, incoherent, ... reconstructions: ``*_buffer3_<variant>_iq.hdf5``) with the
+    same head. Returns the Estimate (or the stored record) of the main files."""
+    res = _unwrap_main(folder, output_dir, dry_run=dry_run, gif=gif, log=log)
+    if not dry_run:
+        unwrap_variants(folder, output_dir, gif=gif, log=log)
+    return res
+
+
+def _record_estimate(rec):
+    return Estimate(rec["status"], int(rec["first_frame"]), int(rec["shift_frames"]), rec["method"],
+                    json.loads(rec["details"]))
+
+
+def unwrap_variants(folder, output_dir=None, gif=True, log=print):
+    """Apply the head stored in the main buffer-3 file to the other buffer-3 IQ files of the folder.
+
+    Reconstruction variants are beamformed from the same (stored-order) RF, so they carry the same
+    rotation; they are reordered with the stored head, never re-estimated. Idempotent. Returns the
+    list of files changed."""
+    output_dir = Path(output_dir) if output_dir else Path(folder) / "output"
+    conv, iq = buffer_files(output_dir)
+    rec = read_flag(iq) or read_flag(conv)
+    if rec is None:
+        return []
+    est = _record_estimate(rec)
+    changed = []
+    for path in sorted(output_dir.glob(f"*_buffer{BUFFER}_*_iq.hdf5")):
+        if iq is not None and path.samefile(iq) or read_flag(path):
+            continue
+        with h5py.File(path, "r") as f:
+            if f"{_BF}/values" not in f:
+                continue
+            n = f[f"{_BF}/values"].shape[0]
+        if est.resolved and n != int(est.details.get("n_frames", n)):
+            log(f"  {path.name}: {n} frames, main file {est.details.get('n_frames')} - left alone")
+            continue
+        times, phases = chronological_times(folder, n, est.shift) if est.resolved else (None, None)
+        extra = _extra(est, times, phases, time.strftime("%Y-%m-%d %H:%M:%S"))
+        ts = ((times - times[0]) * 1e-3).astype(np.float32) if times is not None else None
+        moves = est.resolved and est.first != 0
+        if moves:
+            per = {f"{_BF}/values": None}
+            if ts is not None:
+                per[f"{_BF}/timestamps"] = ts
+            _rewrite(path, (np.arange(n) + est.first) % n, per, extra)
+        else:
+            _write_inplace(path, extra, replace={f"{_BF}/timestamps": ts})
+        from ..provenance import stamp_h5
+        stamp_h5(str(path), extra={"stage": "unwrap", "buffer": BUFFER}, group="provenance_unwrap")
+        changed.append(path)
+        log(f"  {path.name}: {'reordered' if moves else 'flagged'} ({est.status}, head {est.first})")
+        if gif and moves:
+            try:
+                from .gifs import gif_for_file
+                gif_for_file(Path(path))
+            except Exception as exc:                                   # noqa: BLE001
+                log(f"  {path.name}: GIF not re-rendered ({exc})")
+    return changed
+
+
+def _unwrap_main(folder, output_dir=None, dry_run=False, gif=True, log=print):
     """Estimate the head of buffer 3 and rewrite its converted RF and IQ files chronologically.
 
     Safe to re-run: a file already carrying ``custom/unwrap_status`` is never permuted again. If one
@@ -412,8 +474,7 @@ def unwrap_buffer3(folder, output_dir=None, dry_run=False, gif=True, log=print):
         return fc or fi
     ref = fc or fi
     if ref is not None:
-        est = Estimate(ref["status"], int(ref["first_frame"]), int(ref["shift_frames"]),
-                       ref["method"], json.loads(ref["details"]))
+        est = _record_estimate(ref)
         # a file carrying no flag is in .mat order unless it was produced from the flagged file
         # after the unwrap: the IQ re-beamformed from an unwrapped converted file
         iq_from_unwrapped = (fc and not fi and iq is not None

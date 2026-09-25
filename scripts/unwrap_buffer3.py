@@ -57,7 +57,8 @@ def main():
         if iq is None or not (outdir / "CombinedData_buffer4_iq.gif").exists():
             counts["not ready"] = counts.get("not ready", 0) + 1
             continue
-        if read_flag(iq) and (conv is None or read_flag(conv)) and not a.dry_run:
+        variants = [v for v in outdir.glob("*_buffer3_*_iq.hdf5") if not read_flag(v)]
+        if read_flag(iq) and (conv is None or read_flag(conv)) and not variants and not a.dry_run:
             counts["already done"] = counts.get("already done", 0) + 1
             continue
         t0 = time.perf_counter()
