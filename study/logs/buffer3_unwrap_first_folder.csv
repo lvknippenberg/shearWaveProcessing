@@ -1,0 +1,2 @@
+folder,status,first,shift,method,n_frames,trigger_run_length,trigger_first,ecg_trustworthy,buffer1_first,buffer1_margin,buffer1_score,buffer1_score_stored_order,buffer1_agrees,seconds
+C000000001/SWE_01_SW_data_21-April-2026_12-12-54,unwrapped,6,-1,trigger-count,26,319,6,True,6,0.0636,0.867,0.7134,True,34.9

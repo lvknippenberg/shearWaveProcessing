@@ -1,9 +1,32 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-09-24.
+for the full passive-SWE investigation record. Last updated 2026-09-25.
 
-## 0. LATEST (2026-09-24): review follow-up - see `docs/review_followup_2026-09-24.md`
+## 0. LATEST (2026-09-25): buffer 3 unwrapped; manual passive reading of the whole study
+
+**Buffer 3 is a circular buffer with an unrecorded head.** See **`docs/buffer3_unwrap.md`**.
+- The focused live loop's frames were stored rotated, and the saved
+  `Resource.RcvBuffer(3).lastFrame` is always `numFrames`: VSX sets it only on freeze or exit, and
+  `SaveRFData.m` copies the buffers mid-sequence.
+- Every buffer-3 time and phase used before this date is wrong.
+- `swp.acquisition.unwrap` fixes it in the converted RF and IQ files, with flags and frame times.
+  The head comes from the trigger count (exact) or from buffer-1 similarity (98.9 % at
+  margin ≥ 0.006); otherwise the folder is marked `ambiguous`.
+- New beamforms unwrap automatically. `scripts/unwrap_buffer3.py` retrofits old folders.
+- Done: the 44 September folders.
+- To do: the rest of the study on the Linux server after the beamforming batch
+  (`docs/TODO.md` item 15), and the acquisition fix (item 16).
+
+**Manual passive reading of the whole study.** See **`docs/passive_manual.md`**.
+- Run `python scripts/passive_manual.py session`: M-lines on buffers 1 | 3 | 4 (synchronised on
+  the ECG, motion-corrected onto buffer 4), and one hand slope mirrored on five views.
+- Resumable at every prompt, with two background workers.
+- The first day's lines (C000000001-5) were archived after the buffer-3 finding
+  (`archive --tag buffer3_unwrap`). The reading restarts from the 44 September folders.
+- The user found the UI works well. Continue with `session`.
+
+## 0. (2026-09-24): review follow-up - see `docs/review_followup_2026-09-24.md`
 
 - **The in-vivo ARF wave is still not there with the literature recipe** (frame-to-frame velocity,
   75-750 Hz; Caenen 11.7x push/control, our 4 acquisitions 0.86-1.01x), nor in a screen of all

@@ -23,15 +23,32 @@ def _iq(values: np.ndarray) -> np.ndarray:
     return values[..., 0].astype(np.float64) + 1j * values[..., 1].astype(np.float64)
 
 
-def load_acquisition(path: str) -> Acquisition:
+def _roi_slices(coords: np.ndarray, roi):
+    """Index slices of the (nz, nx) grid covering ``roi = (x_min, x_max, z_min, z_max)`` [m]."""
+    x = coords[0, :, 0]
+    z = coords[:, 0, 2]
+    ix = np.where((x >= roi[0]) & (x <= roi[1]))[0]
+    iz = np.where((z >= roi[2]) & (z <= roi[3]))[0]
+    if ix.size < 2 or iz.size < 2:
+        raise ValueError(f"roi {roi} does not overlap the grid")
+    return slice(int(iz.min()), int(iz.max()) + 1), slice(int(ix.min()), int(ix.max()) + 1)
+
+
+def load_acquisition(path: str, roi=None) -> Acquisition:
     """Load one measurement HDF5 into an :class:`Acquisition`.
 
     Handles both normal-grid and fine-grid files and phantom vs in-vivo
-    (in-vivo carries ``custom/t_reference``).
+    (in-vivo carries ``custom/t_reference``). ``roi = (x_min, x_max, z_min, z_max)`` in metres
+    reads only that box of every frame - a buffer-4 file is ~1 GB, and a box around an M-line is
+    a small fraction of it.
     """
     with h5py.File(path, "r") as f:
-        values = np.array(f[f"{_BF}/values"])          # (n_frames, nz, nx, 2)
         coords = np.array(f[f"{_BF}/coordinates"])     # (nz, nx, 3): (x, y, z)
+        sz = sx = slice(None)
+        if roi is not None:
+            sz, sx = _roi_slices(coords, roi)
+            coords = coords[sz, sx]
+        values = np.array(f[f"{_BF}/values"][:, sz, sx, :])     # (n_frames, nz, nx, 2)
         t = np.array(f[f"{_BF}/timestamps"]).astype(np.float64)
 
         # Pre-push reference is present for active SWE (buffer 2) but ABSENT for passive
@@ -39,7 +56,7 @@ def load_acquisition(path: str) -> Acquisition:
         # path can share this loader; passive uses frame_to_frame displacement.
         ref_values = None
         if "custom/reference_iq" in f:
-            ref_values = np.array(f["custom/reference_iq"])  # (n_ref, nz, nx, 2)
+            ref_values = np.array(f["custom/reference_iq"][:, sz, sx, :])  # (n_ref, nz, nx, 2)
         t_ref = None
         if "custom/t_reference" in f:
             t_ref = np.array(f["custom/t_reference"]).astype(np.float64)
@@ -96,7 +113,7 @@ def load_acquisition(path: str) -> Acquisition:
         prf=prf, f_demod=f_demod, f0=f0, c=c, dz=dz, dx=dx,
         grid=grid, source=source, t_ref=t_ref, coords=coords,
         push_x=push_x, push_z=push_z,
-        meta={"path": path, "push_gap_s": push_gap},
+        meta={"path": path, "push_gap_s": push_gap, "roi": roi},
     )
 
 

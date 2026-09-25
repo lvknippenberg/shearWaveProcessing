@@ -1,0 +1,52 @@
+
+=== worker 0 started Fri Sep 25 11:49:17 2026 ===
+worker on 724 folder(s) (watching)
+  detect  Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  [detect] phase-aware: MVC@51ms, AVC@441ms, MVC@788ms, AVC@945ms
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 51 ms, window [1, 101] ms
+    #1: peak 441 ms, window [391, 491] ms
+    #2: peak 788 ms, window [738, 838] ms
+    #3: peak 945 ms, window [895, 995] ms
+    4 window(s), 34 s
+  detect  Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  [detect] phase-aware: MVC@64ms, AVC@401ms, energy@616ms
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 64 ms, window [14, 114] ms
+    #1: peak 401 ms, window [351, 451] ms
+    #2: peak 616 ms, window [566, 666] ms
+    3 window(s), 8 s
+  detect  Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  [detect] phase-aware: MVC@69ms, AVC@408ms, energy@588ms, energy@892ms
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 69 ms, window [19, 119] ms
+    #1: peak 408 ms, window [358, 458] ms
+    #2: peak 588 ms, window [538, 638] ms
+    #3: peak 892 ms, window [842, 942] ms
+    4 window(s), 9 s
+  detect  Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  [detect] no usable R-peak record - falling back to energy ranking
+  detected 4 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 159 ms, window [109, 209] ms
+    #1: peak 338 ms, window [288, 388] ms
+    #2: peak 573 ms, window [523, 623] ms
+    #3: peak 746 ms, window [696, 796] ms
+    4 window(s), 6 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54  windows [0]
+    win0: disp +3.1, velo +3.2, velo +3.2, Keij +2.6, acce +4.0
+    7 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54  windows [2]
+    win2: disp +14.0, velo +8.8, velo +8.8, Keij +8.8, acce +4.5
+    8 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45  windows [1]
+    win1: disp +8.8, velo +8.8, velo +12.2, Keij +12.2, acce +8.8
+    10 s

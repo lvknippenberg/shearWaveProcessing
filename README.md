@@ -250,6 +250,11 @@ draw-events | reprocess | status` — see **[docs/passive_mlines.md](docs/passiv
 `draw-events --defer-process` (so 2.5 min of processing does not stall every prompt) and then run
 `reprocess`.
 
+**Whole-study manual reading (from 2026-09-25):** `scripts/passive_manual.py session` - M-lines
+with buffers 1 | 3 | 4 side by side at the R-peak / the event's phase (drawn on any, motion-corrected
+onto buffer 4), and one hand slope mirrored on five views (displacement, velocity median/Gaussian,
+Keijzer, acceleration). Resumable at every prompt; see **[docs/passive_manual.md](docs/passive_manual.md)**.
+
 **Reading the speed.** The automatic slant-stack fit is biased high (+11–76 % against hand-drawn
 wavefronts) and on average places its line where a line through noise would sit — use it to rank
 and triage, not as the reported number, and read the speed off `study/analysis/manual_slope.py`.
@@ -300,6 +305,8 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                          widebeam buffers - each transmit reconstructs only where it insonified),
                        passive_study.py (passive M-lines + processing + event labels over a study;
                          draw | process | draw-events | reprocess | label | status),
+                       passive_manual.py (whole-study manual reading: 3-buffer M-lines, 5-view
+                         hand slopes, background workers; session | worker | status | export),
                        linux_validation.py (re-run one folder elsewhere and compare to output/),
                        draw_passive_mlines.py (legacy: buffer-4 cine general M-lines),
                        gif_montage.py (synchronised montage of several GIFs),
@@ -309,14 +316,19 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                          with the phantom and Caenen data as positive controls),
                        study_active_screen.py (the same screen over every study push),
                        retrofit_push_gap.py (correct reference timestamps of old IQ files),
+                       unwrap_buffer3.py (put buffer 3 - circular live loop - in chronological
+                         order in folders beamformed before 2026-09-25; idempotent),
                        swe_lib.py / detect_v.py / auto_mline.py (shared helpers)
 scripts/archive/       finished campaigns, kept runnable (see its README)
 tests/                 pytest, synthetic
 docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-config rules),
                        focused_bmode_striations.md (buffer-3 radial lines investigation),
+                       buffer3_unwrap.md (buffer 3 is a circular buffer with an unrecorded head:
+                         evidence, methods, calibration, the unwrap and its flags),
                        widebeam_bmode_reconstruction.md (buffer-1: which pixels each transmit
                          should reconstruct; +5 dB dynamic range at no resolution cost),
                        passive_mlines.md (where/how to draw passive M-lines, study workflow, results),
+                       passive_manual.md (the whole-study manual reading tool: keys, files, resume),
                        passive_speed_estimation.md (automatic vs hand-drawn slopes, tracking score,
                          why the slant stack misses the wave and what to change),
                        ecg_timing.md (what is gated, trigger log, buffer phases, MVC/AVC/AK labels),

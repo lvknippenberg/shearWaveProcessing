@@ -162,6 +162,26 @@ docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
 - Fully detached alternative to tmux: `docker exec -d ... bash -c "... > log 2>&1"`, follow with
   `tail -f` on the log (it is on the NAS).
 
+### Buffer-3 unwrap (2026-09-25)
+
+Buffer 3 is a circular live loop, and its stored frames are rotated (`docs/buffer3_unwrap.md`).
+New beamforms unwrap it automatically (`process_folder(..., unwrap=True)`). Folders beamformed
+earlier are retrofitted with one idempotent command:
+
+```bash
+docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
+  "export KERAS_BACKEND=torch && \
+   python scripts/unwrap_buffer3.py --root /mnt/z/VISUALIZE/raw_data 2>&1 | tee study/logs/buffer3_unwrap_server_\$(date +%Y%m%d).log"
+```
+
+- **Pull first**, and only once no batch is running from this clone: a running process must not
+  have its code replaced underneath it.
+- Only folders whose beamforming is complete are touched (the buffer-4 GIF exists), and flagged
+  files are skipped. Rerun it after later batches.
+- `--dry-run` estimates without writing anything.
+- It is CPU and NAS-bound (no GPU): ~6 s to estimate, plus a minute or two to rewrite a
+  folder's ~1 GB converted buffer-3 file.
+
 ## Maintenance
 
 - **Update this repo:** `git -C ~/mounts/VISUALIZE/shearWaveProcessing pull` (no rebuild needed).

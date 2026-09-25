@@ -205,7 +205,7 @@ def build_views(cfg: dict, acq: Optional[Acquisition] = None):
         return None
     out = []
     for v in views_cfg:
-        ov = {k: v[k] for k in ("quantity", "field_filters", "directional", "directional_mode",
+        ov = {k: v[k] for k in ("quantity", "iq_filters", "field_filters", "directional", "directional_mode",
                                 "estimator", "estimator_params", "mode", "drop_first",
                                 "continuous_record") if k in v}
         vc = build_pipeline_config(cfg, overrides=ov, acq=acq)

@@ -1,0 +1,22 @@
+
+=== worker 1 started Fri Sep 25 11:49:17 2026 ===
+worker on 724 folder(s) (watching)
+  detect  Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  computing displacement overview for burst detection (5-150 Hz, spatial stride 2) ...
+  [detect] phase-aware: MVC@33ms, AVC@404ms, MVC@824ms
+  detected 3 burst window(s) -> passive_bursts.png
+  full-window space-time -> passive_full_spacetime.png
+    #0: peak 33 ms, window [1, 83] ms
+    #1: peak 404 ms, window [354, 454] ms
+    #2: peak 824 ms, window [774, 874] ms
+    3 window(s), 31 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54  windows [1]
+    win1: disp -7.4, velo +2.5, velo +3.0, Keij +20.0, acce +20.0
+    7 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54  windows [3]
+    win3: disp -16.5, velo -2.6, velo -2.6, Keij -4.5, acce -2.2
+    9 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45  windows [0]
+    win0: disp +8.8, velo +5.6, velo +6.0, Keij +6.4, acce +4.3
+    7 s

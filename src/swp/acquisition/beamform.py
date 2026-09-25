@@ -704,7 +704,7 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                    compression=DEFAULT_COMPRESSION, save_converted=True, converted_dir=None,
                    overwrite=False, sw_roi=None, append_params=True, gif_stretch=None,
                    gif_curve=None, gif_gain_db=None, gif_legacy_display=False,
-                   buffers_matlab=None):
+                   buffers_matlab=None, unwrap=True):
     """End-to-end Stage A for one measurement folder: IQ (+ GIFs) into ``output/``.
 
     Args:
@@ -726,6 +726,8 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
         buffers_matlab: only process these MATLAB buffer numbers (e.g. ``[3]``).
             ``None`` = every buffer present. GIF rendering is restricted to the
             same set.
+        unwrap: put buffer 3 (circular live loop) in chronological order after
+            beamforming (:mod:`swp.acquisition.unwrap`); default True.
     """
     folder = Path(folder)
     mat_path = find_mat(folder)
@@ -736,6 +738,16 @@ def process_folder(folder, output_dir=None, make_gifs=True, pi_mode=None,
                   pi_mode=pi_mode, compression=compression,
                   save_converted=save_converted, converted_dir=converted_dir,
                   overwrite=overwrite, sw_roi=sw_roi, append_params=append_params)
+
+    # Buffer 3 is a circular live loop whose head VSX does not record (the saved lastFrame is
+    # always numFrames): put its frames in chronological order before anything reads them.
+    # Idempotent - files already unwrapped are left alone (swp.acquisition.unwrap).
+    if unwrap and (buffers_matlab is None or 3 in buffers_matlab):
+        from .unwrap import unwrap_buffer3
+        try:
+            unwrap_buffer3(folder, output_dir, gif=False)
+        except Exception as exc:                                  # noqa: BLE001 - never lose the beamform
+            print(f"  buffer 3: unwrap FAILED ({type(exc).__name__}: {exc}) - left in stored order")
 
     if make_gifs:
         from .gifs import run as gif_run, DEFAULT_CURVE, DEFAULT_GAIN_DB, REAL_TIME_STRETCH

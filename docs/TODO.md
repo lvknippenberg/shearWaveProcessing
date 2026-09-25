@@ -175,6 +175,20 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
 
 ## Runs (commands ready; not run because they rewrite study outputs or take hours)
 
+15. **Buffer-3 unwrap of the whole study, on the Linux server, after the beamforming batch
+    finishes.** Buffer 3 is a circular live loop whose head VSX never recorded
+    (`docs/buffer3_unwrap.md`).
+    - Command: `docs/linux_server.md` → "Buffer-3 unwrap". It is idempotent.
+    - The 44 September folders were unwrapped on 2026-09-25 from Windows: 37 resolved, 7 ambiguous
+      (C000000014, 17, 21, 30 without a trustworthy ECG; C000000036, 39, 45 below the margin).
+    - Afterwards, review a few `ambiguous` folders (`status` column of
+      `study/logs/buffer3_unwrap_*.csv`) to see how to resolve them.
+16. **Acquisition fix for buffer 3** (scanner). Either freeze before `copyBuffers` in `SaveRFData.m`
+    (as Verasonics' `saveRF.m` does) and check `Resource.RcvBuffer(3).lastFrame`, or leave the
+    focused loop at a deterministic point (redirect its jump-back `SeqControl` instead of
+    `set&Run`). Verify with a recording that has a visible event (e.g. lifting the probe) just
+    before the loop is left.
+
 13. Correct the reference timestamps of the study's buffer-2 files (only the timing arrays change;
     the originals are kept as `custom/t_reference_v0`):
     `python scripts/retrofit_push_gap.py --root "Z:/raw_data"` (dry run), then `--apply`.
