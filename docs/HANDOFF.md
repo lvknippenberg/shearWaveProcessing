@@ -1,9 +1,26 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-09-25.
+for the full passive-SWE investigation record. Last updated 2026-09-28.
 
-## 0. LATEST (2026-09-25): buffer 3 unwrapped; manual passive reading of the whole study
+## 0. LATEST (2026-09-28): buffer-3 unwrap VERSION 2 applied to the whole study
+
+See `docs/buffer3_unwrap.md`, the 2026-09-28 sections.
+- **Trigger-log bug fixed.** `triggerlog.parse_sequence` now assigns every trigger to its mode
+  from the known sequence (live loop -> buffer 1 -> buffer 4 -> SW, 4 triggers per push),
+  parsed backwards from buffer 4. The old period-only segmentation counted buffer 1's first
+  trigger as a loop frame in 227 of 724 folders (buffer-3 head and times one frame off). A 32-bit
+  µs counter overflow in `read_log` is unwrapped too.
+- **New estimator** after the trigger count: buffer-1 similarity + expected motion + continuity
+  (98 % exact on the trigger-count reference); continuity alone without ECG.
+- **Applied to all 724 folders**: 244 trigger count, 422 combined, 5 continuity, 53 ambiguous.
+  Playback check: jumps inside the sequence 450 -> 15 of 671 resolved folders.
+- **Montages are plain playback, never R-peak aligned** (buffers 1 and 3 are not ECG-triggered):
+  `study/montages/playback/`. Visual check tool: `study/analysis/all_heads_gifs.py`.
+- Paths: the `D:\swp_*` junctions are gone from code; the two needed for MAX_PATH live in
+  `D:\Luuk van Knippenberg\Claude\links\`.
+
+## 0. (2026-09-25): buffer 3 unwrapped; manual passive reading of the whole study
 
 **Buffer 3 is a circular buffer with an unrecorded head.** See **`docs/buffer3_unwrap.md`**.
 - The focused live loop's frames were stored rotated, and the saved

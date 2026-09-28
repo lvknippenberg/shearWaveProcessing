@@ -1,0 +1,6 @@
+reference with ECG 210; without trigger count, ECG ok 450, no ECG 31
+w05: exact 0.981; 99 % point margin 1.312 accepts 202/210 -> resolves 423/450 without trigger count
+w10: exact 0.976; 99 % point margin 2.363 accepts 181/210 -> resolves 383/450 without trigger count
+wj: exact 0.971; 99 % point margin 1.820 accepts 186/210 -> resolves 396/450 without trigger count
+continuity alone (all reference 243): 98% point margin 0.046 accepts 72 -> resolves 5/31 no-ECG folders
+continuity alone (all reference 243): 99% point margin 0.053 accepts 63 -> resolves 3/31 no-ECG folders

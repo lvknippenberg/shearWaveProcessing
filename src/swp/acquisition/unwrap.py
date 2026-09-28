@@ -20,16 +20,20 @@ order of preference (calibration: ``study/analysis/buffer3_unwrap_calibration.py
                    the run the oldest stored slot is ``(L - 1) mod N``: the loop is always left
                    mid-frame, after that frame's trigger but before its transfer, so the last
                    trigger has no stored frame (``shift`` -1 for the frame times).
-``buffer1``        every stored frame gets a trigger time and cardiac phase under each candidate
-                   head and is compared with the buffer-1 frame (chronological, correctly timed)
-                   at the same phase; the head with the most similar pairs wins. Needs a
-                   trustworthy R-peak record. Against the trigger count (145 folders): 89 % exact,
-                   and at margin >= MIN_MARGIN_BUFFER1 (75 % of folders) 98.9 % exact, the one
-                   miss being one slot.
+``combined``       (needs a trustworthy ECG) z(buffer-1 similarity: every stored frame vs the
+                   buffer-1 frame at the same cardiac phase under each candidate head)
+                   + z(expected motion: buffer 3's own frame-similarity matrix vs buffer 1's at
+                   the same phases) + 0.5 z(continuity); 98 % exact on the 210-folder trigger-count
+                   reference, 99 % at margin >= MIN_MARGIN_COMBINED (96 % of folders).
+``continuity``     the least similar cyclic neighbour pair is the wrap; image-only, so the one
+                   method without ECG, accepted only at a high margin. It works when the wrap
+                   joins different cardiac phases (92-95 % exact for a > 300 ms phase jump).
 otherwise          'ambiguous': stored order kept, ``buffer_unwrapped`` False.
 
-Frame continuity (the least similar cyclic neighbour pair is the wrap) was tested on the IQ and on
-beamforming-free RF and rejected: 33-56 % exact, with large errors at high margins.
+VERSION 2 (2026-09-28): the loop's triggers come from the parsed acquisition sequence
+(triggerlog.parse_sequence) - VERSION 1 counted buffer 1's first trigger as a loop frame in 227 of
+724 folders, one slot off - and the combined estimator replaces buffer-1-only. Files flagged by
+VERSION 1 are re-estimated and rotated from their current head (docs/buffer3_unwrap.md).
 
 The result is written back into BOTH the converted RF file and the beamformed IQ file (atomically:
 a reordered copy replaces the original), with flags so it is never applied twice:
@@ -62,7 +66,7 @@ try:
 except ImportError:                                              # pragma: no cover
     pass
 
-VERSION = 1
+VERSION = 2                     # 2 (2026-09-28): parsed trigger log + combined estimator; v1 files are redone
 BUFFER = 3                     # MATLAB buffer number of the focused live loop
 _RAW = "tracks/track_0/data/raw_data"
 _BF = "tracks/track_0/data/beamformed_data"
@@ -72,7 +76,11 @@ GZ = np.arange(20, 100.01, 0.8)
 # Decision threshold (study/analysis/buffer3_unwrap_calibration.py, docs/buffer3_unwrap.md): of the
 # buffer-1 heads that disagreed with the exact trigger count, all but one (off by one slot) had a
 # margin <= 0.005.
-MIN_MARGIN_BUFFER1 = 0.006     # buffer-1 score gap to the best non-adjacent head
+MIN_MARGIN_BUFFER1 = 0.006     # (VERSION 1) buffer-1 score gap to the best non-adjacent head
+# VERSION 2 (study/analysis/unwrap_combined_calibration.py, corrected trigger-count reference):
+MIN_MARGIN_COMBINED = 1.3      # combined z-score gap: 99 % exact on 210 reference folders
+MIN_MARGIN_CONTINUITY = 0.055  # continuity alone (no ECG): its 99 % point
+W_CONTINUITY = 0.5             # weight of continuity in the combined score (0.5 beat 1.0 and a wrap-jump weight)
 SHIFT = -1                     # the loop is left mid-frame: the last trigger has no stored frame
 DEFAULT_SHIFT = SHIFT
 
@@ -210,18 +218,21 @@ def trigger_count_head(folder):
     left (aborted mid-frame, never transferred), the oldest stored slot is c = (L - 1) mod N.
     The log is circular (1500/2000 triggers, shared with every buffer), so a long live run loses
     its start: then the count is unknown and None is returned.
+
+    The run is taken from the parsed acquisition sequence (triggerlog.parse_sequence), which ends
+    it before buffer 1's first trigger; a log that does not fit the sequence gives None.
     """
-    from .triggerlog import _runs, read_log
+    from .triggerlog import parse_sequence, read_log
     log = read_log(str(folder))
     if log is None or BUFFER not in log[2]:
         return None
-    _, trig, params = log
-    n, fms = params[BUFFER]["n"], 1000.0 / params[BUFFER]["fps"]
-    runs = [(i, j) for i, j in _runs(trig, fms, max(1.5, 0.08 * fms)) if j - i + 1 >= n]
-    if not runs:
+    seq = parse_sequence(log)
+    if seq is None or seq.loop_truncated:
         return None
-    i, j = runs[-1]
-    if i == 0:                                       # run starts at the start of the log: truncated
+    _, trig, params = log
+    n = params[BUFFER]["n"]
+    i, j = seq.loop
+    if j - i + 1 < n:
         return None
     L = j - i + 1
     return dict(run_length=int(L), n=int(n), c=int((L - 1) % n),
@@ -268,21 +279,87 @@ class Estimate:
         return self.status in ("unwrapped", "chronological")
 
 
-def estimate(folder, output_dir=None, cross_check=True):
+def _zs(v):
+    v = np.asarray(v, float)
+    return (v - np.nanmean(v)) / (np.nanstd(v) + 1e-12)
+
+
+def buffer1_curve(A1, A3, ph1, ph3, rr_ms, tol_ms=10.0):
+    """Buffer-1 similarity per candidate head (higher = better). Each stored buffer-3 frame is paired
+    with the buffer-1 frame at the same cardiac phase (circular, mod RR, +-tol_ms); correlations are
+    z-scored per buffer-3 frame across buffer-1 frames first, which removes a frame's own baseline."""
+    M = A3 @ A1.T
+    M = (M - M.mean(1, keepdims=True)) / (M.std(1, keepdims=True) + 1e-12)
+    n = len(A3)
+    ok1 = np.isfinite(ph1)
+    sc = np.full(n, np.nan)
+    for first in range(n):
+        vals = []
+        for q in range(n):
+            ph = ph3[(q - first) % n]
+            if not np.isfinite(ph):
+                continue
+            dd = np.abs(ph1 - ph)
+            if np.isfinite(rr_ms):
+                dd = np.minimum(dd, rr_ms - dd)
+            dd = np.where(ok1, dd, np.inf)
+            j = int(np.argmin(dd))
+            if dd[j] < tol_ms:
+                vals.append(M[q, j])
+        if len(vals) >= n // 2:
+            sc[first] = np.mean(vals)
+    return sc
+
+
+def expected_motion_curve(A1, A3, ph1, ph3, frame_ms):
+    """Per candidate head (higher = better): correlation between buffer 3's own frame-to-frame
+    similarity matrix and the one buffer 1 predicts for the same phases. Each buffer is compared only
+    with itself, so the widebeam-vs-focused image difference cancels. None without enough phases."""
+    n = len(A3)
+    ok1 = np.flatnonzero(np.isfinite(ph1))
+    jk = np.full(n, -1)
+    for k in range(n):
+        if np.isfinite(ph3[k]) and ok1.size:
+            dd = np.abs(ph1[ok1] - ph3[k])
+            if dd.min() < frame_ms / 2:
+                jk[k] = ok1[np.argmin(dd)]
+    valid = np.flatnonzero(jk >= 0)
+    if valid.size < n // 2:
+        return None
+    S1 = A1[jk[valid]] @ A1[jk[valid]].T
+    S3 = A3 @ A3.T
+    iu = np.triu_indices(valid.size, 1)
+    p = S1[iu]
+    sc = np.full(n, np.nan)
+    for first in range(n):
+        q = (valid + first) % n
+        sc[first] = np.corrcoef(S3[np.ix_(q, q)][iu], p)[0, 1]
+    return sc
+
+
+def estimate(folder, output_dir=None, current_head=0):
     """Find the head of buffer 3 for one measurement folder (read-only).
 
-    1. trigger count (exact) when the log holds the start of the live run;
-    2. otherwise buffer-1 similarity (shift fixed at -1), accepted at margin >= MIN_MARGIN_BUFFER1;
-    3. otherwise 'ambiguous'.
-    With ``cross_check`` the buffer-1 method also runs when the trigger count is available, and its
-    agreement is recorded in the details (a running check of both on every folder).
+    ``current_head``: the stored slot at frame 0 of the buffer-3 IQ file as it is now (0 = stored
+    order; an earlier unwrap's head otherwise) - the features are rotated back to stored order.
+
+    Decision (VERSION 2, calibration: study/analysis/unwrap_combined_calibration.py):
+    1. trigger count (exact) when the parsed log holds the start of the live run;
+    2. otherwise, with a trustworthy ECG, the COMBINED score
+       z(buffer-1 similarity) + z(expected motion) + 0.5 z(continuity), accepted at margin >=
+       MIN_MARGIN_COMBINED (99 % exact on the 210-folder trigger-count reference);
+    3. otherwise continuity alone at margin >= MIN_MARGIN_CONTINUITY (no ECG needed; 99 % point);
+    4. otherwise 'ambiguous'.
+    The combined score also runs where the trigger count exists and its agreement is recorded.
     """
+    from .triggerlog import buffer_timing, median_rr_ms
     output_dir = Path(output_dir) if output_dir else Path(folder) / "output"
     _, iq3 = buffer_files(output_dir)
     if iq3 is None:
         return Estimate("no-data", details=dict(reason="no buffer-3 IQ"))
     A3 = anatomy_stack(iq3)
     n = len(A3)
+    A3 = A3[(np.arange(n) - current_head) % n]                 # back to stored slot order
     det = dict(n_frames=n)
     tc = trigger_count_head(folder)
     if tc is not None:
@@ -292,24 +369,41 @@ def estimate(folder, output_dir=None, cross_check=True):
     except Exception:                                                  # noqa: BLE001
         ecg_ok = False
     det["ecg_trustworthy"] = ecg_ok
-    b_first = None
-    if ecg_ok and (tc is None or cross_check):
-        _, iq1 = buffer_files(output_dir, buffer=1)
-        sc = buffer1_scores(folder, A3, iq1) if iq1 is not None else None
-        if sc is not None and np.isfinite(sc[SHIFT]).any():
-            b_first, b_margin = best_and_margin(sc[SHIFT], lower_is_better=False)
-            det.update(buffer1_first=b_first, buffer1_margin=round(b_margin, 4),
-                       buffer1_score=round(float(sc[SHIFT][b_first]), 4),
-                       buffer1_score_stored_order=round(float(sc[SHIFT][0]), 4))
+    cont = -continuity_scores(A3)                                      # higher = more likely
+    c_first, c_margin = best_and_margin(cont, lower_is_better=False)
+    det.update(continuity_first=c_first, continuity_margin=round(c_margin, 4))
+    comb = None
+    b1, b3 = buffer_timing(str(folder), 1), buffer_timing(str(folder), BUFFER)
+    _, iq1 = buffer_files(output_dir, buffer=1)
+    if ecg_ok and b1 is not None and b3 is not None and b3.n_frames == n and iq1 is not None:
+        A1 = anatomy_stack(iq1)
+        if len(A1) == b1.n_frames:
+            rp = np.asarray(b3.r_peaks_ms)
+            rr = median_rr_ms(rp)
+            ph1 = _phase(b1.frame_times() + b1.frame_ms / 2, rp)
+            _, ph3 = chronological_times(folder, n, SHIFT)
+            s_b1 = buffer1_curve(A1, A3, ph1, ph3, rr)
+            s_em = expected_motion_curve(A1, A3, ph1, ph3, b3.frame_ms)
+            if np.isfinite(s_b1).any():
+                comb = _zs(s_b1) + (_zs(s_em) if s_em is not None else 0.0) + W_CONTINUITY * _zs(cont)
+                comb = np.where(np.isfinite(comb), comb, -np.inf)
+                m_first, m_margin = best_and_margin(comb, lower_is_better=False)
+                det.update(combined_first=m_first, combined_margin=round(m_margin, 3),
+                           buffer1_first=int(np.nanargmax(s_b1)),
+                           expected_motion_first=int(np.nanargmax(s_em)) if s_em is not None else -1)
     if tc is not None:
         first, method = tc["c"], "trigger-count"
-        if b_first is not None:
-            det["buffer1_agrees"] = bool(b_first == first)
-    elif b_first is not None and det["buffer1_margin"] >= MIN_MARGIN_BUFFER1:
-        first, method = b_first, "buffer1"
+        if comb is not None:
+            det["combined_agrees"] = bool(det["combined_first"] == first)
+        det["continuity_agrees"] = bool(c_first == first)
+    elif comb is not None and det["combined_margin"] >= MIN_MARGIN_COMBINED:
+        first, method = det["combined_first"], "combined"
+    elif c_margin >= MIN_MARGIN_CONTINUITY:
+        first, method = c_first, "continuity"
     else:
-        det["reason"] = ("no trigger count; " + ("buffer-1 margin below threshold" if b_first is not None
-                                                 else "no trustworthy ECG / buffer 1"))
+        det["reason"] = "no trigger count; " + (
+            "combined margin below threshold" if comb is not None else "no trustworthy ECG / buffer 1") + (
+            " and continuity margin below threshold")
         return Estimate("ambiguous", method="none", details=det)
     return Estimate("chronological" if first == 0 else "unwrapped", int(first), SHIFT, method, det)
 
@@ -411,6 +505,43 @@ def _record_estimate(rec):
                     json.loads(rec["details"]))
 
 
+def is_current(rec):
+    """True when an unwrap record was written by this VERSION (older ones are redone)."""
+    return bool(rec) and int(rec.get("version", 1)) >= VERSION
+
+
+def file_head(rec):
+    """Stored slot at frame 0 of a file as it is now: an earlier unwrap's head, else 0 (stored order)."""
+    return int(rec["first_frame"]) if rec and rec.get("buffer_unwrapped") and int(rec["first_frame"]) >= 0 else 0
+
+
+def _apply(path, est, head_now, n, per_key, folder, log, gif):
+    """Rotate one file from ``head_now`` to the estimate's head (stored order when unresolved) and
+    write the flags. Returns True when frames moved."""
+    target = est.first if est.resolved else 0
+    rot = (target - head_now) % n
+    times, phases = chronological_times(folder, n, est.shift) if est.resolved else (None, None)
+    extra = _extra(est, times, phases, time.strftime("%Y-%m-%d %H:%M:%S"))
+    ts = ((times - times[0]) * 1e-3).astype(np.float32) if times is not None else None
+    is_iq = per_key != _RAW
+    if rot:
+        per = {per_key: None}
+        if is_iq and ts is not None:
+            per[f"{_BF}/timestamps"] = ts
+        _rewrite(path, (np.arange(n) + rot) % n, per, extra)
+    else:
+        _write_inplace(path, extra, replace={f"{_BF}/timestamps": ts} if is_iq else None)
+    from ..provenance import stamp_h5
+    stamp_h5(str(path), extra={"stage": "unwrap", "buffer": BUFFER, "version": VERSION}, group="provenance_unwrap")
+    if gif and rot and is_iq:
+        try:
+            from .gifs import gif_for_file
+            gif_for_file(Path(path))
+        except Exception as exc:                                       # noqa: BLE001
+            log(f"  {Path(path).name}: GIF not re-rendered ({exc})")
+    return bool(rot)
+
+
 def unwrap_variants(folder, output_dir=None, gif=True, log=print):
     """Apply the head stored in the main buffer-3 file to the other buffer-3 IQ files of the folder.
 
@@ -420,110 +551,68 @@ def unwrap_variants(folder, output_dir=None, gif=True, log=print):
     output_dir = Path(output_dir) if output_dir else Path(folder) / "output"
     conv, iq = buffer_files(output_dir)
     rec = read_flag(iq) or read_flag(conv)
-    if rec is None:
-        return []
+    if not is_current(rec):
+        return []                                  # the main file is unwrapped (by this VERSION) first
     est = _record_estimate(rec)
     changed = []
     for path in sorted(output_dir.glob(f"*_buffer{BUFFER}_*_iq.hdf5")):
-        if iq is not None and path.samefile(iq) or read_flag(path):
+        vrec = read_flag(path)
+        if iq is not None and path.samefile(iq) or is_current(vrec):
             continue
         with h5py.File(path, "r") as f:
             if f"{_BF}/values" not in f:
                 continue
             n = f[f"{_BF}/values"].shape[0]
-        if est.resolved and n != int(est.details.get("n_frames", n)):
+        if n != int(est.details.get("n_frames", n)):
             log(f"  {path.name}: {n} frames, main file {est.details.get('n_frames')} - left alone")
             continue
-        times, phases = chronological_times(folder, n, est.shift) if est.resolved else (None, None)
-        extra = _extra(est, times, phases, time.strftime("%Y-%m-%d %H:%M:%S"))
-        ts = ((times - times[0]) * 1e-3).astype(np.float32) if times is not None else None
-        moves = est.resolved and est.first != 0
-        if moves:
-            per = {f"{_BF}/values": None}
-            if ts is not None:
-                per[f"{_BF}/timestamps"] = ts
-            _rewrite(path, (np.arange(n) + est.first) % n, per, extra)
-        else:
-            _write_inplace(path, extra, replace={f"{_BF}/timestamps": ts})
-        from ..provenance import stamp_h5
-        stamp_h5(str(path), extra={"stage": "unwrap", "buffer": BUFFER}, group="provenance_unwrap")
+        moved = _apply(path, est, file_head(vrec), n, f"{_BF}/values", folder, log, gif)
         changed.append(path)
-        log(f"  {path.name}: {'reordered' if moves else 'flagged'} ({est.status}, head {est.first})")
-        if gif and moves:
-            try:
-                from .gifs import gif_for_file
-                gif_for_file(Path(path))
-            except Exception as exc:                                   # noqa: BLE001
-                log(f"  {path.name}: GIF not re-rendered ({exc})")
+        log(f"  {path.name}: {'reordered' if moved else 'flagged'} ({est.status}, head {est.first})")
     return changed
 
 
 def _unwrap_main(folder, output_dir=None, dry_run=False, gif=True, log=print):
     """Estimate the head of buffer 3 and rewrite its converted RF and IQ files chronologically.
 
-    Safe to re-run: a file already carrying ``custom/unwrap_status`` is never permuted again. If one
-    file is flagged and the other is not (e.g. buffer 3 re-beamformed from an unwrapped converted
-    file, or reconverted from the .mat), the stored head is reused - frames already chronological
-    are not moved, frames in .mat order are. Returns the Estimate (or the stored record).
+    Safe to re-run: a file flagged by this VERSION is never permuted again. A file flagged by an
+    older VERSION is re-estimated and rotated from its current head to the new one. If one file is
+    flagged (this VERSION) and the other is not (e.g. reconverted from the .mat), the stored head is
+    reused. Each file is rotated from where it is now (``file_head``) to the target head.
+    Returns the Estimate (or the stored record).
     """
     output_dir = Path(output_dir) if output_dir else Path(folder) / "output"
     conv, iq = buffer_files(output_dir)
     fc, fi = read_flag(conv), read_flag(iq)
-    if (conv is None or fc) and (iq is None or fi):
-        log(f"  buffer 3: already {(fc or fi or {}).get('status', 'absent')} - nothing to do")
+    if (conv is None or is_current(fc)) and (iq is None or is_current(fi)):
+        log(f"  buffer 3: already {(fc or fi or {}).get('status', 'absent')} (v{VERSION}) - nothing to do")
         return fc or fi
-    ref = fc or fi
-    if ref is not None:
-        est = _record_estimate(ref)
-        # a file carrying no flag is in .mat order unless it was produced from the flagged file
-        # after the unwrap: the IQ re-beamformed from an unwrapped converted file
-        iq_from_unwrapped = (fc and not fi and iq is not None
+    # where each file is now; an unflagged IQ written after the converted file was unwrapped was
+    # re-beamformed from it and carries the converted file's head
+    head_conv = file_head(fc)
+    iq_from_unwrapped = bool(fc and not fi and iq is not None and fc.get("buffer_unwrapped")
                              and os.path.getmtime(iq) > time.mktime(time.strptime(fc["time"], "%Y-%m-%d %H:%M:%S")))
+    head_iq = head_conv if iq_from_unwrapped else file_head(fi)
+    cur = fc if is_current(fc) else fi if is_current(fi) else None
+    if cur is not None:
+        est = _record_estimate(cur)
         log(f"  buffer 3: reusing stored head (slot {est.first}, {est.status})")
     else:
-        est = estimate(folder, output_dir)
-        iq_from_unwrapped = False
+        est = estimate(folder, output_dir, current_head=head_iq)
+        old = fi or fc
         log(f"  buffer 3: {est.status} - first slot {est.first}, shift {est.shift:+d} ({est.method}; "
-            + ", ".join(f"{k} {v}" for k, v in est.details.items() if "first" in k or "margin" in k) + ")")
+            + ", ".join(f"{k} {v}" for k, v in est.details.items() if "first" in k or "margin" in k) + ")"
+            + (f"  [was v{old.get('version', 1)} {old.get('status')} slot {old.get('first_frame')}]" if old else ""))
     if dry_run or est.status == "no-data":
         return est
-    n = None
-    for p in (conv, iq):
-        if p is not None:
-            with h5py.File(p, "r") as f:
-                n = f[_RAW].shape[0] if _RAW in f else f[f"{_BF}/values"].shape[0]
-            break
-    order = (np.arange(n) + (est.first if est.resolved else 0)) % n
-    times, phases = chronological_times(folder, n, est.shift) if est.resolved else (None, None)
-    when = time.strftime("%Y-%m-%d %H:%M:%S")
-    extra = _extra(est, times, phases, when)
-    from ..provenance import stamp_h5
-    moves = est.resolved and est.first != 0
-    if conv is not None and not fc:
-        if moves:
-            _rewrite(conv, order, {_RAW: None}, extra)
-        else:
-            _write_inplace(conv, extra)
-        stamp_h5(str(conv), extra={"stage": "unwrap", "buffer": BUFFER}, group="provenance_unwrap")
-    if iq is not None and not fi:
-        ts = None
-        if times is not None:
-            ts = ((times - times[0]) * 1e-3).astype(np.float32)
-        iq_moves = moves and not iq_from_unwrapped
-        if iq_moves:
-            per = {f"{_BF}/values": None}
-            if ts is not None:
-                per[f"{_BF}/timestamps"] = ts
-            _rewrite(iq, order, per, extra)
-        else:
-            _write_inplace(iq, extra, replace={f"{_BF}/timestamps": ts})
-        stamp_h5(str(iq), extra={"stage": "unwrap", "buffer": BUFFER}, group="provenance_unwrap")
-        if gif and iq_moves:
-            try:
-                from .gifs import gif_for_file
-                gif_for_file(Path(iq))
-            except Exception as exc:                                   # noqa: BLE001
-                log(f"  buffer 3: GIF not re-rendered ({exc})")
+    if conv is not None and not is_current(fc):
+        with h5py.File(conv, "r") as f:
+            n = f[_RAW].shape[0]
+        _apply(conv, est, head_conv, n, _RAW, folder, log, gif)
+    if iq is not None and not is_current(fi):
+        with h5py.File(iq, "r") as f:
+            n = f[f"{_BF}/values"].shape[0]
+        _apply(iq, est, head_iq, n, f"{_BF}/values", folder, log, gif)
     return est
 
 

@@ -1,0 +1,11 @@
+Reference check: signed error (method - trigger count) where each method is confident
+ buffer-1 (margin>=0.006), n=152: {-1: 1, 0: 150, 1: 1}
+ continuity, wrap jump >300 ms (image-only, no timing/count), n=85: {-3: 1, -1: 22, 0: 57, 1: 1, 8: 3, 14: 1}
+   ... and upper half of its margin, n=43: {-1: 12, 0: 30, 14: 1}
+
+Study-wide under the CURRENT rule (trigger count > buffer-1 margin>=0.006 > ambiguous):
+ trigger count 243, buffer-1 353, ambiguous 128 of 724  (ambiguous: low margin 97, no valid ECG 31)
+  26 frames: trigger 105, buffer-1 18, ambiguous 9 of 132
+  32 frames: trigger 138, buffer-1 335, ambiguous 119 of 592
+ with threshold 0.0046 instead: buffer-1 383, ambiguous 98
+ buffer3->buffer1 gap ms: {'count': 724.0, 'mean': -5892.0, 'std': 159453.0, 'min': -4290398.0, '25%': 2.0, '50%': 44.0, '75%': 52.0, 'max': 62.0}

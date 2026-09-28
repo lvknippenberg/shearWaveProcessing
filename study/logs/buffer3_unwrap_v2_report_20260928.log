@@ -1,0 +1,28 @@
+724 folders; failed: 0
+
+result: {'combined': 422, 'trigger-count': 244, 'ambiguous': 53, 'continuity': 5}
+
+by campaign (frames):
+result    ambiguous  combined  continuity  trigger-count  All
+n_frames                                                     
+26               12        14           0            106  132
+32               41       408           5            138  592
+All              53       422           5            244  724
+
+by acquisition index (1 = first of the subject):
+result  ambiguous  combined  continuity  trigger-count  All
+acq                                                        
+1               5        29           0             14   48
+2               3        34           1             10   48
+3               3        31           2             12   48
+4               3        34           0             11   48
+5+             39       294           2            197  532
+All            53       422           5            244  724
+
+trigger-count folders: combined_agrees 208/211 (98.6%)
+
+trigger-count folders: continuity_agrees 166/244 (68.0%)
+
+ambiguous, reason: {'no trigger count; no trustworthy ECG / buffer 1 and continuity margin below threshold': 28, 'no trigger count; combined margin below threshold and continuity margin below threshold': 25}
+
+folders unwrapped by VERSION 1: 77; v2 head - v1 head: {-2: 1, -1: 19, 0: 57} (NaN = now ambiguous)

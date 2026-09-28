@@ -175,14 +175,16 @@ M-lines and hand-fitted speeds** as the reference, judged by eye.
 
 ## Runs (commands ready; not run because they rewrite study outputs or take hours)
 
-15. **Buffer-3 unwrap of the whole study, on the Linux server, after the beamforming batch
-    finishes.** Buffer 3 is a circular live loop whose head VSX never recorded
-    (`docs/buffer3_unwrap.md`).
-    - Command: `docs/linux_server.md` → "Buffer-3 unwrap". It is idempotent.
-    - The 44 September folders were unwrapped on 2026-09-25 from Windows: 37 resolved, 7 ambiguous
-      (C000000014, 17, 21, 30 without a trustworthy ECG; C000000036, 39, 45 below the margin).
-    - Afterwards, review a few `ambiguous` folders (`status` column of
-      `study/logs/buffer3_unwrap_*.csv`) to see how to resolve them.
+15. ~~**Buffer-3 unwrap of the whole study**~~ **DONE 2026-09-28** (VERSION 2, all 724 SW folders,
+    from Windows; `docs/buffer3_unwrap.md`, last section): trigger count 244, combined 422,
+    continuity 5, ambiguous 53. Left open:
+    - the 53 ambiguous folders (28 without a trustworthy ECG, 25 below the combined margin;
+      `status` column of `study/logs/buffer3_unwrap_v2_20260928.csv`) - check a few with
+      `study/analysis/all_heads_gifs.py` (one GIF per possible head);
+    - the 15 resolved folders whose playback still has a weak link inside
+      (`study/logs/unwrap_v2_playback_check_20260928.csv`, `v2_min < 0`) - same check;
+    - the server clone (`Z:\shearWaveProcessing`) must be pulled so new beamforms unwrap with
+      VERSION 2.
 16. **Acquisition fix for buffer 3** (scanner). Either freeze before `copyBuffers` in `SaveRFData.m`
     (as Verasonics' `saveRF.m` does) and check `Resource.RcvBuffer(3).lastFrame`, or leave the
     focused loop at a deterministic point (redirect its jump-back `SeqControl` instead of

@@ -1,0 +1,13 @@
+folder,status,first,shift,method,n_frames,trigger_run_length,trigger_first,ecg_trustworthy,buffer1_first,buffer1_margin,buffer1_score,buffer1_score_stored_order,buffer1_agrees,seconds
+C000000004/VIS_4_SW_data_16-June-2026_11-00-06,unwrapped,15,-1,trigger-count,26,900,15,True,15,0.0145,0.9708,0.9272,True,48.6
+C000000009/VIS-009_SW_data_03-July-2026_09-45-12,unwrapped,20,-1,trigger-count,26,359,20,True,20,0.0168,0.9288,0.8813,True,45.7
+C000000013/VIS-016_SW_data_10-July-2026_10-11-53,unwrapped,22,-1,buffer1,32,,,True,22,0.0381,0.9243,0.8528,,50.7
+C000000017/VIS-013_SW_data_07-July-2026_10-53-54,chronological,0,-1,trigger-count,32,193,0,False,,,,,,4.0
+C000000021/VIS-024_SW_data_17-July-2026_09-36-34,unwrapped,26,-1,buffer1,32,,,True,26,0.02,0.944,0.8972,,50.5
+C000000025/VIS-025_SW_data_21-July-2026_09-53-59,unwrapped,21,-1,buffer1,32,,,True,21,0.01,0.8985,0.8531,,54.8
+C000000029/VIS-031_SW_data_24-July-2026_11-13-37,unwrapped,11,-1,buffer1,32,,,True,11,0.0646,0.9626,0.8293,,54.0
+C000000033/VIS-028_SW_data_24-July-2026_08-45-28,unwrapped,24,-1,buffer1,32,,,True,24,0.0097,0.8679,0.8195,,53.4
+C000000037/VIS-042_SW_data_07-August-2026_08-40-25,unwrapped,18,-1,trigger-count,32,83,18,True,18,0.0097,0.9692,0.9417,True,57.1
+C000000041/VIS-038_SW_data_31-July-2026_09-02-26,unwrapped,9,-1,buffer1,32,,,True,9,0.0157,0.9308,0.8613,,53.4
+C000000045/VIS-033_SW_data_28-July-2026_09-26-33,unwrapped,30,-1,buffer1,32,,,True,30,0.0192,0.9194,0.8918,,53.0
+C000000049/VIS-046_SW_data_28-August-2026_08-47-17,chronological,0,-1,buffer1,32,,,True,0,0.0093,0.9394,0.9394,,8.6

@@ -1,0 +1,68 @@
+724 folders; ground truth with valid ECG: 210 (26 frames 84, 32 frames 126)
+
+         method  exact  within1  exact26  exact32
+ b1zc+ss+cont_A  0.981    0.981    0.988    0.976
+b1zc+ss+cont_Ad  0.971    0.981    0.964    0.976
+ b1zc+ss+cont_L  0.967    0.976    0.964    0.968
+b1zc+ss+cont_Ld  0.957    0.976    0.952    0.960
+    b1zc+cont_A  0.952    0.962    0.940    0.960
+   b1zc+cont_Ad  0.948    0.962    0.917    0.968
+    b1zc+cont_L  0.943    0.967    0.940    0.944
+          b1_Ld  0.924    0.976    0.952    0.905
+        b1+ss_L  0.924    0.957    0.940    0.913
+           b1_L  0.924    0.967    0.952    0.905
+   b1zc+cont_Ld  0.924    0.952    0.917    0.929
+        b1zc_Ld  0.919    0.967    0.917    0.921
+         b1z_Ld  0.919    0.971    0.929    0.913
+      b1zc+ss_L  0.914    0.962    0.929    0.905
+         b1zc_L  0.910    0.962    0.905    0.913
+          b1z_L  0.910    0.962    0.917    0.905
+        b1+ss_A  0.910    0.967    0.929    0.897
+      b1zc+ss_A  0.910    0.967    0.940    0.889
+         b1z_Ad  0.905    0.948    0.940    0.881
+     b1zc+ss_Ad  0.905    0.962    0.917    0.897
+       b1+ss_Ad  0.900    0.957    0.905    0.897
+        b1zc_Ad  0.900    0.943    0.929    0.881
+     b1zc+ss_Ld  0.895    0.957    0.905    0.889
+       b1+ss_Ld  0.895    0.962    0.905    0.889
+           b1_A  0.890    0.952    0.917    0.873
+          b1z_A  0.890    0.952    0.929    0.865
+         b1zc_A  0.886    0.948    0.917    0.865
+          b1_Ad  0.876    0.948    0.893    0.865
+        vote_Ld  0.838    0.962    0.869    0.817
+           ss_A  0.838    0.914    0.857    0.825
+           ss_L  0.833    0.900    0.845    0.825
+          ss_Ad  0.829    0.905    0.833    0.825
+          ss_Ld  0.805    0.886    0.786    0.817
+        vote_Ad  0.800    0.924    0.869    0.754
+         vote_A  0.743    0.848    0.798    0.706
+        cont_Ld  0.729    0.738    0.583    0.825
+         vote_L  0.719    0.867    0.762    0.690
+        cont_Ad  0.714    0.719    0.560    0.817
+         cont_A  0.681    0.681    0.536    0.778
+         cont_L  0.676    0.676    0.512    0.786
+          adj_A  0.333    0.371    0.357    0.317
+         adj_Ad  0.305    0.329    0.286    0.317
+     anchorR_Ld  0.271    0.429    0.357    0.214
+     anchorR_Ad  0.262    0.386    0.357    0.198
+         adj_Ld  0.257    0.314    0.262    0.254
+          adj_L  0.257    0.324    0.214    0.286
+      anchorR_A  0.219    0.343    0.321    0.151
+         adj2_A  0.214    0.233    0.202    0.222
+         adj2_L  0.195    0.224    0.190    0.198
+      anchorR_L  0.176    0.329    0.202    0.159
+        adj2_Ad  0.171    0.181    0.131    0.198
+        adj2_Ld  0.157    0.167    0.107    0.190
+  no-ECG ground truth (33): cont_A exact 0.667
+  no-ECG ground truth (33): adj_A exact 0.394
+  no-ECG ground truth (33): adj2_A exact 0.212
+  no-ECG ground truth (33): cont_Ad exact 0.545
+  no-ECG ground truth (33): adj_Ad exact 0.333
+  no-ECG ground truth (33): adj2_Ad exact 0.152
+  no-ECG ground truth (33): cont_L exact 0.636
+  no-ECG ground truth (33): adj_L exact 0.424
+  no-ECG ground truth (33): adj2_L exact 0.152
+  no-ECG ground truth (33): cont_Ld exact 0.576
+  no-ECG ground truth (33): adj_Ld exact 0.242
+  no-ECG ground truth (33): adj2_Ld exact 0.212
+-> D:\Luuk van Knippenberg\Github\shearWaveProcessing\study\logs\unwrap_explore_eval_20260928.csv

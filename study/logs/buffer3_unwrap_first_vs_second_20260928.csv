@@ -1,0 +1,49 @@
+subject,n_frames_2nd,result_1st,trigger_run_length_1st,result_2nd,trigger_run_length_2nd,first_2nd,buffer1_margin_2nd,buffer1_agrees_2nd,ecg_trustworthy_2nd
+C000000001,26,,,trigger count,265.0,4,0.1542,True,True
+C000000002,26,trigger count,769.0,trigger count,444.0,1,0.0256,True,True
+C000000003,26,trigger count,236.0,trigger count,717.0,14,0.0016,True,True
+C000000004,26,trigger count,505.0,trigger count,900.0,15,0.0145,True,True
+C000000005,26,trigger count,221.0,trigger count,298.0,11,,,False
+C000000007,26,trigger count,177.0,buffer-1 similarity,,24,0.0067,,True
+C000000008,26,trigger count,219.0,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.0046,,True
+C000000009,26,buffer-1 similarity,,trigger count,359.0,20,0.0168,True,True
+C000000010,26,trigger count,251.0,buffer-1 similarity,,4,0.0195,,True
+C000000011,32,buffer-1 similarity,,buffer-1 similarity,,25,0.0277,,True
+C000000012,32,trigger count,129.0,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,-1,,,False
+C000000013,32,buffer-1 similarity,,buffer-1 similarity,,22,0.0381,,True
+C000000014,32,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.0039,,True
+C000000015,32,buffer-1 similarity,,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.0048,,True
+C000000016,32,buffer-1 similarity,,buffer-1 similarity,,31,0.0476,,True
+C000000017,32,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,trigger count,193.0,0,,,False
+C000000018,32,buffer-1 similarity,,buffer-1 similarity,,17,0.017,,True
+C000000019,32,buffer-1 similarity,,buffer-1 similarity,,13,0.0639,,True
+C000000020,32,buffer-1 similarity,,buffer-1 similarity,,19,0.0125,,True
+C000000021,32,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,buffer-1 similarity,,26,0.02,,True
+C000000022,32,buffer-1 similarity,,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.0034,,True
+C000000023,32,buffer-1 similarity,,buffer-1 similarity,,2,0.0317,,True
+C000000024,32,trigger count,174.0,buffer-1 similarity,,31,0.0285,,True
+C000000025,32,buffer-1 similarity,,buffer-1 similarity,,21,0.01,,True
+C000000026,32,buffer-1 similarity,,buffer-1 similarity,,17,0.0179,,True
+C000000027,32,buffer-1 similarity,,buffer-1 similarity,,18,0.0831,,True
+C000000028,32,buffer-1 similarity,,trigger count,173.0,12,0.1059,True,True
+C000000029,32,buffer-1 similarity,,buffer-1 similarity,,11,0.0646,,True
+C000000030,32,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,buffer-1 similarity,,31,0.0328,,True
+C000000031,32,buffer-1 similarity,,trigger count,116.0,19,0.0055,True,True
+C000000032,32,buffer-1 similarity,,buffer-1 similarity,,4,0.0309,,True
+C000000033,32,trigger count,176.0,buffer-1 similarity,,24,0.0097,,True
+C000000034,32,buffer-1 similarity,,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.0049,,True
+C000000035,32,trigger count,153.0,buffer-1 similarity,,7,0.0098,,True
+C000000036,32,ambiguous (no trigger count; buffer-1 margin below threshold),,buffer-1 similarity,,18,0.0122,,True
+C000000037,32,buffer-1 similarity,,trigger count,83.0,18,0.0097,True,True
+C000000038,32,buffer-1 similarity,,buffer-1 similarity,,19,0.0111,,True
+C000000039,32,ambiguous (no trigger count; buffer-1 margin below threshold),,buffer-1 similarity,,31,0.0198,,True
+C000000040,32,buffer-1 similarity,,buffer-1 similarity,,12,0.0117,,True
+C000000041,32,buffer-1 similarity,,buffer-1 similarity,,9,0.0157,,True
+C000000042,32,buffer-1 similarity,,buffer-1 similarity,,31,0.0161,,True
+C000000043,32,buffer-1 similarity,,buffer-1 similarity,,2,0.0801,,True
+C000000044,32,buffer-1 similarity,,buffer-1 similarity,,19,0.0129,,True
+C000000045,32,ambiguous (no trigger count; buffer-1 margin below threshold),,buffer-1 similarity,,30,0.0192,,True
+C000000046,32,,,buffer-1 similarity,,26,0.0206,,True
+C000000047,32,,,ambiguous (no trigger count; buffer-1 margin below threshold),,-1,0.001,,True
+C000000048,32,,,ambiguous (no trigger count; no trustworthy ECG / buffer 1),,-1,,,False
+C000000049,32,,,buffer-1 similarity,,0,0.0093,,True

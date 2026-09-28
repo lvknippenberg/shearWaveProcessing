@@ -1,0 +1,12 @@
+Z:/raw_data/C000000001/SWE_01_SW_data_21-April-2026_12-14-11
+Z:/raw_data/C000000005/VIS-005_SW_data_19-June-2026_09-12-54
+Z:/raw_data/C000000010/vis-006_SW_data_30-June-2026_09-44-14
+Z:/raw_data/C000000014/VIS-008_SW_data_10-July-2026_08-38-51
+Z:/raw_data/C000000018/VIS-012_SW_data_07-July-2026_09-22-43
+Z:/raw_data/C000000022/VIS-023_SW_data_17-July-2026_08-48-50
+Z:/raw_data/C000000026/VIS-020_SW_data_14-July-2026_10-04-27
+Z:/raw_data/C000000030/VIS-029_SW_data_24-July-2026_09-37-10
+Z:/raw_data/C000000034/VIS-045_SW_data_07-August-2026_11-42-57
+Z:/raw_data/C000000038/VIS-041_SW_data_04-August-2026_12-29-03
+Z:/raw_data/C000000042/VIS-036_SW_data_28-July-2026_14-08-15
+Z:/raw_data/C000000046/VIS-049_SW_data_04-September-2026_09-34-47

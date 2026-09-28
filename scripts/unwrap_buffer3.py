@@ -2,8 +2,8 @@
 
 New conversions do this automatically (``beamform.process_folder`` calls
 ``swp.acquisition.unwrap.unwrap_buffer3``); this script retrofits folders beamformed before
-2026-09-25. It is idempotent: folders whose buffer-3 files already carry ``custom/unwrap_status``
-are skipped, so it can simply be re-run (e.g. after the server batch has finished more folders).
+2026-09-25. It is idempotent: folders whose buffer-3 files carry a flag of the current unwrap VERSION
+are skipped; older-version flags (v1, before 2026-09-28) are re-estimated and re-rotated, so it can simply be re-run (e.g. after the server batch has finished more folders).
 
     python scripts/unwrap_buffer3.py --root "Z:/raw_data" --dry-run      # estimate only, write nothing
     python scripts/unwrap_buffer3.py --root "Z:/raw_data"                # estimate + rewrite + GIF
@@ -42,7 +42,7 @@ def main():
         ap.error("give --root and/or --folder")
 
     from process_raw_data import find_measurement_folders
-    from swp.acquisition.unwrap import buffer_files, read_flag, summary, unwrap_buffer3
+    from swp.acquisition.unwrap import buffer_files, is_current, read_flag, summary, unwrap_buffer3
 
     folders = find_measurement_folders(a.root, a.folder, a.subject)
     out = Path(a.log) if a.log else _REPO / "study" / "logs" / (
@@ -57,8 +57,8 @@ def main():
         if iq is None or not (outdir / "CombinedData_buffer4_iq.gif").exists():
             counts["not ready"] = counts.get("not ready", 0) + 1
             continue
-        variants = [v for v in outdir.glob("*_buffer3_*_iq.hdf5") if not read_flag(v)]
-        if read_flag(iq) and (conv is None or read_flag(conv)) and not variants and not a.dry_run:
+        variants = [v for v in outdir.glob("*_buffer3_*_iq.hdf5") if not is_current(read_flag(v))]
+        if is_current(read_flag(iq)) and (conv is None or is_current(read_flag(conv))) and not variants and not a.dry_run:
             counts["already done"] = counts.get("already done", 0) + 1
             continue
         t0 = time.perf_counter()

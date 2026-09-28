@@ -1,0 +1,10 @@
+status
+ok    724
+
+log length: {1500: 666, 2000: 58}
+SW triggers per push: {4.0: 724}
+gap loop end -> buffer 1 (ms): {'count': 724.0, 'mean': 45.8, 'std': 7.5, 'min': 22.0, '25%': 40.0, '50%': 44.2, '75%': 52.3, 'max': 61.0}
+old run end - new run end: {0: 497, 1: 227}
+loop start in log (countable): 244 of 724 | old: 244
+gap before loop start (ms): {'count': 244.0, 'mean': 17936.0, 'std': 11258.0, 'min': 4309.0, '25%': 5221.0, '50%': 20598.0, '75%': 21676.0, 'max': 69450.0}
+head new vs old where both countable: {0: 165, -1: 75, 31: 4}

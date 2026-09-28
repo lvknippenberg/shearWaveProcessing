@@ -1,0 +1,49 @@
+folder,status,first,shift,method,n_frames,trigger_run_length,trigger_first,ecg_trustworthy,buffer1_first,buffer1_margin,buffer1_score,buffer1_score_stored_order,buffer1_agrees,seconds,reason
+C000000001/SWE_01_SW_data_21-April-2026_12-14-11,unwrapped,4,-1,trigger-count,26,265.0,4.0,True,4.0,0.1542,0.9475,0.7273,True,48.5,
+C000000002/SWE02_SW_data_28-April-2026_10-11-53,unwrapped,1,-1,trigger-count,26,444.0,1.0,True,1.0,0.0256,0.9709,0.9582,True,47.8,
+C000000003/VIS_03_SW_data_16-June-2026_10-10-39,unwrapped,14,-1,trigger-count,26,717.0,14.0,True,14.0,0.0016,0.9274,0.9112,True,48.5,
+C000000004/VIS_4_SW_data_16-June-2026_11-00-06,unwrapped,15,-1,trigger-count,26,900.0,15.0,True,15.0,0.0145,0.9708,0.9272,True,48.6,
+C000000005/VIS-005_SW_data_19-June-2026_09-12-54,unwrapped,11,-1,trigger-count,26,298.0,11.0,False,,,,,,39.5,
+C000000007/VIS-007_SW_data_30-June-2026_11-47-50,unwrapped,24,-1,buffer1,26,,,True,24.0,0.0067,0.9576,0.9509,,43.9,
+C000000008/VIS-010_SW_data_03-July-2026_10-37-16,ambiguous,-1,-1,none,26,,,True,0.0,0.0046,0.9481,0.9481,,10.2,no trigger count; buffer-1 margin below threshold
+C000000009/VIS-009_SW_data_03-July-2026_09-45-12,unwrapped,20,-1,trigger-count,26,359.0,20.0,True,20.0,0.0168,0.9288,0.8813,True,45.7,
+C000000010/vis-006_SW_data_30-June-2026_09-44-14,unwrapped,4,-1,buffer1,26,,,True,4.0,0.0195,0.9431,0.9044,,47.0,
+C000000011/VIS-11_SW_data_07-July-2026_08-40-50,unwrapped,25,-1,buffer1,32,,,True,25.0,0.0277,0.9627,0.8877,,48.4,
+C000000012/VIS-014_SW_data_07-July-2026_11-42-46,ambiguous,-1,-1,none,32,,,False,,,,,,4.4,no trigger count; no trustworthy ECG / buffer 1
+C000000013/VIS-016_SW_data_10-July-2026_10-11-53,unwrapped,22,-1,buffer1,32,,,True,22.0,0.0381,0.9243,0.8528,,50.7,
+C000000014/VIS-008_SW_data_10-July-2026_08-38-51,ambiguous,-1,-1,none,32,,,True,27.0,0.0039,0.9184,0.9074,,12.1,no trigger count; buffer-1 margin below threshold
+C000000015/VIS-017_SW_data_10-July-2026_10-54-09,ambiguous,-1,-1,none,32,,,True,12.0,0.0048,0.8814,0.7527,,12.2,no trigger count; buffer-1 margin below threshold
+C000000016/VIS-015_SW_data_10-July-2026_09-25-23,unwrapped,31,-1,buffer1,32,,,True,31.0,0.0476,0.9199,0.9009,,57.9,
+C000000017/VIS-013_SW_data_07-July-2026_10-53-54,chronological,0,-1,trigger-count,32,193.0,0.0,False,,,,,,4.0,
+C000000018/VIS-012_SW_data_07-July-2026_09-22-43,unwrapped,17,-1,buffer1,32,,,True,17.0,0.017,0.9641,0.9441,,52.4,
+C000000019/VIS-027_SW_data_21-July-2026_11-20-11,unwrapped,13,-1,buffer1,32,,,True,13.0,0.0639,0.9576,0.7866,,50.4,
+C000000020/VIS-026_SW_data_21-July-2026_10-43-19,unwrapped,19,-1,buffer1,32,,,True,19.0,0.0125,0.9509,0.893,,54.4,
+C000000021/VIS-024_SW_data_17-July-2026_09-36-34,unwrapped,26,-1,buffer1,32,,,True,26.0,0.02,0.944,0.8972,,50.5,
+C000000022/VIS-023_SW_data_17-July-2026_08-48-50,ambiguous,-1,-1,none,32,,,True,31.0,0.0034,0.939,0.935,,10.5,no trigger count; buffer-1 margin below threshold
+C000000023/VIS-022_SW_data_14-July-2026_11-41-58,unwrapped,2,-1,buffer1,32,,,True,2.0,0.0317,0.9079,0.8762,,51.0,
+C000000024/VIS-021_SW_data_14-July-2026_10-56-18,unwrapped,31,-1,buffer1,32,,,True,31.0,0.0285,0.9351,0.9133,,57.0,
+C000000025/VIS-025_SW_data_21-July-2026_09-53-59,unwrapped,21,-1,buffer1,32,,,True,21.0,0.01,0.8985,0.8531,,54.8,
+C000000026/VIS-020_SW_data_14-July-2026_10-04-27,unwrapped,17,-1,buffer1,32,,,True,17.0,0.0179,0.9623,0.9226,,58.8,
+C000000027/VIS-019_SW_data_14-July-2026_09-21-01,unwrapped,18,-1,buffer1,32,,,True,18.0,0.0831,0.9359,0.7691,,51.9,
+C000000028/VIS-018_SW_data_14-July-2026_08-31-36,unwrapped,12,-1,trigger-count,32,173.0,12.0,True,12.0,0.1059,0.9487,0.6932,True,57.2,
+C000000029/VIS-031_SW_data_24-July-2026_11-13-37,unwrapped,11,-1,buffer1,32,,,True,11.0,0.0646,0.9626,0.8293,,54.0,
+C000000030/VIS-029_SW_data_24-July-2026_09-37-10,unwrapped,31,-1,buffer1,32,,,True,31.0,0.0328,0.963,0.9492,,60.6,
+C000000031/VIS-032_SW_data_24-July-2026_11-58-23,unwrapped,19,-1,trigger-count,32,116.0,19.0,True,19.0,0.0055,0.9523,0.9383,True,53.6,
+C000000032/VIS-030_SW_data_24-July-2026_10-27-00,unwrapped,4,-1,buffer1,32,,,True,4.0,0.0309,0.9704,0.9239,,59.3,
+C000000033/VIS-028_SW_data_24-July-2026_08-45-28,unwrapped,24,-1,buffer1,32,,,True,24.0,0.0097,0.8679,0.8195,,53.4,
+C000000034/VIS-045_SW_data_07-August-2026_11-42-57,ambiguous,-1,-1,none,32,,,True,19.0,0.0049,0.925,0.9053,,17.3,no trigger count; buffer-1 margin below threshold
+C000000035/VIS-044_SW_data_07-August-2026_10-55-40,unwrapped,7,-1,buffer1,32,,,True,7.0,0.0098,0.9383,0.9108,,52.4,
+C000000036/VIS-043_SW_data_07-August-2026_10-04-23,unwrapped,18,-1,buffer1,32,,,True,18.0,0.0122,0.9273,0.898,,60.4,
+C000000037/VIS-042_SW_data_07-August-2026_08-40-25,unwrapped,18,-1,trigger-count,32,83.0,18.0,True,18.0,0.0097,0.9692,0.9417,True,57.1,
+C000000038/VIS-041_SW_data_04-August-2026_12-29-03,unwrapped,19,-1,buffer1,32,,,True,19.0,0.0111,0.968,0.9344,,58.1,
+C000000039/VIS-040_SW_data_04-August-2026_11-50-50,unwrapped,31,-1,buffer1,32,,,True,31.0,0.0198,0.9349,0.9233,,52.1,
+C000000040/VIS-039_SW_data_04-August-2026_10-58-42,unwrapped,12,-1,buffer1,32,,,True,12.0,0.0117,0.9579,0.9181,,52.7,
+C000000041/VIS-038_SW_data_31-July-2026_09-02-26,unwrapped,9,-1,buffer1,32,,,True,9.0,0.0157,0.9308,0.8613,,53.4,
+C000000042/VIS-036_SW_data_28-July-2026_14-08-15,unwrapped,31,-1,buffer1,32,,,True,31.0,0.0161,0.9665,0.9573,,54.5,
+C000000043/VIS-035_SW_data_28-July-2026_12-25-18,unwrapped,2,-1,buffer1,32,,,True,2.0,0.0801,0.9267,0.828,,52.7,
+C000000044/VIS-034_SW_data_28-July-2026_11-03-14,unwrapped,19,-1,buffer1,32,,,True,19.0,0.0129,0.9775,0.9556,,50.8,
+C000000045/VIS-033_SW_data_28-July-2026_09-26-33,unwrapped,30,-1,buffer1,32,,,True,30.0,0.0192,0.9194,0.8918,,53.0,
+C000000046/VIS-049_SW_data_04-September-2026_09-34-47,unwrapped,26,-1,buffer1,32,,,True,26.0,0.0206,0.9417,0.8747,,55.4,
+C000000047/VIS-048_SW_data_04-September-2026_08-52-20,ambiguous,-1,-1,none,32,,,True,10.0,0.001,0.9133,0.8987,,11.9,no trigger count; buffer-1 margin below threshold
+C000000048/VIS-047_SW_data_28-August-2026_10-13-27,ambiguous,-1,-1,none,32,,,False,,,,,,4.5,no trigger count; no trustworthy ECG / buffer 1
+C000000049/VIS-046_SW_data_28-August-2026_08-47-17,chronological,0,-1,buffer1,32,,,True,0.0,0.0093,0.9394,0.9394,,8.6,

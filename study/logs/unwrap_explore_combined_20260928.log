@@ -1,0 +1,23 @@
+b1_A               exact 0.890 within1 0.952  26fr 0.917 32fr 0.873  wrong: {1: 9, -1: 4, 2: 2, 3: 2, -3: 1, -9: 1, -5: 1, -11: 1, 10: 1, 7: 1}
+b1zc+cont_A        exact 0.952 within1 0.962  26fr 0.940 32fr 0.960  wrong: {-5: 2, 1: 1, -1: 1, -2: 1, -9: 1, 3: 1, 4: 1, -3: 1, 14: 1}
+b1zc+cont_L        exact 0.943 within1 0.967  26fr 0.940 32fr 0.944  wrong: {1: 3, -1: 2, -2: 2, 4: 2, -3: 1, 14: 1, 3: 1}
+b1zc+ss+cont_A     exact 0.981 within1 0.981  26fr 0.988 32fr 0.976  wrong: {-10.0: 1, 3.0: 1, -3.0: 1, 14.0: 1}
+b1zc+ss+cont_L     exact 0.967 within1 0.976  26fr 0.964 32fr 0.968  wrong: {-3.0: 3, 1.0: 2, -10.0: 1, 2.0: 1}
+b1zc+ss+cont_Ad    exact 0.971 within1 0.981  26fr 0.964 32fr 0.976  wrong: {-1.0: 2, -10.0: 1, 3.0: 1, -3.0: 1, 14.0: 1}
+lowest-margin 10 of combined:                                            folder  b1zc+ss+cont_A_margin  b1zc+ss+cont_A_err  wrap_jump_ms
+C000000015__VIS-017_SW_data_10-July-2026_10-57-02               0.346695                 0.0         189.7
+C000000033__VIS-028_SW_data_24-July-2026_08-54-29               0.457892                 0.0          15.7
+C000000009__VIS-009_SW_data_03-July-2026_09-56-29               1.064480                 0.0         164.3
+C000000027__VIS-019_SW_data_14-July-2026_09-22-29               1.150613                 0.0         324.4
+C000000020__VIS-026_SW_data_21-July-2026_10-53-50               1.171425                 3.0          82.8
+C000000012__VIS-014_SW_data_07-July-2026_11-53-20               1.184293                 0.0         259.7
+ C000000003__VIS_03_SW_data_16-June-2026_10-19-41               1.201188                 0.0          39.9
+C000000010__vis-006_SW_data_30-June-2026_09-56-24               1.284580                10.0         322.9
+C000000045__VIS-033_SW_data_28-July-2026_09-36-04               1.312485                 0.0         115.8
+C000000031__VIS-032_SW_data_24-July-2026_12-08-42               1.315616                 0.0         354.4
+
+already unwrapped: 77 folders; boundary bug present in 21
+ applied head == corrected combined estimate: {False: {'sum': 54, 'size': 56}, True: {'sum': 1, 'size': 21}}
+ corrected - applied: {0.0: 55, -1.0: 17, -9.0: 1, -4.0: 1, 14.0: 1, 3.0: 1, -2.0: 1}
+study-wide boundary bug: 226 of 724 | odd gap outliers:                                            folder  gap_b3_b1_ms
+C000000031__VIS-032_SW_data_24-July-2026_12-09-49    -4290397.5

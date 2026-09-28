@@ -52,6 +52,24 @@ class BufferTiming:
         return int(i), float(d[i, j])
 
 
+COUNTER_WRAP_US = 2 ** 32      # the µs timestamps are a 32-bit counter: it wraps every 71.6 min
+
+
+def _unwrap_us_counter(*cols):
+    """Undo 32-bit µs counter overflows. Each column is in log (chronological) order; a backward step
+    of more than half the counter range is an overflow. Columns are then put on one clock (a column
+    lying wholly before the other's overflow gets 2**32 added). Sorting without this scrambled the
+    order in logs that span an overflow (C000000031 12-09-49: the live loop's first 70 triggers
+    were sorted to the end)."""
+    out = []
+    for v in cols:
+        if v.size > 1:
+            v = v + COUNTER_WRAP_US * np.r_[0, np.cumsum(np.diff(v) < -COUNTER_WRAP_US / 2)]
+        out.append(v)
+    ref = max((np.median(v) for v in out if v.size), default=0.0)
+    return [v + COUNTER_WRAP_US * np.round((ref - np.median(v)) / COUNTER_WRAP_US) if v.size else v for v in out]
+
+
 def read_log(folder):
     """-> (r_peaks_ms sorted, frame_triggers_ms sorted, params dict) or None if absent."""
     import scipy.io as sio
@@ -78,12 +96,15 @@ def read_log(folder):
         start = heads[name] + 1
         nxt = [i for i in order if i > heads[name]]
         stop = nxt[0] if nxt else len(lines)
-        return np.array([float(x) for x in lines[start:stop] if x.strip()], float) * scale[name]
+        return np.array([float(x) for x in lines[start:stop] if x.strip()], float)
 
     if "ECG_trigger" not in heads or "Vera_trigger" not in heads:
         return None
-    r = np.sort(column("ECG_trigger"))
-    trig = np.sort(column("Vera_trigger"))
+    r, trig = column("ECG_trigger"), column("Vera_trigger")
+    if scale["Vera_trigger"] != 1.0 and scale["ECG_trigger"] != 1.0:
+        r, trig = _unwrap_us_counter(r, trig)
+    r = np.sort(r * scale["ECG_trigger"])
+    trig = np.sort(trig * scale["Vera_trigger"])
     params = {}
     for b, s in BUFFER_STRUCT.items():
         if s in m:
@@ -196,12 +217,77 @@ def label_buffer4_events(folder, t_s):
     return out
 
 
+@dataclass
+class Sequence:
+    """Trigger-log indices (inclusive) of each acquisition mode, parsed from the known sequence."""
+    loop: tuple                # buffer-3 focused live loop; the LAST trigger is the aborted frame
+    loop_truncated: bool       # the loop's start was overwritten in the circular log
+    b1: tuple                  # buffer 1 widebeam block
+    b4: tuple                  # buffer 4 diverging-wave block
+    sw: tuple                  # active SW events (4 per push: reference, push, tracking, B-mode)
+
+
+def parse_sequence(log):
+    """Assign every trigger to its acquisition mode, or None when the log does not fit the sequence.
+
+    The sequence (SetUp_SWI_Widebeam.m) is: focused live loop (buffer 3, one trigger per frame) ->
+    buffer 1 (n1 frames) -> wait for R -> buffer 4 (n4 frames) -> active SW (4 triggers per push).
+    It is parsed BACKWARDS from buffer 4, the one block nobody can mistake: n4 triggers whose
+    intervals are all far below the buffer-1 period (early campaigns log whole ms, so 1.08 ms reads
+    as 1 or 2 ms) and whose span is (n4 - 1) frame periods. Buffer 1 is the n1 triggers just before
+    it; the live loop is everything before buffer 1 that keeps the loop cadence, walking back.
+
+    Replaces the period-only segmentation for buffer 3, which in ~31 % of folders (buffer 1
+    starting 39.4 +- 3 ms after the last loop trigger) absorbed buffer 1's first trigger into the
+    loop: the loop one trigger too long, the buffer-3 frame times one frame late
+    (study/analysis/triggerlog_structure_check.py, docs/buffer3_unwrap.md).
+    """
+    if log is None:
+        return None
+    _, trig, p = log
+    if not all(b in p for b in (1, 3, 4)):
+        return None
+    n1, n3, n4 = p[1]["n"], p[3]["n"], p[4]["n"]
+    f1, f3, f4 = (1000.0 / p[b]["fps"] for b in (1, 3, 4))
+    d = np.diff(trig)
+    fast = d < 0.25 * f1
+    edges = np.flatnonzero(np.diff(np.r_[0, fast.astype(int), 0]))
+    cand = [s for s, e in zip(edges[::2], edges[1::2]) if e - s >= n4 - 1
+            and abs(trig[s + n4 - 1] - trig[s] - (n4 - 1) * f4) < 0.02 * n4 * f4]
+    if len(cand) != 1:
+        return None
+    b4s = int(cand[0])
+    b1s = b4s - n1
+    if b1s < 1 or not np.all(np.abs(d[b1s:b1s + n1 - 1] - f1) < 0.15 * f1):
+        return None
+    tol3 = max(1.5, 0.08 * f3)
+    e = b1s - 1
+    s = e
+    while s > 0 and abs(d[s - 1] - f3) < tol3:
+        s -= 1
+    return Sequence(loop=(int(s), int(e)), loop_truncated=s == 0, b1=(b1s, b1s + n1 - 1),
+                    b4=(b4s, b4s + n4 - 1), sw=(b4s + n4, len(trig) - 1))
+
+
 def buffer_timing(folder, buffer):
     """Locate ``buffer`` (1, 3 or 4) in the trigger log. Returns :class:`BufferTiming` or None."""
     log = read_log(folder)
     if log is None or buffer not in log[2]:
         return None
     r, trig, params = log
+    seq = parse_sequence(log)
+    if seq is not None:
+        n, frame_ms = params[buffer]["n"], 1000.0 / params[buffer]["fps"]
+        if buffer == 1:
+            return BufferTiming(1, n, frame_ms, float(trig[seq.b1[0]]), r, "block")
+        if buffer == 4:
+            return BufferTiming(4, n, frame_ms, float(trig[seq.b4[0]]), r, "block")
+        s, e = seq.loop
+        if e - s + 1 < n:
+            return None
+        # the stored frames are the loop's last n triggers (incl. the aborted one; see unwrap SHIFT)
+        return BufferTiming(3, n, frame_ms, float(trig[e - n + 1]), r, "block" if e - s + 1 == n else "tail")
+    # log does not fit the sequence: period-only segmentation (pre-2026-09-28 behaviour)
     n, frame_ms = params[buffer]["n"], 1000.0 / params[buffer]["fps"]
     tol = max(1.5, 0.08 * frame_ms)
     runs = [(i, j) for i, j in _runs(trig, frame_ms, tol) if j - i + 1 >= n]

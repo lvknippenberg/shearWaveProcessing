@@ -181,6 +181,10 @@ docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
 - `--dry-run` estimates without writing anything.
 - It is CPU and NAS-bound (no GPU): ~6 s to estimate, plus a minute or two to rewrite a
   folder's ~1 GB converted buffer-3 file.
+- **2026-09-28:** unwrap VERSION 2 was applied to all 724 SW folders from Windows (4 workers,
+  2 h 20 min). Files flagged by an older version are redone automatically; files flagged by the
+  current version are skipped. Pull this clone before the next beamforming batch so new folders
+  get VERSION 2.
 
 ## Maintenance
 

@@ -36,3 +36,6 @@ study/analysis/atlas_cache/
 study/analysis/panel_cache/*_cfwi.npz
 study/analysis/atlas_cache_*/
 study/analysis/atlas15_cache/
+
+# buffer-3 head estimator exploration cache (2026-09-28)
+study/analysis/unwrap_cache/

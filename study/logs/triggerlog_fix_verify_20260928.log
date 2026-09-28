@@ -1,0 +1,4 @@
+buffer 1: t0 new-old (ms): {0.0: 724}
+buffer 3: t0 new-old (ms): {0.0: 497, -39.0: 218, -40.0: 8, -4290434.0: 1}
+buffer 4: t0 new-old (ms): {0.0: 724}
+trigger count available: 242 of 724

@@ -1,0 +1,9 @@
+724 folders: weakest link inside the playback, relative to the median link (1 = ordinary)
+               stored_min  v2_min
+method                           
+ambiguous            0.07    0.07
+combined            -0.37    0.48
+continuity          -0.70    0.62
+trigger-count       -0.22    0.49
+ambiguous (53): v2 better 0, worse 0, inside minimum < 0 (a jump): stored 24 -> v2 24
+resolved (671): v2 better 538, worse 0, inside minimum < 0 (a jump): stored 450 -> v2 15

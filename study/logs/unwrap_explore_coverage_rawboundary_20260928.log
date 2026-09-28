@@ -1,0 +1,29 @@
+ground truth (ECG ok) 210; to resolve without trigger count (ECG ok) 450; no trigger count AND no valid ECG 31
+
+        method  exact exact_by_margin_quintile_low_to_high  thr98 gt_accepted rest_resolved
+          b1_A  0.881          [0.5, 0.93, 0.98, 1.0, 1.0] 0.0046     163/210       383/450
+         b1z_A  0.886          [0.55, 0.9, 0.98, 1.0, 1.0] 0.3100     160/210       367/450
+         b1z_L  0.900         [0.67, 0.9, 0.95, 0.98, 1.0] 0.3321     124/210       319/450
+     b1zc+ss_A  0.886       [0.67, 0.86, 0.95, 0.98, 0.98] 2.3781     100/210       275/450
+       b1+ss_A  0.886       [0.67, 0.88, 0.93, 0.98, 0.98] 3.6159      32/210        88/450
+b1zc+ss+cont_A  0.786       [0.45, 0.74, 0.93, 0.86, 0.95] 5.2344      31/210        83/450
+         ss_Ad  0.781       [0.52, 0.69, 0.95, 0.79, 0.95] 0.3018      33/210        99/450
+       vote_Ad  0.800        [0.33, 0.74, 0.95, 0.98, 1.0] 0.2262     125/210       276/450
+       cont_Ld  0.505        [0.21, 0.33, 0.6, 0.64, 0.74] 1.3745       9/210        36/450
+
+current method (b1_A) at the 0.006 threshold on ground truth:
+  margin >= 0.006: n=152, exact 0.987, within 1 1.000
+  margin < 0.006: n=58, exact 0.603, within 1 0.810
+  exact by frame count: {26: 0.929, 32: 0.849}
+  margin median by frame count: {26: 0.0114, 32: 0.0095}
+  margin median, folders w/o trigger count, by frame count: {26: 0.0128, 32: 0.0146}
+
+continuity (cont_Ld) exact vs wrap phase jump (ms between the cardiac phases either side of the wrap):
+             n  exact
+bin                  
+(0, 50]     15   0.27
+(50, 100]   18   0.33
+(100, 200]  36   0.28
+(200, 300]  62   0.50
+(300, 600]  79   0.70
+wrap jump median (ms): ground truth 251 | rest 299 | by n: {26: 180.0, 32: 304.0}

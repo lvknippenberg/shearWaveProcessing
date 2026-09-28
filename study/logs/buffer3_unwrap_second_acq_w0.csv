@@ -1,0 +1,13 @@
+folder,status,first,shift,method,n_frames,trigger_run_length,trigger_first,ecg_trustworthy,buffer1_first,buffer1_margin,buffer1_score,buffer1_score_stored_order,buffer1_agrees,seconds,reason
+C000000001/SWE_01_SW_data_21-April-2026_12-14-11,unwrapped,4,-1,trigger-count,26,265,4,True,4,0.1542,0.9475,0.7273,True,48.5,
+C000000005/VIS-005_SW_data_19-June-2026_09-12-54,unwrapped,11,-1,trigger-count,26,298,11,False,,,,,,39.5,
+C000000010/vis-006_SW_data_30-June-2026_09-44-14,unwrapped,4,-1,buffer1,26,,,True,4,0.0195,0.9431,0.9044,,47.0,
+C000000014/VIS-008_SW_data_10-July-2026_08-38-51,ambiguous,-1,-1,none,32,,,True,27,0.0039,0.9184,0.9074,,12.1,no trigger count; buffer-1 margin below threshold
+C000000018/VIS-012_SW_data_07-July-2026_09-22-43,unwrapped,17,-1,buffer1,32,,,True,17,0.017,0.9641,0.9441,,52.4,
+C000000022/VIS-023_SW_data_17-July-2026_08-48-50,ambiguous,-1,-1,none,32,,,True,31,0.0034,0.939,0.935,,10.5,no trigger count; buffer-1 margin below threshold
+C000000026/VIS-020_SW_data_14-July-2026_10-04-27,unwrapped,17,-1,buffer1,32,,,True,17,0.0179,0.9623,0.9226,,58.8,
+C000000030/VIS-029_SW_data_24-July-2026_09-37-10,unwrapped,31,-1,buffer1,32,,,True,31,0.0328,0.963,0.9492,,60.6,
+C000000034/VIS-045_SW_data_07-August-2026_11-42-57,ambiguous,-1,-1,none,32,,,True,19,0.0049,0.925,0.9053,,17.3,no trigger count; buffer-1 margin below threshold
+C000000038/VIS-041_SW_data_04-August-2026_12-29-03,unwrapped,19,-1,buffer1,32,,,True,19,0.0111,0.968,0.9344,,58.1,
+C000000042/VIS-036_SW_data_28-July-2026_14-08-15,unwrapped,31,-1,buffer1,32,,,True,31,0.0161,0.9665,0.9573,,54.5,
+C000000046/VIS-049_SW_data_04-September-2026_09-34-47,unwrapped,26,-1,buffer1,32,,,True,26,0.0206,0.9417,0.8747,,55.4,

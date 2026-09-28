@@ -1,0 +1,47 @@
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+[1/12] C000000001/SWE_01_SW_data_21-April-2026_12-14-11
+  buffer 3: unwrapped - first slot 4, shift -1 (trigger-count; trigger_first 4, buffer1_first 4, buffer1_margin 0.1542)
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-14-11\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading 'Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-14-11\output\CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-14-11\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[2/12] C000000005/VIS-005_SW_data_19-June-2026_09-12-54
+  buffer 3: unwrapped - first slot 11, shift -1 (trigger-count; trigger_first 11)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-54\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[3/12] C000000010/vis-006_SW_data_30-June-2026_09-44-14
+  buffer 3: unwrapped - first slot 4, shift -1 (buffer1; buffer1_first 4, buffer1_margin 0.0195)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-44-14\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[4/12] C000000014/VIS-008_SW_data_10-July-2026_08-38-51
+  buffer 3: ambiguous - first slot -1, shift -1 (none; buffer1_first 27, buffer1_margin 0.0039)
+[5/12] C000000018/VIS-012_SW_data_07-July-2026_09-22-43
+  buffer 3: unwrapped - first slot 17, shift -1 (buffer1; buffer1_first 17, buffer1_margin 0.017)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-22-43\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[6/12] C000000022/VIS-023_SW_data_17-July-2026_08-48-50
+  buffer 3: ambiguous - first slot -1, shift -1 (none; buffer1_first 31, buffer1_margin 0.0034)
+[7/12] C000000026/VIS-020_SW_data_14-July-2026_10-04-27
+  buffer 3: unwrapped - first slot 17, shift -1 (buffer1; buffer1_first 17, buffer1_margin 0.0179)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-04-27\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[8/12] C000000030/VIS-029_SW_data_24-July-2026_09-37-10
+  buffer 3: unwrapped - first slot 31, shift -1 (buffer1; buffer1_first 31, buffer1_margin 0.0328)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000030\VIS-029_SW_data_24-July-2026_09-37-10\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[9/12] C000000034/VIS-045_SW_data_07-August-2026_11-42-57
+  buffer 3: ambiguous - first slot -1, shift -1 (none; buffer1_first 19, buffer1_margin 0.0049)
+[10/12] C000000038/VIS-041_SW_data_04-August-2026_12-29-03
+  buffer 3: unwrapped - first slot 19, shift -1 (buffer1; buffer1_first 19, buffer1_margin 0.0111)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000038\VIS-041_SW_data_04-August-2026_12-29-03\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[11/12] C000000042/VIS-036_SW_data_28-July-2026_14-08-15
+  buffer 3: unwrapped - first slot 31, shift -1 (buffer1; buffer1_first 31, buffer1_margin 0.0161)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000042\VIS-036_SW_data_28-July-2026_14-08-15\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[12/12] C000000046/VIS-049_SW_data_04-September-2026_09-34-47
+  buffer 3: unwrapped - first slot 26, shift -1 (buffer1; buffer1_first 26, buffer1_margin 0.0206)
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33mZ:\raw_data\C000000046\VIS-049_SW_data_04-September-2026_09-34-47\output\CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 32 frames = 1.26 s -> 1.28 s GIF (real time); 32 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+
+8.6 min: ambiguous 3, unwrapped 9  -> study\logs\buffer3_unwrap_second_acq_w0.csv

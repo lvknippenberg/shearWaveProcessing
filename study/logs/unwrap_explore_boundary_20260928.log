@@ -1,0 +1,27 @@
+neighbour corr / median lag-1, around the trigger-count head c (slot c = oldest, c-1 = newest):
+  pairs: (c-3,c-2) (c-2,c-1) [c-1,c]=reference wrap (c,c+1) | skip-one: (c-2,c) (c-1,c+1)
+      s  c3c2  c2c1  c1c0  c0p1  c2c0  c1p1
+s                                          
+-1 -1.0  1.02 -0.68  1.01  0.96 -0.65  0.73
+ 0  0.0  1.03  1.01 -0.51  1.00 -0.57 -0.55
+ 1  8.0  0.80  1.00  0.79  0.76  0.48  0.13
+{-1: 23, 0: 57, 1: 5}
+
+gap between the live loop's last trigger and buffer-1 frame 0 (ms), by continuity verdict:
+    count   min   25%   50%   75%   max
+s                                      
+-1   22.0  -3.2  -2.0  -0.4   1.8  48.5
+ 0   57.0  33.6  43.4  45.7  54.1  60.0
+s             1 frame lost (ref OK)  2 frames lost (ref -1)
+short                                                      
+gap < 20 ms                       0                      21
+gap >= 20 ms                     57                       1
+
+all 724 folders, gap histogram: {Interval(-1000000000.0, -1.0, closed='right'): 79, Interval(-1.0, 10.0, closed='right'): 148, Interval(10.0, 20.0, closed='right'): 0, Interval(20.0, 35.0, closed='right'): 35, Interval(35.0, 45.0, closed='right'): 128, Interval(45.0, 55.0, closed='right'): 219, Interval(55.0, 65.0, closed='right'): 115, Interval(65.0, 1000000000.0, closed='right'): 0}
+
+raw trigger log at the end of the buffer-3 run (ms relative to buffer-1 block start):
+ gap~0  C000000001__SWE_01_SW_data_21-April-2026: run ends at idx 904, buffer-1 block starts at idx 904; triggers [-121.0, -82.0, -42.0, 0.0, 11.0, 22.0]; diffs [39.0, 40.0, 42.0, 11.0, 11.0]
+ gap~0  C000000001__SWE_01_SW_data_21-April-2026: run ends at idx 904, buffer-1 block starts at idx 904; triggers [-117.0, -77.0, -38.0, 0.0, 11.0, 22.0]; diffs [40.0, 39.0, 38.0, 11.0, 11.0]
+ gap~0  C000000001__SWE_01_SW_data_21-April-2026: run ends at idx 904, buffer-1 block starts at idx 904; triggers [-116.0, -76.0, -37.0, 0.0, 11.0, 23.0]; diffs [40.0, 39.0, 37.0, 11.0, 12.0]
+ gap~50 C000000001__SWE_01_SW_data_21-April-2026: run ends at idx 903, buffer-1 block starts at idx 904; triggers [-163.0, -123.0, -84.0, -44.0, 0.0, 11.0]; diffs [40.0, 39.0, 40.0, 44.0, 11.0]
+ gap~50 C000000001__SWE_01_SW_data_21-April-2026: run ends at idx 903, buffer-1 block starts at idx 904; triggers [-162.0, -123.0, -83.0, -44.0, 0.0, 12.0]; diffs [39.0, 40.0, 39.0, 44.0, 12.0]
