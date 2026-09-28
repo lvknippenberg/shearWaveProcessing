@@ -31,7 +31,7 @@ from scipy.ndimage import maximum_filter, uniform_filter
 _REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO / "src"))
 
-F = Path(r"D:/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51/output")
+F = Path(r"D:/Luuk van Knippenberg/Claude/links/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51/output")
 BUFFERS = [("buffer 4 (diverging, passive SWE)", "CombinedData_buffer4_iq.hdf5"),
            ("buffer 1 (widebeam)", "CombinedData_buffer1_iq.hdf5"),
            ("buffer 3 (focused, standard)", "CombinedData_buffer3_iq.hdf5"),

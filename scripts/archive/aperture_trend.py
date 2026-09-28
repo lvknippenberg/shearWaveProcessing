@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import swe_lib as L                                              # noqa: E402
 
-AUG07 = r"D:/swp_v04/Phantom parameter sweep"
+AUG07 = r"D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_04 voltage sweep/Phantom parameter sweep"
 V_MEAS = np.array([15, 20, 25, 30, 35, 40, 45, 50], float)
 MI_MEAS = {41: [0.71, 0.93, 1.15, 1.37, 1.64, 1.94, 2.25, 2.25],
            61: [1.03, 1.33, 1.56, 2.15, 2.66, 2.86, 3.19, 3.59],
@@ -119,7 +119,7 @@ def read_aug17(csv_path, cycles=1500):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--outdir", required=True)
-    ap.add_argument("--aug17-csv", default=r"D:/swp_ph17/analysis/scores_velo_phantom.csv")
+    ap.add_argument("--aug17-csv", default=r"D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage/analysis/scores_velo_phantom.csv")
     ap.add_argument("--quantity", default="velocity")
     a = ap.parse_args()
     os.makedirs(a.outdir, exist_ok=True)

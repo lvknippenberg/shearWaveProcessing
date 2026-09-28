@@ -25,7 +25,7 @@ and write those back into `CombinedData.mat` (v7.3 HDF5, in place -- values only
 Verified against the 2026-08-04 phantom data, whose base config already carries the 3968-sample
 layout and which reconstructs correctly.
 
-    python scripts/fix_buffer2_receive.py --root D:/swp_ph17 [--check]
+    python scripts/fix_buffer2_receive.py --root "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage" [--check]
 """
 from __future__ import annotations
 

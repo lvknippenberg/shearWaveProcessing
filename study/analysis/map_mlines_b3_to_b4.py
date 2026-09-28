@@ -60,7 +60,7 @@ COH_HALF_MS = 10.0
 KNOWN = (Transform(dx=2.0, dz=-1.5), Transform(dx=-3.0, dz=2.0), Transform(dx=1.0, dz=1.0, angle=3.0))
 ROT_KNOWN = KNOWN[2]         # in vivo: unmodelled-rotation tolerance (the shifts are checked by transfer_line)
 ROT_ANGLES = np.arange(-10.0, 10.01, 1.0)
-PHANTOM = Path(r"D:/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51/output")
+PHANTOM = Path(r"D:/Luuk van Knippenberg/Claude/links/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51/output")
 
 
 def with_centre(t, c):

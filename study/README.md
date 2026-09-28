@@ -208,7 +208,7 @@ downscaled tiles in `study/analysis/tilecache/` so re-rendering is seconds).
 
 ## 4a. Resolution phantom — investigation CLOSED
 
-`D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51` (79 point targets,
+`D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51` (79 point targets,
 30–105 mm; focused sequence identical to in-vivo on all 7 parameters).
 
 | reconstruction | lateral −6 dB | axial | CNR | ripple |
@@ -228,15 +228,15 @@ every ripple figure here understates the artefact ~10x. Apex-referenced, standar
 synthesised 2nd-harmonic field peaks at 1.260°), but **every fix costs more than the artefact**.
 Keep standard.
 
-**Processing note:** needs the `D:\swp_res` junction (original path is 209 chars, overruns
+**Processing note:** needs the `D:\Luuk van Knippenberg\Claude\links\swp_res` junction (original path is 209 chars, overruns
 MAX_PATH) and the *same session's elasticity-phantom* `CombinedData.mat` as base config —
 `S5_1_SWI_Luuk.mat` is a setup-time workspace missing `Receive.startSample`/`endSample`, and
 `BaseConfig_10frames_*` has only half the buffer-2 `Receive` entries a 20-push run needs.
 
 ```
-python run.py beamform "D:/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51" \
+python run.py beamform "D:/Luuk van Knippenberg/Claude/links/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51" \
   --base-config-dir "D:/Luuk van Knippenberg/SWI/Base config files" \
-  --base-config "D:/swp_res/Elasticity phantom/DefaultPatient_SW_data_18-June-2026_14-05-44/CombinedData.mat"
+  --base-config "D:/Luuk van Knippenberg/Claude/links/swp_res/Elasticity phantom/DefaultPatient_SW_data_18-June-2026_14-05-44/CombinedData.mat"
 ```
 
 **Deconvolution lead — chased, and it does NOT transfer in vivo.** On the phantom, dividing by the

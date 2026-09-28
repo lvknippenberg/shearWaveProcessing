@@ -20,7 +20,7 @@ from scipy.ndimage import uniform_filter1d
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LINE_SPACING_DEG = 1.1111
-PHANTOM = (r"D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output"
+PHANTOM = (r"D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output"
            r"\CombinedData_buffer3_iq.hdf5")
 
 maps = np.load(os.path.join(HERE, "region_truncation_maps.npy"), allow_pickle=True).item()

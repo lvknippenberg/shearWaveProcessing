@@ -16,7 +16,7 @@ voltage + element count.
 
 Outputs: <root>/pulse_variance.csv  and  <root>/pulse_variance.png (CV & reproducibility vs voltage).
 
-Usage:  python scripts/archive/phantom_pulse_variance.py --root D:\\swp_ph
+Usage:  python scripts/archive/phantom_pulse_variance.py --root D:\\Luuk van Knippenberg\\Claude\\links\\swp_ph
 """
 from __future__ import annotations
 

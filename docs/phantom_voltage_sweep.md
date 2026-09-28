@@ -33,9 +33,9 @@ the montage is written to `<Phantom parent folder>/phantom_voltage_montage.png`.
 > `discover_measurements` / `beamform` silently report "no measurement folders" (while the shorter
 > `RF_data_*.bin` names still resolve). Fix: run everything through a short **directory junction**:
 > ```powershell
-> New-Item -ItemType Junction -Path D:\swp_ph -Target "<Phantom parent folder>"
+> New-Item -ItemType Junction -Path D:\Luuk van Knippenberg\Claude\links\swp_ph -Target "<Phantom parent folder>"
 > ```
-> then use `--root D:\swp_ph`. (The `.mat` may also be a dehydrated OneDrive placeholder; once the
+> then use `--root D:\Luuk van Knippenberg\Claude\links\swp_ph`. (The `.mat` may also be a dehydrated OneDrive placeholder; once the
 > path is short enough to `stat`, `is_file()` is reliable and a read hydrates it.)
 
 ## 1. What "phantom" changes

@@ -35,7 +35,7 @@ from zea import File
 from swp.acquisition.beamform import apply_grid
 from swp.acquisition.sequence import read_swi_meta
 
-ROOT = r"D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51"
+ROOT = r"D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51"
 OUT = os.path.dirname(os.path.abspath(__file__))
 DEV = "cuda" if torch.cuda.is_available() else "cpu"
 PIX_CHUNK = 20000

@@ -279,7 +279,7 @@ structure than ours, plus a coverage boundary past ~110–120 mm at the edges.
 
 ## 5a. Resolution-phantom results — and the conclusions they REVERSED
 
-Phantom: `D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51`
+Phantom: `D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51`
 (2026-06-18, 79 point targets over 30-105 mm). Its focused sequence is **identical to in-vivo**
 on all seven parameters (`na`, `txFocus`, `txFNum`, `rayDelta`, `theta`, `aperture`, `radius`),
 so the results transfer.

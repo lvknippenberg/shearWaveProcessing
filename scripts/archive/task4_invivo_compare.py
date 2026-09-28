@@ -14,7 +14,7 @@ strong in both is cardiac motion shaped by the outward-directional filter (repor
 scored over the same (control-length, ~8 ms) window so the comparison is like-for-like; the
 montages still display the full push window.
 
-    python scripts/archive/task4_invivo_compare.py --root D:/swp_iv --outdir <dir> [--quantity ...]
+    python scripts/archive/task4_invivo_compare.py --root "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_18 Invivo cycles elements TXvoltage" --outdir <dir> [--quantity ...]
 """
 from __future__ import annotations
 

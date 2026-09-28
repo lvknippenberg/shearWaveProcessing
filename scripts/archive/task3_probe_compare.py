@@ -14,7 +14,7 @@ Duplicate cells: each probe folder contains the resolution-phantom acquisition (
 41 el / 1500 cyc / 20 V settings) plus a few deliberate repeats. The resolution acquisition is
 excluded by name and the *first* sweep occurrence of each cell is used.
 
-    python scripts/archive/task3_probe_compare.py --tue D:/swp_tue --mumc D:/swp_mumc --outdir <dir>
+    python scripts/archive/task3_probe_compare.py --tue "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/TUe probe" --mumc "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/MUMC probe" --outdir <dir>
 """
 from __future__ import annotations
 

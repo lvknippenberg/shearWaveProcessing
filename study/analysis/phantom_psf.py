@@ -19,7 +19,7 @@ import h5py
 import numpy as np
 from scipy.ndimage import maximum_filter, uniform_filter1d
 
-F = r"D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output"
+F = r"D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output"
 OUT = os.path.dirname(os.path.abspath(__file__))
 
 RECONS = [

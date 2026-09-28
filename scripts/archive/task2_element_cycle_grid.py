@@ -6,7 +6,7 @@ Each cell shows the space-time of the *median-quality* push of that measurement'
 with the median (IQR) origin-coherence and mirror-symmetry over all 10 in the title, plus the
 acoustic-output indices for that (elements, voltage, cycles).
 
-    python scripts/archive/task2_element_cycle_grid.py --root D:/swp_ph17 --outdir <dir>
+    python scripts/archive/task2_element_cycle_grid.py --root "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage" --outdir <dir>
                                                [--quantity velocity|displacement]
 """
 from __future__ import annotations

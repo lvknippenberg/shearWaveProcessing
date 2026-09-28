@@ -12,9 +12,9 @@ can accept its shape by clicking along it or ignore it entirely. It is overwritt
 Controls (from the repo selector): left-click to add a point in any order, drag a point to move
 it, right-click to delete one, ENTER (with the figure focused) to finish that push.
 
-    python scripts/draw_invivo_mlines.py D:/swp_iv                # both folders, all pushes
-    python scripts/draw_invivo_mlines.py D:/swp_iv --meas 0-5     # a subset
-    python scripts/draw_invivo_mlines.py D:/swp_iv --redraw       # start over
+    python scripts/draw_invivo_mlines.py "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_18 Invivo cycles elements TXvoltage"                # both folders, all pushes
+    python scripts/draw_invivo_mlines.py "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_18 Invivo cycles elements TXvoltage" --meas 0-5     # a subset
+    python scripts/draw_invivo_mlines.py "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_18 Invivo cycles elements TXvoltage" --redraw       # start over
 """
 from __future__ import annotations
 

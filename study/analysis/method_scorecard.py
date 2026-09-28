@@ -32,7 +32,7 @@ sys.path.insert(0, OUT)
 LINE_SPACING_DEG = 1.1111
 
 DATASETS = [
-    ("phantom", r"D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output",
+    ("phantom", r"D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51\output",
      (0.030, 0.105), True),
     ("in vivo C1", r"Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54\output",
      (0.045, 0.085), False),

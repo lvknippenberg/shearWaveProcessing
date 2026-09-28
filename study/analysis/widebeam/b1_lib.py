@@ -48,7 +48,7 @@ DATASETS = {
         frames="spread",
     ),
     "phantom": dict(
-        root=Path("D:/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51"),
+        root=Path("D:/Luuk van Knippenberg/Claude/links/swp_res/Resolution phantom/DefaultPatient_SW_data_18-June-2026_13-52-51"),
         frames="all",
     ),
 }

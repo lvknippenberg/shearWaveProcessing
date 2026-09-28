@@ -13,7 +13,7 @@ constant               environment variable        default
 ``METRIC_EXPERIMENT``  ``SWP_METRIC_EXPERIMENT``   ``<VOLTAGE_SWEEP>/metric_experiment``
 ``CAENEN_SWE``         ``SWP_CAENEN_DIR``          ``<DATA_ROOT>/Data Caenen/SWE_results``
 ``INVIVO_SW``          ``SWP_INVIVO_SW``           ``<DATA_ROOT>/invivo_sw``
-``INVIVO_0818``        ``SWP_INVIVO_0818``         ``D:/swp_iv`` (R-peak triggered 41 el / 61 el pair)
+``INVIVO_0818``        ``SWP_INVIVO_0818``         ``<DATA_ROOT>/MI estimation/2026_08_18 Invivo ...`` (41 / 61 el R-peak pair)
 ``RAW_DATA``           ``SWP_RAW_DATA``            ``Z:/raw_data`` (the 44-folder in-vivo study)
 =====================  ==========================  ==================================================
 
@@ -37,7 +37,8 @@ VOLTAGE_SWEEP = _env("SWP_VOLTAGE_SWEEP",
 METRIC_EXPERIMENT = _env("SWP_METRIC_EXPERIMENT", os.path.join(VOLTAGE_SWEEP, "metric_experiment"))
 CAENEN_SWE = _env("SWP_CAENEN_DIR", os.path.join(DATA_ROOT, "Data Caenen", "SWE_results"))
 INVIVO_SW = _env("SWP_INVIVO_SW", os.path.join(DATA_ROOT, "invivo_sw"))
-INVIVO_0818 = _env("SWP_INVIVO_0818", "D:/swp_iv")
+INVIVO_0818 = _env("SWP_INVIVO_0818",
+                   os.path.join(DATA_ROOT, "MI estimation", "2026_08_18 Invivo cycles elements TXvoltage"))
 RAW_DATA = _env("SWP_RAW_DATA", "Z:/raw_data")
 
 

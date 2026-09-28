@@ -8,7 +8,7 @@ Runs the three preparation steps for every measurement folder under one or more 
   3. `run.py beamform --no-gifs --no-converted` (forced with --overwrite when step 2 changed
      anything, since any existing IQ was reconstructed from the wrong sample windows).
 
-    python scripts/batch_prepare.py --roots D:/swp_ph17 D:/swp_tue [--jobs-note ...]
+    python scripts/batch_prepare.py --roots "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage" "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/TUe probe" [--jobs-note ...]
 """
 from __future__ import annotations
 

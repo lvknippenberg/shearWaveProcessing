@@ -37,7 +37,7 @@ from swp.acquisition.sequence import read_swi_meta
 
 import phantom_psf as P   # its module-level analysis prints the reference table; harmless here
 
-ROOT = r"D:\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51"
+ROOT = r"D:\Luuk van Knippenberg\Claude\links\swp_res\Resolution phantom\DefaultPatient_SW_data_18-June-2026_13-52-51"
 APEX_M = -0.0121                 # virtual apex, 12.1 mm behind the array (from CenterTransmit.mat)
 STEER_DEG = np.arange(73) * 1.1111111 - 40.0
 KS = (1, 2, 3, 6, 12, 73)

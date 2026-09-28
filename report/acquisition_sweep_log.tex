@@ -1218,14 +1218,14 @@ the 2026-08-17 folder also has an \texttt{analysis/README.md} recording the bug 
 \paragraph{Reproduction.} In the \texttt{zea} environment
 (\texttt{KERAS\_BACKEND=torch}), through short directory junctions:
 \begin{verbatim}
-python scripts/batch_prepare.py --roots D:/swp_ph17 D:/swp_tue D:/swp_mumc
+python scripts/batch_prepare.py --roots D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/TUe probe D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/MUMC probe
 python scripts/beamform_sw_only.py <invivo folder> ... --overwrite
 python scripts/auto_mline.py <invivo folder> --x-span-mm 34 --order 1 --save
-python scripts/task1_repro_voltage.py    --root D:/swp_v04/Phantom --out <fig>
-python scripts/task2_element_cycle_grid.py --root D:/swp_ph17 --outdir <dir>
+python scripts/task1_repro_voltage.py    --root D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_04 voltage sweep/Phantom --out <fig>
+python scripts/task2_element_cycle_grid.py --root D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage --outdir <dir>
 python scripts/task2b_iso_safety.py      --csv <scores csv> --out <fig>
-python scripts/task3_probe_compare.py    --tue D:/swp_tue --mumc D:/swp_mumc --outdir <dir>
-python scripts/task4_invivo_compare.py   --root D:/swp_iv --outdir <dir>
+python scripts/task3_probe_compare.py    --tue D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/TUe probe --mumc D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_18 TUe MUMC comparison/MUMC probe --outdir <dir>
+python scripts/task4_invivo_compare.py   --root D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_18 Invivo cycles elements TXvoltage --outdir <dir>
 python scripts/task4b_config_contrast.py --folders <f...> --labels <l...> --out <fig>
 \end{verbatim}
 Total re-processing cost: about 100 folders, $\approx$\,\SI{90}{\second} each, run as two parallel

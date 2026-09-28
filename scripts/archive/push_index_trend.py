@@ -8,7 +8,7 @@ pushes of each 10-push phantom measurement should image a weaker wave than the f
 This checks that directly: mirror symmetry and origin coherence as a function of push index,
 per (elements, cycles, voltage) cell of the 2026-08-17 sweep.
 
-    python scripts/archive/push_index_trend.py --root D:/swp_ph17 --outdir <dir>
+    python scripts/archive/push_index_trend.py --root "D:/Luuk van Knippenberg/Claude/MI estimation/2026_08_12 MI estimation impedance/2026_08_17 Phantom sweep elements cycles TXvoltage" --outdir <dir>
 """
 from __future__ import annotations
 
