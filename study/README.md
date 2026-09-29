@@ -9,6 +9,18 @@ buffer-3 radial-striation investigation, and the reconstruction comparisons.
 * **Processed data**: stays next to the raw data in `Z:\raw_data\C*\*\output\`
 * **This folder**: deliverables, figures, logs, one-off analysis scripts
 
+> **Current work (2026-09-29): the whole-study MANUAL passive reading.**
+> - Tool: `scripts/passive_manual.py`, see `docs/passive_manual.md`.
+> - Evaluation after 27 acquisitions (detector, screen, speed resolution, MVC/AVC):
+>   `docs/passive_manual_prelim_2026-09-29.md`. Its last section, "Where we left off", lists the
+>   open decisions and how to rerun the analysis.
+> - Figures: `montages/passive_general/`.
+> - Tables: `logs/passive_manual_prelim/`.
+> - Analysis steps: `analysis/passive_manual_prelim*`, `analysis/passive_general_*`,
+>   `analysis/passive_detector_v2_check.py`, `analysis/passive_speed_resolution.py`.
+>
+> Sections 0-8 below are the September processing record.
+
 
 ## 0. Buffer 3 default changed — REFoCUS adjoint (2026-09-14) — **APPLIED to all 44**
 

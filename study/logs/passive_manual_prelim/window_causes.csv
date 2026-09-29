@@ -1,0 +1,98 @@
+folder,subject,window,label,confidence,search_inside,cause
+Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54,C000000001,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54,C000000001,1,AVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54,C000000001,2,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54,C000000001,3,AVC,0.0,0.09402622080474327,1 AVC search window beyond the recording
+Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45,C000000002,0,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45,C000000002,1,AVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45,C000000002,2,other,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42,C000000003,0,MVC,1.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42,C000000003,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42,C000000003,2,other,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42,C000000003,3,AK,1.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59,C000000004,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59,C000000004,1,AVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59,C000000004,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20,C000000005,0,?,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20,C000000005,1,?,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20,C000000005,2,?,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20,C000000005,3,?,1.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50,C000000007,0,?,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50,C000000007,1,?,1.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50,C000000007,2,?,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50,C000000007,3,?,2.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33,C000000008,0,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33,C000000008,1,AVC,2.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33,C000000008,2,AVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33,C000000008,3,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28,C000000010,0,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28,C000000010,1,AVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28,C000000010,2,MVC,2.0,1.0,4 peak on search edge (no burst inside)
+Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28,C000000010,3,AVC,0.0,0.0,1 AVC search window beyond the recording
+Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05,C000000011,0,MVC,1.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05,C000000011,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05,C000000011,2,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05,C000000011,3,AVC,1.0,0.08477834677120814,1 AVC search window beyond the recording
+Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37,C000000012,0,?,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37,C000000012,1,?,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37,C000000012,2,?,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37,C000000012,3,?,1.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11,C000000013,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11,C000000013,1,AK,0.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11,C000000013,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11,C000000013,3,AVC,0.0,0.9945101659243348,"5 interior peak, nothing visible"
+Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06,C000000014,0,?,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06,C000000014,1,?,2.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06,C000000014,2,?,2.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06,C000000014,3,?,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28,C000000015,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28,C000000015,1,AK,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28,C000000015,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28,C000000015,3,AVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32,C000000016,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32,C000000016,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32,C000000016,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32,C000000016,3,AVC,0.0,0.0,1 AVC search window beyond the recording
+Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31,C000000018,0,MVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31,C000000018,1,AVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31,C000000018,2,MVC,2.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31,C000000018,3,AVC,3.0,0.885558118613312,"5 interior peak, nothing visible"
+Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20,C000000019,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20,C000000019,1,other,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20,C000000019,2,AVC,0.0,1.0,4 peak on search edge (no burst inside)
+Z:\raw_data\C000000020\VIS-026_SW_data_21-July-2026_10-42-10,C000000020,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000020\VIS-026_SW_data_21-July-2026_10-42-10,C000000020,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000020\VIS-026_SW_data_21-July-2026_10-42-10,C000000020,2,other,0.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47,C000000021,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47,C000000021,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47,C000000021,2,MVC,2.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000021\VIS-024_SW_data_17-July-2026_09-35-47,C000000021,3,AVC,0.0,0.7238162353387024,4 peak on search edge (no burst inside)
+Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06,C000000022,0,MVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06,C000000022,1,AVC,1.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06,C000000022,2,AK,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000022\VIS-023_SW_data_17-July-2026_08-48-06,C000000022,3,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10,C000000023,0,MVC,3.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10,C000000023,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10,C000000023,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000023\VIS-022_SW_data_14-July-2026_11-41-10,C000000023,3,AVC,0.0,0.14632570038803164,1 AVC search window beyond the recording
+Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09,C000000025,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09,C000000025,1,AVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09,C000000025,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000025\VIS-025_SW_data_21-July-2026_09-53-09,C000000025,3,AVC,2.0,0.27287684872624984,1 AVC search window beyond the recording
+Z:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-03-40,C000000026,0,MVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-03-40,C000000026,1,AVC,0.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-03-40,C000000026,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000026\VIS-020_SW_data_14-July-2026_10-03-40,C000000026,3,AVC,0.0,0.0,1 AVC search window beyond the recording
+Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26,C000000027,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26,C000000027,1,AVC,3.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26,C000000027,2,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000027\VIS-019_SW_data_14-July-2026_09-20-26,C000000027,3,AVC,0.0,0.0,1 AVC search window beyond the recording
+Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41,C000000028,0,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41,C000000028,1,AVC,3.0,1.0,2 energy ranking (top-up / no ECG)
+Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41,C000000028,2,AVC,1.0,1.0,3 wrong time: event-like stretch <=150 ms away
+Z:\raw_data\C000000028\VIS-018_SW_data_14-July-2026_08-30-41,C000000028,3,MVC,3.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50,C000000029,0,MVC,1.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50,C000000029,1,AVC,2.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50,C000000029,2,MVC,0.0,1.0,"5 interior peak, nothing visible"
+Z:\raw_data\C000000029\VIS-031_SW_data_24-July-2026_11-11-50,C000000029,3,AVC,0.0,0.03803981803303099,1 AVC search window beyond the recording
+Z:\raw_data\C000000030\VIS-029_SW_data_24-July-2026_09-36-27,C000000030,0,MVC,2.0,1.0,"5 interior peak, nothing visible"
