@@ -62,6 +62,10 @@ class BurstWindow:
     score: float             # peak energy (relative burst strength)
     label: str = ""          # optional user label, e.g. "mitral" / "aortic"
     expect: str = ""         # phase window this burst was SEARCHED in ("MVC"/"AVC"), if any
+    # set only by the semblance picker (swp.passive_screen); None on energy-detected windows
+    screen: float | None = None   # slant-stack semblance of the window on the general line
+    burst: float | None = None    # RMS in the window / RMS in its +-20 ms pads (general line)
+    screened: bool = False        # screen below the threshold: no event line is asked for
 
     @property
     def window(self) -> tuple[float, float]:
@@ -1211,9 +1215,23 @@ if __name__ == "__main__":
           "    process_mline(r'...\\CombinedData_buffer4_iq.hdf5', MLineConfig())")
 
 
+def phase_targets(r_peaks_s, rr_s, mvc_max_ms=150.0, avc_tol_ms=120.0):
+    """The expected valve-closure search windows [(name, lo_s, hi_s)], one MVC and one AVC per
+    R-peak: MVC within ``mvc_max_ms`` after the R-peak, AVC within ``avc_tol_ms`` of the Weissler
+    QS2 (``546 - 2.1 * HR`` ms, HR from ``rr_s``). R-peaks only - no ECG waveform is read."""
+    hr = 60.0 / rr_s if rr_s and np.isfinite(rr_s) and rr_s > 0 else np.nan
+    qs2 = (546.0 - 2.1 * hr) * 1e-3 if np.isfinite(hr) else np.nan
+    targets = []
+    for r in np.asarray(r_peaks_s, float):
+        targets.append(("MVC", r, r + mvc_max_ms * 1e-3))
+        if np.isfinite(qs2):
+            targets.append(("AVC", r + qs2 - avc_tol_ms * 1e-3, r + qs2 + avc_tol_ms * 1e-3))
+    return targets
+
+
 def detect_phase_windows(D_st, t_s, r_peaks_s, rr_s, window_ms=100.0, edge_frames=30,
                          mvc_max_ms=150.0, avc_tol_ms=120.0, min_separation_s=0.15,
-                         max_events=4, fill_with_energy=True):
+                         max_events=4, fill_with_energy=True, min_inside=0.0):
     """Detect bursts by SEARCHING the expected valve-closure phases, not by ranking energy.
 
     The default detector (:func:`detect_line_bursts`) keeps the ``max_events`` largest bursts of
@@ -1238,6 +1256,10 @@ def detect_phase_windows(D_st, t_s, r_peaks_s, rr_s, window_ms=100.0, edge_frame
         fill_with_energy: if fewer than ``max_events`` phase-matched bursts are found, top up from
             the largest remaining bursts so the behaviour degrades to the old detector rather than
             returning nothing.
+        min_inside: skip a search window less than this fraction inside the usable record (the
+            span not masked by ``edge_frames``). With the default 0 a window hanging off the end
+            is still searched, and when it lies wholly in the masked tail its "peak" is the first
+            zero-energy sample - the phantom second AVC of a ~1 s recording (2026-09-29).
 
     Returns ``(windows, energy_raw)`` exactly like :func:`detect_line_bursts`; each window carries
     ``expect`` naming the phase it was found in ("MVC" / "AVC"), or "" for an energy top-up.
@@ -1246,17 +1268,14 @@ def detect_phase_windows(D_st, t_s, r_peaks_s, rr_s, window_ms=100.0, edge_frame
     r_peaks_s = np.asarray(r_peaks_s, float)
     e_raw, e = energy_along_line(D_st, edge_frames)
     half = 0.5 * window_ms * 1e-3
-    hr = 60.0 / rr_s if rr_s and np.isfinite(rr_s) and rr_s > 0 else np.nan
-    qs2 = (546.0 - 2.1 * hr) * 1e-3 if np.isfinite(hr) else np.nan
-
-    targets = []
-    for r in r_peaks_s:
-        targets.append(("MVC", r, r + mvc_max_ms * 1e-3))
-        if np.isfinite(qs2):
-            targets.append(("AVC", r + qs2 - avc_tol_ms * 1e-3, r + qs2 + avc_tol_ms * 1e-3))
+    targets = phase_targets(r_peaks_s, rr_s, mvc_max_ms, avc_tol_ms)
+    usable = t_s[e > 0]
+    span = (usable[0], usable[-1]) if usable.size else (t_s[0], t_s[-1])
 
     found = []
     for name, lo, hi in targets:
+        if min_inside > 0 and (max(0.0, min(hi, span[1]) - max(lo, span[0])) / (hi - lo)) < min_inside:
+            continue
         m = (t_s >= lo) & (t_s <= hi)
         if m.sum() < 3:
             continue

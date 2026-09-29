@@ -68,7 +68,14 @@ def detect(folder):
     cfg["data"]["root"] = p.output
     acq = _load(p, [pts])
     ml = mline_from_points(pts, S.N_SAMPLES)
-    windows = detect_windows(acq, ml, cfg, p.dir, WINDOW_MS, MAX_EVENTS, OVERVIEW_STRIDE, folder=folder)
+    det = cfg.get("detect", {})
+    track = None
+    if det.get("screen") or str(det.get("picker", "energy")).lower() == "semblance":
+        # score every 100 ms window of the general line (swp.passive_screen); since 2026-09-29
+        from ..passive_screen import general_line_track
+        track = general_line_track(acq, ml, cfg, str(det.get("screen_view", "velocity gauss")))
+    windows = detect_windows(acq, ml, cfg, p.dir, WINDOW_MS, MAX_EVENTS, OVERVIEW_STRIDE, folder=folder,
+                             screen=track)
     st = dict(windows=[dataclasses.asdict(w) for w in windows])
     label_windows(folder, st)
     try:
@@ -82,6 +89,8 @@ def detect(folder):
                  max_events=MAX_EVENTS, overview_stride=OVERVIEW_STRIDE),
         hash=S.windows_hash(st["windows"]), windows=st["windows"],
         window_phases=st.get("window_phases"), ecg=ecg, roi=list(acq.meta["roi"]),
+        screen_track=None if track is None else {k: np.round(np.asarray(v, float), 4).tolist()
+                                                 for k, v in track.items()},
         provenance=provenance(config=cfg)))
     return windows
 

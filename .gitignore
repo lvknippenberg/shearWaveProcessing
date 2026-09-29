@@ -39,3 +39,7 @@ study/analysis/atlas15_cache/
 
 # buffer-3 head estimator exploration cache (2026-09-28)
 study/analysis/unwrap_cache/
+
+# general-line screen cache of the manual passive study (2026-09-29; regenerable, ~2 MB/folder)
+study/analysis/general_screen_cache/
+study/montages/passive_general/all_folders.pdf

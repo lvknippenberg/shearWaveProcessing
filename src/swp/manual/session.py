@@ -71,6 +71,34 @@ def _legacy_event(p, t_peak):
                 what=f"September line of this event (buffer {b})")
 
 
+def _onto_buffer4(pre, panels):
+    """Pre-loads always start on buffer 4, so ENTER saves exactly the line shown there.
+
+    A line from another buffer (the September lines were drawn on buffer 1) is moved onto the
+    buffer-4 anatomy by the same registration the review step uses, when that registration is
+    trusted; otherwise it keeps its coordinates. Before 2026-09-29 such a line opened on buffer 1
+    and ENTER silently saved the motion-corrected copy on buffer 4 (7 lines, 0.1-2.4 mm).
+    """
+    if pre is None or pre["source"] == 4 or panels.get(4) is None:
+        return pre
+    src = panels.get(pre["source"])
+    what = pre["what"]
+    pts = np.asarray(pre["points_mm"], float)
+    if src is not None:
+        from ._light import transfer
+        try:
+            d4 = panels[4]
+            r = transfer().transfer_line(pts, (src.env, src.x_mm, src.z_mm),
+                                         (d4.env, d4.x_mm, d4.z_mm), check=True)
+            if r.reliable():
+                return dict(source=4, points_mm=np.asarray(r.points, float),
+                            what=f"{what}, registered onto buffer 4 (moved {r.shift_mm:.1f} mm)")
+            what += f", registration NOT trusted ({r.shift_mm:.1f} mm) - uncorrected coordinates"
+        except Exception as exc:                                    # noqa: BLE001
+            what += f", registration failed ({exc}) - uncorrected coordinates"
+    return dict(source=4, points_mm=pts, what=f"{what} - CHECK its position on buffer 4")
+
+
 # ------------------------------------------------------------------ task data (thread-safe: no GUI)
 def load_task(task):
     kind, f, i = task
@@ -79,11 +107,10 @@ def load_task(task):
         targets = F.rpeak_targets(f)
         panels = F.load_panels(f, p, targets)
         cur = S.read_json(p.general_json)
-        if cur and not cur.get("skipped"):
-            pre = dict(source=cur["source_buffer"], points_mm=np.asarray(cur["points_src_mm"]),
-                       what="current line (redo)")
+        if cur and not cur.get("skipped"):          # redo: the saved buffer-4 line
+            pre = dict(source=4, points_mm=np.asarray(cur["points4_mm"]), what="current line (redo)")
         else:
-            pre = _legacy_general(p)
+            pre = _onto_buffer4(_legacy_general(p), panels)
         return dict(panels=panels, preload=pre, reference=None)
     if kind == "event":
         win = S.read_json(p.windows_json)
@@ -94,13 +121,11 @@ def load_task(task):
         g4 = S.load_points(p.general_npz) * 1e3
         ev = (S.read_json(p.events_json) or {})
         cur = ev.get("events", {}).get(str(i)) if ev.get("windows_hash") == win["hash"] else None
-        if cur and not cur.get("skipped"):
-            pre = dict(source=cur["source_buffer"], points_mm=np.asarray(cur["points_src_mm"]),
-                       what="current line (redo)")
+        if cur and not cur.get("skipped"):          # redo: the saved buffer-4 line
+            pre = dict(source=4, points_mm=np.asarray(cur["points4_mm"]), what="current line (redo)")
         else:
-            pre = _legacy_event(p, w["t_peak"]) or dict(
-                source=gen["source_buffer"], points_mm=np.asarray(gen["points_src_mm"]),
-                what=f"general line as drawn (buffer {gen['source_buffer']}, R-peak anatomy)")
+            pre = _onto_buffer4(_legacy_event(p, w["t_peak"]), panels) or dict(
+                source=4, points_mm=g4, what="general line (buffer 4, R-peak anatomy)")
         return dict(panels=panels, preload=pre, reference=("general line (buffer 4)", g4),
                     window=w, phase=(win.get("window_phases") or [{}] * len(win["windows"]))[i])
     if kind == "slope":
@@ -117,12 +142,14 @@ def load_task(task):
 
 # ------------------------------------------------------------------ session
 class Session:
-    def __init__(self, folders, mode="auto", retry_skipped=False, redo=()):
-        """``redo``: tasks ``(kind, folder, window)`` to re-open first, with their answers pre-loaded."""
+    def __init__(self, folders, mode="auto", retry_skipped=False, redo=(), include_screened=False):
+        """``redo``: tasks ``(kind, folder, window)`` to re-open first, with their answers pre-loaded.
+        ``include_screened``: also ask event lines for windows below the detection screen."""
         self.queue = list(redo)
         self.folders = list(folders)
         self.kinds = KINDS[mode]
         self.retry_skipped = retry_skipped
+        self.include_screened = include_screened
         self.states = {}
         self.history = []
         self.forced = None
@@ -160,7 +187,8 @@ class Session:
             return [("general", f, None)] if (s["stage"] == "need-general"
                                               or (r and s["stage"] == "skipped")) else []
         if kind == "event":
-            return [("event", f, i) for i in s["need_events"] + (s["lines_skipped"] if r else [])]
+            return [("event", f, i) for i in s["need_events"] + (s["lines_skipped"] if r else [])
+                    + (s.get("screened", []) if self.include_screened else [])]
         return [("slope", f, i) for i in s["need_slopes"] + (s["slopes_skipped"] if r else [])]
 
     def next_task(self, exclude=()):

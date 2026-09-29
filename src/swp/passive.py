@@ -221,7 +221,8 @@ def window_cine(acq: Acquisition, w: BurstWindow):
 
 
 # ------------------------------------------------------------------ detection
-def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None):
+def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None, min_inside=0.0,
+                          fill_with_energy=True):
     """Phase-aware burst search -> windows, or None when there is no usable R-peak record.
 
     **R-peaks only - the ECG waveform is never read.** The expected MVC and AVC intervals are
@@ -235,8 +236,21 @@ def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None):
     too sparse, since searching a cardiac phase that does not exist would be worse than not
     searching at all.
     """
-    from .acquisition.triggerlog import buffer_timing, clean_r_peaks
     from .mline.select import detect_phase_windows
+
+    rp = _buffer4_r_peaks(acq, t_s, folder)
+    if rp is None:
+        return None
+    windows, _ = detect_phase_windows(D_st, t_s, rp[0], rp[1],
+                                      window_ms=window_ms, max_events=max_events,
+                                      min_inside=min_inside, fill_with_energy=fill_with_energy)
+    return windows or None
+
+
+def _buffer4_r_peaks(acq, t_s, folder=None):
+    """(R-peaks on the buffer-4 clock [s], RR [s]) from the trigger log, or None when the record
+    is unusable (fixed-rate pulse train, too sparse, no log)."""
+    from .acquisition.triggerlog import buffer_timing, clean_r_peaks
 
     if folder is None:
         folder = getattr(acq, "meta", {}).get("folder")
@@ -253,14 +267,18 @@ def _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder=None):
     r_rel = r_rel[(r_rel >= span[0]) & (r_rel <= span[1])]
     if r_rel.size < 1:
         return None
-    windows, _ = detect_phase_windows(D_st, t_s, r_rel, rr_ms * 1e-3,
-                                      window_ms=window_ms, max_events=max_events)
-    return windows or None
+    return r_rel, rr_ms * 1e-3
 
 
 def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, overview_stride=2,
-                   folder=None):
-    """Along-line displacement over the whole recording -> burst windows (+ overview figures)."""
+                   folder=None, screen=None):
+    """Along-line displacement over the whole recording -> burst windows (+ overview figures).
+
+    ``screen``: a :func:`swp.passive_screen.screen_track` of the general line. When given, the
+    windows are picked by that score inside the phase windows (swp.passive_screen.pick_windows,
+    ``detect.min_inside`` / ``detect.screen_min``) instead of by displacement energy; the energy
+    overview is still computed for the figures. Without it, behaviour is unchanged.
+    """
     base = rc.build_pipeline_config(cfg, acq=acq)
     # Burst detection runs on a FIXED band (detect.band), independent of the processing band, so
     # tuning pipeline.field_filters does not move the detected windows (keeps index M-lines valid).
@@ -285,20 +303,41 @@ def detect_windows(acq, gen_mline, cfg, outdir, window_ms=100.0, max_events=4, o
     # NOTE: switching modes changes which windows are detected, and the per-event M-lines are
     # keyed by window INDEX - so it invalidates every stored per-event line for that folder and
     # they must be redrawn. That is why the default is unchanged.
-    mode = str(cfg.get("detect", {}).get("mode", "energy")).lower()
+    det = cfg.get("detect", {})
+    mode = str(det.get("mode", "energy")).lower()
+    min_inside = float(det.get("min_inside", 0.0))
+    screen_min = float(det.get("screen_min", 0.3))
     windows = None
-    if mode == "phase":
-        windows = _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder)
+    picked_by_score = False
+    if screen is not None and str(det.get("picker", "energy")).lower() == "semblance":
+        # experimental, NOT validated as a picker (swp.passive_screen docstring)
+        from .mline.select import energy_along_line
+        from .passive_screen import pick_windows
+        energy, e_masked = energy_along_line(D_st, 30)
+        rp = _buffer4_r_peaks(acq, t_s, folder)
+        windows = pick_windows(screen, *(rp or (None, None)), window_ms=window_ms,
+                               max_events=max_events, min_inside=min_inside or 0.5,
+                               screen_min=screen_min, energy=(t_s, e_masked))
+        picked_by_score = True
+    elif mode == "phase":
+        windows = _detect_phase_windows(acq, D_st, t_s, window_ms, max_events, folder,
+                                        min_inside=min_inside,
+                                        fill_with_energy=bool(det.get("top_up", True)))
         if windows is None:
             print("  [detect] no usable R-peak record - falling back to energy ranking")
     if windows is None:
         windows, energy = detect_line_bursts(D_st, t_s, window_ms=window_ms,
                                              max_events=max_events)
-    else:
+    elif not picked_by_score:
         from .mline.select import energy_along_line
         energy, _ = energy_along_line(D_st, 30)
-        print(f"  [detect] phase-aware: " + ", ".join(
-            f"{w.expect or 'energy'}@{w.t_peak * 1e3:.0f}ms" for w in windows))
+    if screen is not None and not picked_by_score:
+        from .passive_screen import screen_windows
+        screen_windows(windows, screen, screen_min)
+    print(f"  [detect] {'semblance picker' if picked_by_score else mode}: " + ", ".join(
+        f"{w.expect or 'energy'}@{w.t_peak * 1e3:.0f}ms"
+        + ("" if w.screen is None else f" s={w.screen:.2f}{' (screened)' if w.screened else ''}")
+        for w in windows))
     os.makedirs(outdir, exist_ok=True)
     bursts_png = os.path.join(outdir, "passive_bursts.png")
     plot_bursts(energy, t_s, windows, bursts_png,

@@ -46,11 +46,25 @@ pipeline:
   directional_mode: leftward
   speed: ttp_ransac
 
-# Burst detection: identical to configs/passive.yaml (fixed band and quantity, phase-aware).
+# Burst detection. Phase windows as configs/passive.yaml (MVC R+0-150 ms, AVC QS2 +-120 ms), time
+# picked by displacement energy, plus since 2026-09-29 (swp.passive_screen):
+#   * min_inside: a search window less than this fraction inside the recording is dropped (the
+#     second AVC of a ~1 s recording lies after its end; it used to be "found" on zero energy);
+#   * screen: score every picked window by the slant-stack semblance of screen_view along the
+#     GENERAL line; below screen_min the window is "screened" - no event line is asked
+#     (session --include-screened asks them anyway).
+# picker: semblance (pick the time by that score) was tried and rejected - see
+# docs/passive_manual_prelim_2026-09-29.md. Folders detected before 2026-09-29 keep their windows.
 detect:
   band: [5, 150]
   quantity: displacement
   mode: phase
+  picker: energy
+  min_inside: 0.5
+  top_up: true                # fill to 4 windows with the largest other energy bursts (as before)
+  screen: true
+  screen_view: "velocity gauss"
+  screen_min: 0.3
 
 run:
   measurement: 0

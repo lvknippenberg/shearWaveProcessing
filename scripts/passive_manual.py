@@ -61,7 +61,8 @@ def cmd_status(a):
           f"{sum(len(r['need_proc']) for r in rows)}, slopes to draw "
           f"{sum(len(r['need_slopes']) for r in rows)}, slopes done "
           f"{sum(len(r['slopes_done']) for r in rows)}, failed processing "
-          f"{sum(len(r['proc_failed']) for r in rows)}")
+          f"{sum(len(r['proc_failed']) for r in rows)}, screened out (no line asked) "
+          f"{sum(len(r['screened']) for r in rows)}")
 
 
 def _spawn_workers(a, n):
@@ -101,7 +102,8 @@ def cmd_session(a):
                 redo.append((a.redo, f, a.window))
     workers = _spawn_workers(a, a.workers)
     try:
-        Session(folders, mode=a.task, retry_skipped=a.retry_skipped, redo=redo).run(wait=not a.no_wait)
+        Session(folders, mode=a.task, retry_skipped=a.retry_skipped, redo=redo,
+                include_screened=a.include_screened).run(wait=not a.no_wait)
     finally:
         for p, log in workers:
             p.terminate()
@@ -122,13 +124,24 @@ def cmd_export(a):
     rows = []
     for f in _folders(a):
         p = S.Paths(f)
-        slopes = S.read_json(p.slopes_json)
-        if not slopes:
-            continue
+        slopes = S.read_json(p.slopes_json) or {}
         s = S.state(f)
+        if not slopes and not s["screened"]:
+            continue
         win = S.read_json(p.windows_json) or {}
         ecg = win.get("ecg") or {}
         gen = S.read_json(p.general_json) or {}
+        wins = win.get("windows") or []
+        phases = win.get("window_phases") or [{}] * len(wins)
+        picker = (win.get("key", {}).get("detect") or {}).get("picker", "energy")
+        for i in s["screened"]:                     # detected, below the screen: no line, no slope
+            w, ph = wins[i], phases[i] if i < len(phases) else {}
+            rows.append(dict(subject=Path(f).parent.name, folder=Path(f).name, window=i,
+                             label=w.get("label"), t_peak_ms=round(w["t_peak"] * 1e3, 1),
+                             phase_ms=ph.get("phase_ms"), rr_ms=ph.get("rr_ms"), hr_bpm=ph.get("hr_bpm"),
+                             ecg_trustworthy=ecg.get("trustworthy"), ecg_status=ecg.get("status"),
+                             skipped=True, screened=True, detector=picker,
+                             screen=w.get("screen"), burst=w.get("burst")))
         for k, r in sorted(slopes.items(), key=lambda kv: int(kv[0])):
             i = int(k)
             if i not in s["slopes_done"] and i not in s["slopes_skipped"]:
@@ -147,7 +160,10 @@ def cmd_export(a):
                        line_source_buffer=r.get("line_source_buffer"),
                        line_motion_corrected=r.get("line_motion_corrected"),
                        line_mapping_reliable=r.get("line_mapping_reliable"),
-                       general_source_buffer=gen.get("source_buffer"), time=r.get("time"))
+                       general_source_buffer=gen.get("source_buffer"), time=r.get("time"),
+                       screened=False, detector=picker,
+                       screen=(wins[i] if i < len(wins) else {}).get("screen"),
+                       burst=(wins[i] if i < len(wins) else {}).get("burst"))
             for view, au in (r.get("auto") or {}).items():
                 row[f"auto {view} [m/s]"] = au.get("speed_m_s")
             rows.append(row)
@@ -202,6 +218,8 @@ def main():
     ap.add_argument("--no-wait", action="store_true",
                     help="session: exit instead of waiting when only the worker has work left")
     ap.add_argument("--retry-skipped", action="store_true", help="session: also offer skipped prompts")
+    ap.add_argument("--include-screened", action="store_true",
+                    help="session: also ask event lines for windows below the detection screen")
     ap.add_argument("--redo", choices=["general", "event", "slope"], default=None)
     ap.add_argument("--window", type=int, default=None)
     ap.add_argument("--watch", action="store_true", help="worker: keep polling for new work")

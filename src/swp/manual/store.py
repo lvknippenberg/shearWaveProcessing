@@ -124,8 +124,19 @@ def append_log(p: Paths, record: dict):
 
 
 def save_line(path, points_m):
+    """Atomic, like write_json: a session killed mid-write leaves the previous line intact."""
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    np.savez(path, points=np.asarray(points_m, float), n_samples=N_SAMPLES)
+    tmp = f"{path}.{os.getpid()}.tmp"
+    with open(tmp, "wb") as f:
+        np.savez(f, points=np.asarray(points_m, float), n_samples=N_SAMPLES)
+    for attempt in range(10):
+        try:
+            os.replace(tmp, path)
+            return
+        except PermissionError:
+            if attempt == 9:
+                raise
+            time.sleep(0.5)
 
 
 def load_points(path):
@@ -167,8 +178,11 @@ def find_folders(root=None, folders=(), subject=None):
     found = [Path(f) for f in folders]
     if root:
         pattern = f"{subject}/*" if subject else "*/*"
+        # Strain_data acquisitions carry the same runtime .mat but no passive buffer; listing
+        # them only makes every queue refresh poll ~500 never-ready folders on the share
         found += [q for q in Path(root).glob(pattern)
-                  if q.is_dir() and ((q / RUNTIME_MAT).is_file() or (q / COMBINED_MAT).is_file())]
+                  if q.is_dir() and "strain_data" not in q.name.lower()
+                  and ((q / RUNTIME_MAT).is_file() or (q / COMBINED_MAT).is_file())]
     seen, out = set(), []
     for q in sorted(found, key=lambda q: str(q).lower()):
         k = str(q.resolve()).lower()
@@ -192,11 +206,14 @@ def state(folder) -> dict:
 
     stage: not-ready | need-general | skipped | detecting | error | no-windows | need-events |
            processing | need-slopes | done
-    (a window whose processing failed is listed in ``proc_failed`` and does not hold the folder)
+    (a window whose processing failed is listed in ``proc_failed`` and does not hold the folder;
+    a window below the detection screen without a line is listed in ``screened`` and does not
+    hold it either)
     """
     p = Paths(folder)
     s = dict(folder=str(folder), stage="not-ready", n_windows=0, need_events=[], need_proc=[],
-             need_slopes=[], slopes_done=[], slopes_skipped=[], lines_skipped=[], proc_failed=[])
+             need_slopes=[], slopes_done=[], slopes_skipped=[], lines_skipped=[], proc_failed=[],
+             screened=[])
     if not ready(p):
         return s
     gen = read_json(p.general_json)
@@ -227,7 +244,8 @@ def state(folder) -> dict:
         k = str(i)
         e = events.get(k)
         if e is None:
-            s["need_events"].append(i)
+            # below the general-line screen (swp.passive_screen): no line asked unless requested
+            (s["screened"] if windows[i].get("screened") else s["need_events"]).append(i)
             continue
         if e.get("skipped"):
             s["lines_skipped"].append(i)
@@ -252,9 +270,36 @@ def state(folder) -> dict:
 
 
 # ------------------------------------------------------------------ worker lock
+def _lock_owner_dead(path) -> bool:
+    """True when the lock was written on THIS host by a process that no longer runs (a session
+    killed mid-processing). Another host's claim is only released by age."""
+    try:
+        with open(path) as fh:
+            host, pid = fh.read().split()[:2]
+        pid = int(pid)
+        mtime = os.path.getmtime(path)
+    except (OSError, ValueError):
+        return False
+    if host != socket.gethostname():
+        return False
+    try:
+        import psutil
+    except ImportError:                                   # pragma: no cover - age rule only
+        return False
+    try:                                                  # a reused PID started after the claim
+        return psutil.Process(pid).create_time() > mtime + 1
+    except psutil.NoSuchProcess:
+        return True
+    except psutil.Error:                                  # pragma: no cover - access denied etc.
+        return False
+
+
 @contextmanager
 def folder_lock(p: Paths, stale_s=3 * 3600):
-    """Exclusive claim of a folder by one worker (yields False if another worker has it)."""
+    """Exclusive claim of a folder by one worker (yields False if another worker has it).
+
+    A claim is released when it is older than ``stale_s`` or, on the same host, as soon as its
+    process is gone - so a session killed mid-processing does not hold the folder for hours."""
     os.makedirs(p.dir, exist_ok=True)
     got = False
     for _ in range(2):
@@ -266,7 +311,8 @@ def folder_lock(p: Paths, stale_s=3 * 3600):
             break
         except FileExistsError:
             try:
-                if time.time() - os.path.getmtime(p.lock) > stale_s:
+                if (time.time() - os.path.getmtime(p.lock) > stale_s
+                        or _lock_owner_dead(p.lock)):
                     os.remove(p.lock)                     # a crashed worker's claim
                     continue
             except FileNotFoundError:

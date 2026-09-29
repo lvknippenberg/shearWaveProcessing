@@ -129,6 +129,24 @@ def test_folder_lock_is_exclusive_and_released(tmp_path):
         assert c
 
 
+def test_folder_lock_of_a_killed_session_is_released_at_once(tmp_path):
+    import socket
+    import subprocess
+    import sys
+    p = S.Paths(_ready_folder(tmp_path))
+    os.makedirs(p.dir, exist_ok=True)
+    gone = subprocess.Popen([sys.executable, "-c", "pass"])
+    gone.wait()
+    with open(p.lock, "w") as fh:                        # this host, process no longer running
+        fh.write(f"{socket.gethostname()} {gone.pid} now")
+    with S.folder_lock(p) as got:
+        assert got
+    with open(p.lock, "w") as fh:                        # another host: only age releases it
+        fh.write(f"elsewhere-{socket.gethostname()} {gone.pid} now")
+    with S.folder_lock(p) as got:
+        assert not got
+
+
 def test_legacy_folders_come_first(tmp_path):
     for sub in ("C1/A", "C2/B"):
         d = tmp_path / sub

@@ -29,20 +29,44 @@ machine.
   general lines, each in queue order.
 - **Revisit later:**
   - one folder: `--folder <f> --redo general`, or `--redo event --window i` / `--redo slope --window i`;
-  - everything you skipped: `--retry-skipped`.
+  - everything you skipped: `--retry-skipped`;
+  - windows the detector screened out (below the semblance threshold, see step 2):
+    `--include-screened`.
 - **Folders still being beamformed:** they are picked up automatically. A folder counts as ready
   once the batch has written its buffer-4 GIF.
 
 **Queue order.** The 44 folders that already have September lines come first; their old lines are
-pre-loaded, so ENTER accepts them. After that come the remaining folders, sorted.
+pre-loaded, so ENTER accepts them. After that come the remaining folders, sorted. `Strain_data`
+folders are not listed (no passive buffer).
+
+**Restarted 2026-09-29 on unwrap version 2** (all 724 SW folders beamformed, buffer 3 unwrapped:
+650 unwrapped + 21 chronological = timed; 53 ambiguous = chosen by anatomy). Nothing had been
+drawn since the 09-25 archive. Quitting is safe at any point, including a hard kill: lines and
+records are written atomically, the record last, and a worker lock left by a dead process on the
+same machine is released immediately (another host's lock after 3 h).
 
 ## Per folder
 
 1. **General M-line.** Buffers 1 | 3 | 4 at the R-peak, each at the frame nearest a logged R-peak
    (buffer 4: frame 0). This line is used to detect the valve events.
-2. *(worker)* **Detection.** Phase-aware, identical to `configs/passive.yaml` (5-150 Hz
-   displacement, MVC / AVC windows from the R-peaks). Up to 4 windows of 100 ms, labelled
-   MVC / AVC / AK / other.
+2. *(worker)* **Detection.** Up to 4 windows of 100 ms, labelled MVC / AVC / AK / other.
+   - **Search windows** from the R-peaks, as in `configs/passive.yaml`: MVC R+0-150 ms, AVC
+     QS2 ± 120 ms (Weissler QS2 from the heart rate).
+   - **Time picked by displacement energy**, as before.
+   - **Since 2026-09-29** (`swp.passive_screen`, `configs/passive_manual.yaml` `detect:`):
+     - A search window less than half inside the recording is dropped (`min_inside`). The ~1 s
+       recording holds one AVC, and the second one used to be "found" on the masked, zero-energy
+       end.
+     - Every picked window is scored by the slant-stack semblance of the default velocity view
+       along the general line (`screen`). Below 0.3 (`screen_min`) it is kept but **screened**:
+       no event line is asked for it (`--include-screened` asks anyway).
+     - The whole score track is stored in `windows.json` (`screen_track`).
+     - Energy top-ups to 4 windows stay on (`top_up`).
+     - Picking the time by the semblance itself (`picker: semblance`) was tried and **rejected**:
+       it chases near-vertical bands. The reasons and both dry runs are in
+       [passive_manual_prelim_2026-09-29.md](passive_manual_prelim_2026-09-29.md).
+   - **Folders detected before that** (the 27 read on 2026-09-29) keep their windows. Their
+     `windows.json` key has no `min_inside`.
 3. **Event lines.** Buffers 1 | 3 | 4 at the event's cardiac phase: buffer 4 at the event itself,
    buffers 1 and 3 at the frame with the same time since the preceding R-peak. The panel titles
    give the phase and the offset from the event. Pre-loaded, in order of preference:
@@ -185,9 +209,14 @@ counting and is redone:
 
 Nothing is deleted.
 
-`export` writes one row per window: the slope, the displacement slope, confidence, label, phase,
-ECG trustworthiness, line source, registration verdict and the automatic speeds of every view.
-Only rows whose slope matches the current line are written.
+`export` writes one row per window:
+- the slope, the displacement slope, confidence, label, phase;
+- ECG trustworthiness, line source, registration verdict;
+- the automatic speeds of every view;
+- the detector (`energy` / `semblance`) and the window's screen score and burst ratio.
+
+Only rows whose slope matches the current line are written. Screened windows are exported too,
+with `screened=True` and no slope.
 
 ## Implementation notes
 
@@ -201,5 +230,12 @@ Only rows whose slope matches the current line are written.
 - **Fast start.** The editors avoid importing zea/torch, which costs up to 60 s here; the trigger
   log and line transfer are loaded straight from their files (`swp.manual._light`). A session
   starts in a few seconds, and the next prompt is loaded in the background while one is open.
-- **Tests.** `tests/test_manual.py` covers the state machine, staleness, locking, archiving, the
-  cropped loader, the five views and the display constants.
+- **Screen cost.** Detection also runs the default view along the general line over the whole
+  recording and scores a 100 ms window every 5 ms. That adds ~30 s per folder in the background
+  worker (31 s measured on C000000001, on a loaded server).
+- **Tests.**
+  - `tests/test_manual.py`: the state machine, staleness, locking, archiving, the cropped loader,
+    the five views and the display constants.
+  - `tests/test_passive_screen.py`: the picker (phase-window peak, dropped out-of-record window,
+    screening, top-ups), the score on a synthetic wave, and that screened windows do not hold a
+    folder.
