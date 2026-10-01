@@ -4,17 +4,21 @@ Draw the line on whichever buffer shows the septum best - buffer 4 when it is re
 data the passive analysis runs on), otherwise buffer 1, otherwise buffer 3. The line is mirrored on
 the other two panels:
 
-* while drawing: the same coordinates, dashed white (no motion correction yet);
-* after ENTER: moved by the anatomy registration (:func:`swp.mline.transfer.transfer_line`), solid
-  orange, with the buffer-4 line - the one that is saved and processed - in green. The status line
-  says whether the registration is trusted (ensemble agreement + known-shift check).
+* while drawing: the same coordinates, dashed white.
 
-Buffers 1 and 3 are recorded in other heartbeats than buffer 4, so a line drawn there is moved onto
-buffer 4 by the registration. If it is not trusted, look at the green line, nudge it with the arrow
-keys, or press ``i`` to keep the uncorrected coordinates; ENTER accepts.
+**Drawn on buffer 4** (the usual case since 2026-10-01): the saved line is exactly the one drawn, so
+ONE ENTER accepts it - no registration and no review step (the buffer-1 / 3 panels only help to
+read the anatomy).
+
+**Drawn on buffer 1 or 3:** buffers 1 and 3 are recorded in other heartbeats than buffer 4, so the
+first ENTER moves the line onto buffer 4 by the anatomy registration
+(:func:`swp.mline.transfer.transfer_line`): solid orange on the other panels, the buffer-4 line -
+the one that is saved and processed - in green, and the status line says whether the registration
+is trusted (ensemble agreement + known-shift check). If it is not, nudge the green line with the
+arrow keys, or press ``i`` to keep the uncorrected coordinates; the second ENTER accepts.
 
 Mouse: left-click adds a point (any order), drag moves one, right-click deletes one.
-Keys: ENTER review / accept | c clear | backspace remove last point | arrows nudge the green
+Keys: ENTER accept (buffer 4) or review / accept (buffer 1 / 3) | c clear | backspace remove last point | arrows nudge the green
 buffer-4 line 0.25 mm (shift: 1 mm) | i toggle motion correction | z zoom all panels on the line /
 full sector | [ ] step the frame of the panel under the mouse | a toggle buffer-4 averaging |
 x skip (no usable septum) | b back | q quit.
@@ -26,7 +30,7 @@ import numpy as np
 from . import frames as F
 from ._light import order_points, transfer
 
-HELP = ("click: add point | drag: move | right-click: delete | ENTER: review, then accept | "
+HELP = ("click: add point | drag: move | right-click: delete | ENTER: accept (buffer 1/3: review first) | "
         "c: clear | arrows: nudge green line | i: motion correction on/off | z: zoom on line / full | "
         "[ ]: frame of panel under mouse | a: buffer-4 averaging | x: skip (no septum) | b: back | q: quit")
 ZOOM_MM = 25.0
@@ -209,7 +213,8 @@ class LineEditor:
         if self.preload_what and self.phase == "edit":
             head += f" - pre-loaded: {self.preload_what}"
         if self.phase == "edit":
-            return head + " - ENTER to map onto the other buffers and review"
+            return head + (" - ENTER accepts (saved as drawn)" if self.source == 4 else
+                           " - ENTER to map onto buffer 4 and review")
         if self.source == 4:
             return (head + " - REVIEW: the saved line is the one you drew. Buffers 1/3 show it "
                     "registered (orange = trusted, red dotted = not trusted) and uncorrected (dashed "
@@ -310,7 +315,9 @@ class LineEditor:
                 self.status.set_text("Need at least 2 points (or x to skip this line).")
                 self.fig.canvas.draw_idle()
                 return
-            if self.phase == "edit":
+            if self.source == 4:                       # saved as drawn: nothing to register
+                self._finish("accept")
+            elif self.phase == "edit":
                 self.compute_mapping()
                 self.phase = "review"
                 self.redraw()

@@ -412,3 +412,46 @@ def test_roi_editor_fixed_mode_places_and_moves_whole_windows():
     assert [(round(q["t0"]), round(q["t1"])) for q in ed.rois] == [(260, 380), (540, 660)]
     _drag(ed, 380.0, 400.0)                      # grabbing an end moves the whole window
     assert (round(ed.rois[0]["t0"]), round(ed.rois[0]["t1"])) == (280, 400)
+
+
+# ------------------------------------------------------------------ M-line editor: one ENTER on buffer 4
+def _line_editor():
+    import matplotlib
+    matplotlib.use("Agg")
+    from swp.manual import frames as F
+    from swp.manual.line_gui import LineEditor
+    x, z = np.linspace(-30, 30, 80), np.linspace(20, 90, 90)
+    from scipy.ndimage import gaussian_filter
+    env = gaussian_filter(np.random.default_rng(0).rayleigh(size=(z.size, x.size)), 1.5) + 1e-3
+    panels = {b: F.Panel(b, env, x, z, 0, 1, 10, 0.0, "test") for b in F.BUFFERS}
+    ed = LineEditor(panels, "test", lambda b, fr, n: panels[b], maximize=False)
+    ed.fig.canvas.stop_event_loop = lambda: None
+    return ed
+
+
+def _click(ed, b, x, z):
+    from types import SimpleNamespace
+    ed.on_press(SimpleNamespace(inaxes=ed.ax[b], xdata=x, ydata=z, button=1))
+    ed.on_release(None)
+
+
+def test_line_on_buffer4_is_accepted_with_one_enter():
+    from types import SimpleNamespace
+    ed = _line_editor()
+    _click(ed, 4, -10.0, 50.0)
+    _click(ed, 4, 10.0, 60.0)
+    ed.on_key(SimpleNamespace(key="enter", inaxes=None))
+    res = ed.result
+    assert res["action"] == "accept" and res["source_buffer"] == 4 and not res["motion_correction"]
+    assert np.allclose(res["points4_mm"], res["points_src_mm"]) and res["mapping"] is None
+
+
+def test_line_on_buffer1_is_still_registered_and_reviewed_first():
+    from types import SimpleNamespace
+    ed = _line_editor()
+    _click(ed, 1, -10.0, 50.0)
+    _click(ed, 1, 10.0, 60.0)
+    ed.on_key(SimpleNamespace(key="enter", inaxes=None))
+    assert ed.result is None and ed.phase == "review" and 4 in ed.map_info
+    ed.on_key(SimpleNamespace(key="enter", inaxes=None))
+    assert ed.result["action"] == "accept" and ed.result["source_buffer"] == 1
