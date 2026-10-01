@@ -1,0 +1,10 @@
+{"time": "2026-09-29 12:42:32", "host": "EEMATLAB-OP02", "task": "general", "action": "accept", "hash": "fc28e72ea0c9", "source": 4}
+{"time": "2026-09-29 12:51:44", "host": "EEMATLAB-OP02", "task": "event", "window": 0, "action": "accept", "hash": "c3966f41146b"}
+{"time": "2026-09-29 12:52:05", "host": "EEMATLAB-OP02", "task": "event", "window": 1, "action": "accept", "hash": "ef3ae62339b9"}
+{"time": "2026-09-29 12:52:23", "host": "EEMATLAB-OP02", "task": "event", "window": 2, "action": "accept", "hash": "548ecc7629c8"}
+{"time": "2026-09-29 12:52:52", "host": "EEMATLAB-OP02", "task": "slope", "window": 0, "action": "accept", "confidence": 3}
+{"time": "2026-09-29 12:53:01", "host": "EEMATLAB-OP02", "task": "slope", "window": 1, "action": "accept", "confidence": 0}
+{"time": "2026-09-29 12:53:37", "host": "EEMATLAB-OP02", "task": "slope", "window": 2, "action": "accept", "confidence": 3}
+{"time": "2026-09-29 12:53:52", "host": "EEMATLAB-OP02", "task": "event", "window": 3, "action": "accept", "hash": "63150967ee9c"}
+{"time": "2026-09-29 12:55:47", "host": "EEMATLAB-OP02", "task": "slope", "window": 3, "action": "accept", "confidence": 1}
+{"time": "2026-10-01 11:58:56", "host": "EEMATLAB-OP02", "stage": "roi", "action": "accept", "n_rois": 3, "general_hash": "fc28e72ea0c9"}

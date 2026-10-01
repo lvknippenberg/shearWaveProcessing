@@ -1,0 +1,2 @@
+{"time": "2026-09-29 15:37:37", "host": "EEMATLAB-OP02", "task": "general", "action": "accept", "hash": "abd1eae52e86", "source": 4}
+{"time": "2026-10-01 12:15:48", "host": "EEMATLAB-OP02", "stage": "roi", "action": "accept", "n_rois": 3, "general_hash": "abd1eae52e86"}

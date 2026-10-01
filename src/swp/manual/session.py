@@ -4,8 +4,10 @@ Every accept / skip is written to disk the moment it is made, so a session can b
 point (q, or close the window) and the next one resumes where it left off. ``b`` goes back one
 prompt and re-opens it with the stored answer pre-loaded.
 
-Task order (``mode="auto"``): finish folders first - slopes, then event lines, then general lines,
-each in queue order (the September folders first). The data for the next prompt is loaded in a
+Task order (``mode="auto"``): finish folders first - slopes, then event lines, then window reviews,
+then general lines, each in queue order (the September folders first). The window review (detector
+"valves", since 2026-10-01) shows the whole-recording space-time of the general line with the
+automatic MVC / AVC windows, to be moved / added / deleted before the event lines are drawn. The data for the next prompt is loaded in a
 background thread while the current one is open.
 """
 from __future__ import annotations
@@ -19,8 +21,9 @@ import numpy as np
 from . import frames as F
 from . import store as S
 
-KINDS = {"auto": ("slope", "event", "general"), "lines": ("general",), "events": ("event",),
-         "slopes": ("slope",), "lines+events": ("event", "general")}
+KINDS = {"auto": ("slope", "event", "review", "general"), "lines": ("general",), "events": ("event",),
+         "slopes": ("slope",), "windows": ("review",), "lines+events": ("event", "review", "general")}
+REVIEW_MS = 120.0
 WAITING = ("not-ready", "detecting", "processing")
 
 
@@ -112,8 +115,10 @@ def load_task(task):
         else:
             pre = _onto_buffer4(_legacy_general(p), panels)
         return dict(panels=panels, preload=pre, reference=None)
+    if kind == "review":
+        return load_review(p)
     if kind == "event":
-        win = S.read_json(p.windows_json)
+        win = S.event_windows(p)
         w = win["windows"][i]
         t4 = F.buffer4_times(p.bmode(4))
         panels = F.load_panels(f, p, F.event_targets(f, w["t_peak"], t4))
@@ -127,17 +132,77 @@ def load_task(task):
             pre = _onto_buffer4(_legacy_event(p, w["t_peak"]), panels) or dict(
                 source=4, points_mm=g4, what="general line (buffer 4, R-peak anatomy)")
         return dict(panels=panels, preload=pre, reference=("general line (buffer 4)", g4),
-                    window=w, phase=(win.get("window_phases") or [{}] * len(win["windows"]))[i])
+                    window=w, phase=win["phases"][i])
     if kind == "slope":
         from .worker import load_spacetimes
-        win = S.read_json(p.windows_json)
+        win = S.event_windows(p)
         proc = S.read_json(p.processed_json)[str(i)]
         data = load_spacetimes(p.st_npz(i))
         cur = (S.read_json(p.slopes_json) or {}).get(str(i))
-        return dict(data=data, window=win["windows"][i], proc=proc,
-                    phase=(win.get("window_phases") or [{}] * len(win["windows"]))[i],
+        return dict(data=data, window=win["windows"][i], proc=proc, phase=win["phases"][i],
                     preload=cur if cur and not cur.get("skipped") else None)
     raise ValueError(kind)
+
+
+def _fixed(t0, t1, w_s, rec):
+    """A window of length ``w_s`` centred on [t0, t1], shifted inside the recording ``rec``."""
+    a = float(np.clip(0.5 * (t0 + t1) - w_s / 2, rec[0], rec[1] - w_s))
+    return a, a + w_s
+
+
+def load_review(p):
+    """Data for the window review: the whole-recording space-time, the proposals and the hints.
+
+    Proposals, first available: the current review (redo) -> the ROIs marked by eye with
+    scripts/passive_roi.py on the same general line (MVC / AVC, as fixed windows centred on them)
+    -> the automatic windows above the screen. The screened automatic windows are hints."""
+    win = S.read_json(p.windows_json)
+    z = np.load(p.general_st, allow_pickle=False)
+    rr = float(z["rr_s"])
+    data = dict(v=z["v"], t_s=z["t"], r_m=z["r"], r_peaks_s=z["r_peaks_s"], rr_s=rr if np.isfinite(rr) else None)
+    rec = (float(z["t"][0]), float(z["t"][-1]))
+    w_s = REVIEW_MS * 1e-3
+    r_mid = float(z["r"][-1]) * 1e3 / 2
+    gen = S.read_json(p.general_json) or {}
+    cur = S.read_json(p.review_json)
+    rois = S.read_json(p.rois_json)
+    if cur and cur.get("windows_hash") == win["hash"] and cur.get("status") in ("done", "none"):
+        pro, what = cur["windows"], "current review (redo)"
+    elif rois and rois.get("general_hash") == gen.get("hash") and rois.get("status") in ("done", "none"):
+        pro = [dict(zip(("t0", "t1"), _fixed(q["t0"], q["t1"], w_s, rec)), label=q["label"])
+               for q in rois["rois"] if q["label"] in ("MVC", "AVC")]
+        what = "your earlier ROIs (passive_roi.py), as fixed windows"
+    else:
+        pro = [w for w in win["windows"] if not w.get("screened")]
+        what = "automatic windows"
+    preload = dict(rois=[dict(t0=w["t0"], t1=w["t1"], label=w["label"], r_mm=r_mid) for w in pro],
+                   clim_pct=(cur or {}).get("clim_pct"))
+    hints = [dict(t0=w["t0"], t1=w["t1"], text=f"{w['label']} {w['screen']:.2f}")
+             for w in win["windows"] if w.get("screened")]
+    return dict(data=data, preload=preload, preload_what=what, hints=hints, windows_hash=win["hash"],
+                proposals=[{k: w[k] for k in ("t0", "t1", "label")} for w in pro])
+
+
+def review_windows(records, data):
+    """Editor records -> event windows. t_peak = the short-time energy peak inside the window: the
+    event time the buffer-1 / 3 frames are matched to."""
+    from ..passive_valves import short_energy
+    t = np.asarray(data["t_s"], float)
+    es = short_energy(data["v"], t)
+    out = []
+    for q in records:
+        m = (t >= q["t0"]) & (t <= q["t1"])
+        t_peak = float(t[m][int(np.argmax(es[m]))]) if m.any() else q["t_mid"]
+        out.append(dict(t_peak=t_peak, t0=q["t0"], t1=q["t1"], label=q["label"], expect=q.get("expected")))
+    return out
+
+
+def review_hash(windows):
+    """Hash of the reviewed windows (start, end, peak, label): a moved window makes its event line stale."""
+    import hashlib
+    import json
+    key = [(round(w["t0"], 5), round(w["t1"], 5), round(w["t_peak"], 5), w["label"]) for w in windows]
+    return hashlib.sha1(json.dumps(key).encode()).hexdigest()[:12]
 
 
 # ------------------------------------------------------------------ session
@@ -186,6 +251,9 @@ class Session:
         if kind == "general":
             return [("general", f, None)] if (s["stage"] == "need-general"
                                               or (r and s["stage"] == "skipped")) else []
+        if kind == "review":
+            return [("review", f, None)] if (s["stage"] == "need-review"
+                                             or (r and s.get("review_skipped"))) else []
         if kind == "event":
             return [("event", f, i) for i in s["need_events"] + (s["lines_skipped"] if r else [])
                     + (s.get("screened", []) if self.include_screened else [])]
@@ -278,6 +346,8 @@ class Session:
         p = S.Paths(f)
         if kind == "slope":
             return self._prompt_slope(p, i, data)
+        if kind == "review":
+            return self._prompt_review(p, data)
         from .line_gui import LineEditor
 
         def reload_panel(b, frame, n_avg):
@@ -326,8 +396,33 @@ class Session:
             S.append_log(p, dict(task="general", action="skip"))
             print("  folder skipped (no usable septum)")
 
+    def _prompt_review(self, p, data):
+        from .roi_gui import RoiEditor
+        d = data["data"]
+        hr = f"HR {60 / d['rr_s']:.0f} bpm" if d["rr_s"] else "NO VALID ECG (no automatic windows)"
+        what = (f"EVENT WINDOWS ({REVIEW_MS:.0f} ms) on the general line, {hr} - proposed: "
+                f"{data['preload_what']}; move / add / delete, then ENTER")
+        task = ("review", p.folder, None)
+        ed = RoiEditor(d, self._title(task, what), preload=data["preload"], fixed_ms=REVIEW_MS,
+                       hints=data["hints"], roi_name="event windows")
+        res = ed.run(snapshot=p.review_json.replace(".json", ".png"))
+        if res["action"] in ("accept", "none", "skip"):
+            from .worker import window_phases
+            windows = review_windows(res.get("rois", []), d)
+            status = {"accept": "done", "none": "none", "skip": "skipped"}[res["action"]]
+            S.write_json(p.review_json, dict(
+                windows_hash=data["windows_hash"], hash=review_hash(windows), status=status,
+                windows=windows, phases=window_phases(windows, d["r_peaks_s"], d["rr_s"]),
+                window_ms=REVIEW_MS, proposed_from=data["preload_what"], proposals=data["proposals"],
+                clim_pct=res.get("clim_pct"), time=time.strftime("%Y-%m-%d %H:%M:%S")))
+            S.append_log(p, dict(task="review", action=res["action"], n=len(windows)))
+            print("  windows: " + (", ".join(f"{w['label']} {w['t0'] * 1e3:.0f}-{w['t1'] * 1e3:.0f}"
+                                             for w in windows) or status))
+            return "accept" if res["action"] == "none" else res["action"]
+        return res["action"]
+
     def _save_event(self, p, i, res, data):
-        win = S.read_json(p.windows_json)
+        win = S.event_windows(p)
         ev = S.read_json(p.events_json) or {}
         if ev.get("windows_hash") != win["hash"]:
             if ev:

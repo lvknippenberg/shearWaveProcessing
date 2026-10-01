@@ -1,0 +1,142 @@
+{
+ "key": {
+  "general_hash": "eb083377183e",
+  "detect": {
+   "band": [
+    5,
+    150
+   ],
+   "quantity": "displacement",
+   "mode": "phase"
+  },
+  "window_ms": 100.0,
+  "max_events": 4,
+  "overview_stride": 2
+ },
+ "hash": "e0563a011f63",
+ "windows": [
+  {
+   "t_peak": 0.0464400015771389,
+   "t0": 0.0010800000745803118,
+   "t1": 0.0964400015771389,
+   "score": 0.00017699394819070192,
+   "label": "MVC",
+   "expect": "MVC"
+  },
+  {
+   "t_peak": 0.42336001992225647,
+   "t0": 0.3733600199222565,
+   "t1": 0.47336001992225646,
+   "score": 9.385878235946541e-05,
+   "label": "AVC",
+   "expect": "AVC"
+  },
+  {
+   "t_peak": 0.8726400136947632,
+   "t0": 0.8226400136947631,
+   "t1": 0.9226400136947632,
+   "score": 0.00017582846307501298,
+   "label": "MVC",
+   "expect": "MVC"
+  },
+  {
+   "t_peak": 1.1340000629425049,
+   "t0": 1.0840000629425048,
+   "t1": 1.184000062942505,
+   "score": 1.9708217426186523e-05,
+   "label": "AVC",
+   "expect": "AVC"
+  }
+ ],
+ "window_phases": [
+  {
+   "label": "MVC",
+   "phase_ms": 46.4,
+   "to_next_r_ms": 789.1,
+   "rr_ms": 831.1,
+   "hr_bpm": 72.2,
+   "qs2_ms": 394.4,
+   "next_r_logged": true
+  },
+  {
+   "label": "AVC",
+   "phase_ms": 423.4,
+   "to_next_r_ms": 412.2,
+   "rr_ms": 831.1,
+   "hr_bpm": 72.2,
+   "qs2_ms": 394.4,
+   "next_r_logged": true
+  },
+  {
+   "label": "MVC",
+   "phase_ms": 37.1,
+   "to_next_r_ms": 893.0,
+   "rr_ms": 831.1,
+   "hr_bpm": 72.2,
+   "qs2_ms": 394.4,
+   "next_r_logged": true
+  },
+  {
+   "label": "AVC",
+   "phase_ms": 298.4,
+   "to_next_r_ms": 631.6,
+   "rr_ms": 831.1,
+   "hr_bpm": 72.2,
+   "qs2_ms": 394.4,
+   "next_r_logged": true
+  }
+ ],
+ "ecg": {
+  "folder": "Z:\\raw_data\\C000000030\\VIS-029_SW_data_24-July-2026_09-36-27",
+  "status": "warn",
+  "quality": "irregular at the block",
+  "messages": "WARNING: 3 RR interval(s) differ from the median by more than 30% - check for ectopic beats before trusting AVC labels.; WARNING: 1 of 4 beat(s) spanning the passive block are implausible or more than 30% off the median (836-1138 ms vs 831 ms) - the phases of these events may be wrong.",
+  "n_triggers": 50,
+  "n_rr": 49,
+  "n_corrected": 0,
+  "n_rr_short": 0,
+  "n_rr_long": 0,
+  "n_rr_outliers": 3,
+  "frac_rr_short": 0.0,
+  "short_rr_median_ms": NaN,
+  "rr_median_ms": 831.0750000001863,
+  "rr_sd_ms": 90.71739863522382,
+  "rr_cv": 0.10626919986355832,
+  "rr_min_ms": 695.0600000000559,
+  "rr_max_ms": 1140.6009999997914,
+  "rmssd_ms": 110.38866843505805,
+  "hr_bpm": 72.19565021205854,
+  "gating_error_us": -5.000000353902578,
+  "n_rr_local": 4,
+  "n_local_bad": 1,
+  "local_rr_min_ms": 835.5720000001602,
+  "local_rr_max_ms": 1138.1009999997914
+ },
+ "roi": [
+  -0.017478619988464488,
+  0.028549145160585654,
+  0.03905185079108625,
+  0.07414795457753533
+ ],
+ "provenance": {
+  "swp_version": "0.1.0",
+  "swp_git_commit": "b793008ebbda09340e455577bd82989a45a4eb5f",
+  "swp_git_branch": "main",
+  "swp_git_dirty": "3 modified: docs/passive_manual.md, src/swp/manual/store.py, tests/test_manual.py",
+  "swp_git_diff_sha256": "8754fb07c0bc4fd22e0873b54156d17b7772e345ad1d950fdf4021e27a4c8f0d",
+  "zea_version": "0.1.1",
+  "zea_source": "D:/Luuk van Knippenberg/Github/zea",
+  "zea_git_commit": "8c2699fd32b969582049d0f704ac3edb862910be",
+  "zea_git_branch": "verasonics-multibuffer-clean",
+  "zea_git_dirty": "",
+  "numpy": "2.5.0",
+  "scipy": "1.18.0",
+  "python": "3.12.13",
+  "host": "EEMATLAB-OP02",
+  "created_utc": "2026-09-29T13:35:40+00:00",
+  "keras_backend": "torch",
+  "command": "passive_manual.py worker --watch --root Z:/raw_data",
+  "config_sha256": "a4fc7fe7a8d605ebda81db4c976360d323405fb80f807cbb375700edd603bc22",
+  "config_json": "{\"data\":{\"bmode\":\"CombinedData_buffer4_iq.hdf5\",\"ecg\":null,\"file\":\"CombinedData_buffer4_iq.hdf5\",\"grid_dir\":\"\",\"root\":\"Z:\\\\raw_data\\\\C000000030\\\\VIS-029_SW_data_24-July-2026_09-36-27\\\\output\"},\"detect\":{\"band\":[5,150],\"mode\":\"phase\",\"quantity\":\"displacement\"},\"focus\":{\"mode\":\"auto\"},\"mline\":{\"n_samples\":250,\"npz\":\"mlines/passive_mline.npz\",\"offset_step_mm\":0.5,\"offsets\":5,\"type\":\"manual\"},\"pipeline\":{\"directional\":false,\"directional_mode\":\"leftward\",\"drop_first\":1,\"estimator\":\"loupas\",\"estimator_params\":{},\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"iq_filters\":[],\"mode\":\"frame_to_frame\",\"quantity\":\"velocity\",\"speed\":\"ttp_ransac\"},\"run\":{\"bands\":[[5,150]],\"measurement\":0,\"outdir\":\"swp_passive_manual\",\"views\":[{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":10}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"displacement gauss\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"displacement\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_median\",\"params\":{\"size_x_mm\":2.0,\"size_z_mm\":1.0}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"velocity median\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"velocity gauss\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"estimator_params\":{\"kernel_shape\":\"gaussian\",\"kernel_x_mm\":3.0,\"kernel_z_mm\":4.0},\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":100,\"f_lo\":15,\"order\":3}}],\"iq_filters\":[{\"name\":\"iq_slowtime_lowpass\",\"params\":{\"fc_hz\":250.0,\"order\":3}}],\"name\":\"Keijzer velocity\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}},{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":10}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}}],\"name\":\"acceleration\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"acceleration\"}]}}"
+ }
+}

@@ -1,0 +1,186 @@
+{
+ "0": {
+  "window": 0,
+  "st_hash": "3ba2df90b8fc",
+  "t_peak_ms": 42.12000221014023,
+  "label": "?",
+  "phase": {
+   "label": "?",
+   "reason": "no usable ECG in the trigger log"
+  },
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 20.0,
+    "semblance": 0.9219690714025616
+   },
+   "velocity median": {
+    "speed_m_s": 2.3027166882276844,
+    "semblance": 0.2310958056874525
+   },
+   "velocity gauss": {
+    "speed_m_s": 2.3027166882276844,
+    "semblance": 0.30937903666087607
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 5.973154362416108,
+    "semblance": 0.5016183847423094
+   },
+   "acceleration": {
+    "speed_m_s": -16.48148148148148,
+    "semblance": 0.1921080405164741
+   }
+  },
+  "mline_length_mm": 39.93420898984008,
+  "line_source_buffer": 4,
+  "line_motion_corrected": false,
+  "line_mapping_reliable": null,
+  "time": "2026-09-29 11:53:40",
+  "confidence": 0,
+  "confidence_meaning": "none",
+  "shared": {
+   "anchor_t_ms": null,
+   "anchor_r_mm": null,
+   "speed_m_s": null,
+   "anchor_view": null
+  },
+  "disp": null
+ },
+ "1": {
+  "window": 1,
+  "st_hash": "649f6ce37098",
+  "t_peak_ms": 379.07999753952026,
+  "label": "?",
+  "phase": {
+   "label": "?",
+   "reason": "no usable ECG in the trigger log"
+  },
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": -20.0,
+    "semblance": 0.9703873449750468
+   },
+   "velocity median": {
+    "speed_m_s": -10.787878787878787,
+    "semblance": 0.5767081531270675
+   },
+   "velocity gauss": {
+    "speed_m_s": -10.787878787878787,
+    "semblance": 0.7411859939591187
+   },
+   "Keijzer velocity": {
+    "speed_m_s": -20.0,
+    "semblance": 0.8310159055420162
+   },
+   "acceleration": {
+    "speed_m_s": 20.0,
+    "semblance": 0.3721870290238016
+   }
+  },
+  "mline_length_mm": 41.19441746366709,
+  "line_source_buffer": 4,
+  "line_motion_corrected": false,
+  "line_mapping_reliable": null,
+  "time": "2026-09-29 11:54:53",
+  "confidence": 1,
+  "confidence_meaning": "guess",
+  "shared": {
+   "anchor_t_ms": 359.65609934894326,
+   "anchor_r_mm": 24.871392916700962,
+   "speed_m_s": 3.120000000000001,
+   "anchor_view": "Keijzer velocity"
+  },
+  "disp": null
+ },
+ "2": {
+  "window": 2,
+  "st_hash": "853b20e4f0df",
+  "t_peak_ms": 604.7999858856201,
+  "label": "?",
+  "phase": {
+   "label": "?",
+   "reason": "no usable ECG in the trigger log"
+  },
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": -20.0,
+    "semblance": 0.9190158142904146
+   },
+   "velocity median": {
+    "speed_m_s": -3.384030418250951,
+    "semblance": 0.19596357991612096
+   },
+   "velocity gauss": {
+    "speed_m_s": -3.384030418250951,
+    "semblance": 0.3085141766183428
+   },
+   "Keijzer velocity": {
+    "speed_m_s": -12.191780821917808,
+    "semblance": 0.6493517931834962
+   },
+   "acceleration": {
+    "speed_m_s": -3.384030418250951,
+    "semblance": 0.14541358807536217
+   }
+  },
+  "mline_length_mm": 37.8203725558388,
+  "line_source_buffer": 4,
+  "line_motion_corrected": false,
+  "line_mapping_reliable": null,
+  "time": "2026-09-29 12:02:16",
+  "confidence": 0,
+  "confidence_meaning": "none",
+  "shared": {
+   "anchor_t_ms": null,
+   "anchor_r_mm": null,
+   "speed_m_s": null,
+   "anchor_view": null
+  },
+  "disp": null
+ },
+ "3": {
+  "window": 3,
+  "st_hash": "6efb23fab949",
+  "t_peak_ms": 861.840009689331,
+  "label": "?",
+  "phase": {
+   "label": "?",
+   "reason": "no usable ECG in the trigger log"
+  },
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": -20.0,
+    "semblance": 0.9679865199727669
+   },
+   "velocity median": {
+    "speed_m_s": -20.0,
+    "semblance": 0.828977404894423
+   },
+   "velocity gauss": {
+    "speed_m_s": -20.0,
+    "semblance": 0.9007111089715562
+   },
+   "Keijzer velocity": {
+    "speed_m_s": -20.0,
+    "semblance": 0.9386972677869899
+   },
+   "acceleration": {
+    "speed_m_s": -20.0,
+    "semblance": 0.6846661058266681
+   }
+  },
+  "mline_length_mm": 35.37762775695552,
+  "line_source_buffer": 4,
+  "line_motion_corrected": false,
+  "line_mapping_reliable": null,
+  "time": "2026-09-29 12:07:19",
+  "confidence": 2,
+  "confidence_meaning": "plausible",
+  "shared": {
+   "anchor_t_ms": 870.5126432186744,
+   "anchor_r_mm": 12.428494147154822,
+   "speed_m_s": 9.52,
+   "anchor_view": "velocity median"
+  },
+  "disp": null
+ }
+}

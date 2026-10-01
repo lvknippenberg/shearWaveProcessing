@@ -1,0 +1,142 @@
+{
+ "0": {
+  "line_hash": "12b48fa3af9a",
+  "st_hash": "f1d2b69573cb",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 16.48148148148148,
+    "semblance": 0.6614673869544089
+   },
+   "velocity median": {
+    "speed_m_s": -1.1611219830397914,
+    "semblance": 0.10827521171852778
+   },
+   "velocity gauss": {
+    "speed_m_s": -3.5108481262327422,
+    "semblance": 0.18103632460756855
+   },
+   "Keijzer velocity": {
+    "speed_m_s": -8.768472906403941,
+    "semblance": 0.3937493557452275
+   },
+   "acceleration": {
+    "speed_m_s": 2.247474747474748,
+    "semblance": 0.1252573089272375
+   }
+  },
+  "mline_length_mm": 24.8434291461122,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:57:32"
+ },
+ "1": {
+  "line_hash": "71f23a0e0bb9",
+  "st_hash": "b2035de58273",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 1.3444108761329308,
+    "semblance": 0.8641567352419056
+   },
+   "velocity median": {
+    "speed_m_s": 1.1756935270805813,
+    "semblance": 0.33019796806994023
+   },
+   "velocity gauss": {
+    "speed_m_s": 1.3444108761329308,
+    "semblance": 0.46055322096097706
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 3.26605504587156,
+    "semblance": 0.6062931963623291
+   },
+   "acceleration": {
+    "speed_m_s": 1.3444108761329308,
+    "semblance": 0.18442521134888076
+   }
+  },
+  "mline_length_mm": 20.458226270522175,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:57:57"
+ },
+ "2": {
+  "line_hash": "fd487506481a",
+  "st_hash": "2ca2c12f1871",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 1.8855932203389834,
+    "semblance": 0.8911737247444319
+   },
+   "velocity median": {
+    "speed_m_s": 1.8126272912423627,
+    "semblance": 0.6497440027068221
+   },
+   "velocity gauss": {
+    "speed_m_s": 1.8126272912423627,
+    "semblance": 0.7671381126327782
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 1.6824196597353498,
+    "semblance": 0.9113459495633337
+   },
+   "acceleration": {
+    "speed_m_s": 1.9243243243243244,
+    "semblance": 0.42056711205636266
+   }
+  },
+  "mline_length_mm": 20.804771366015146,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:58:25"
+ },
+ "3": {
+  "line_hash": "8ebf3de57c53",
+  "st_hash": "cf26b428376a",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 7.385892116182573,
+    "semblance": 0.9129025976607794
+   },
+   "velocity median": {
+    "speed_m_s": 8.768472906403941,
+    "semblance": 0.8993740452919595
+   },
+   "velocity gauss": {
+    "speed_m_s": 8.768472906403941,
+    "semblance": 0.9340363370136449
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 12.191780821917808,
+    "semblance": 0.9752118101936986
+   },
+   "acceleration": {
+    "speed_m_s": 4.529262086513995,
+    "semblance": 0.6918901448307535
+   }
+  },
+  "mline_length_mm": 20.108172857803815,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 15:00:40"
+ }
+}

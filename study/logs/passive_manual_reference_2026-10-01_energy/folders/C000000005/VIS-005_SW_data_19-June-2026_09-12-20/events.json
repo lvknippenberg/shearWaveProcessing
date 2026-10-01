@@ -1,0 +1,321 @@
+{
+ "windows_hash": "c929ee3d6bd5",
+ "events": {
+  "0": {
+   "window": 0,
+   "t_peak_ms": 160.92000901699066,
+   "label": "?",
+   "time": "2026-09-29 11:33:01",
+   "hash": "2436ebc0f4fa",
+   "preload": "September line of this event (buffer 1)",
+   "source_buffer": 4,
+   "points_src_mm": [
+    [
+     17.61073116499375,
+     64.5448450824033
+    ],
+    [
+     7.323552296053947,
+     65.43167084696707
+    ],
+    [
+     -3.31835687871137,
+     63.12592385910125
+    ]
+   ],
+   "points4_mm": [
+    [
+     17.61073116499375,
+     64.5448450824033
+    ],
+    [
+     7.323552296053947,
+     65.43167084696707
+    ],
+    [
+     -3.31835687871137,
+     63.12592385910125
+    ]
+   ],
+   "motion_correction": false,
+   "mapping": null,
+   "mapping_other": {
+    "1": {
+     "shift_mm": 5.360717146054248,
+     "dx": -4.885599999999999,
+     "dz": 2.206400000000002,
+     "agree": 1.0,
+     "known_err_mm": 0.34357520283047577,
+     "corr": 0.7427676980960304,
+     "corr0": 0.3775323818363346,
+     "reliable": true
+    },
+    "3": {
+     "shift_mm": 5.847283899384396,
+     "dx": -5.4765999999999995,
+     "dz": 2.0488,
+     "agree": 1.0,
+     "known_err_mm": 0.4647582167105861,
+     "corr": 0.6850980902950368,
+     "corr0": 0.3244598329866199,
+     "reliable": true
+    }
+   },
+   "nudge_mm": [
+    0.0,
+    0.0
+   ],
+   "frames": {
+    "1": {
+     "frame": 44,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 4 (r 0.95)"
+    },
+    "3": {
+     "frame": 17,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 1 (r 0.96)"
+    },
+    "4": {
+     "frame": 149,
+     "n_avg": 9,
+     "phase_ms": 160.92500901711173,
+     "note": "NO VALID ECG (unusable: sparse) - event, R+161 ms"
+    }
+   }
+  },
+  "1": {
+   "window": 1,
+   "t_peak_ms": 338.03999423980713,
+   "label": "?",
+   "time": "2026-09-29 11:33:37",
+   "hash": "b1829c5743d6",
+   "preload": "general line as drawn (buffer 4, R-peak anatomy)",
+   "source_buffer": 4,
+   "points_src_mm": [
+    [
+     22.053184743092487,
+     64.69136940763312
+    ],
+    [
+     -0.7707835625767814,
+     60.62503022673802
+    ]
+   ],
+   "points4_mm": [
+    [
+     22.053184743092487,
+     64.69136940763312
+    ],
+    [
+     -0.7707835625767814,
+     60.62503022673802
+    ]
+   ],
+   "motion_correction": false,
+   "mapping": null,
+   "mapping_other": {
+    "1": {
+     "shift_mm": 7.435908462319854,
+     "dx": -7.387500000000001,
+     "dz": 0.8471000000000011,
+     "agree": 0.0,
+     "known_err_mm": 2.593312603601814,
+     "corr": 0.42039367572251907,
+     "corr0": 0.2913946008064026,
+     "reliable": false
+    },
+    "3": {
+     "shift_mm": 9.374095494499723,
+     "dx": -9.1605,
+     "dz": 1.9896999999999956,
+     "agree": 0.0,
+     "known_err_mm": 12.294516293047076,
+     "corr": 0.3347497462313197,
+     "corr0": 0.24563470808072263,
+     "reliable": false
+    }
+   },
+   "nudge_mm": [
+    0.0,
+    0.0
+   ],
+   "frames": {
+    "1": {
+     "frame": 68,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 4 (r 0.95)"
+    },
+    "3": {
+     "frame": 3,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 1 (r 0.96)"
+    },
+    "4": {
+     "frame": 313,
+     "n_avg": 9,
+     "phase_ms": 99.02299423981458,
+     "note": "NO VALID ECG (unusable: sparse) - event, R+99 ms"
+    }
+   }
+  },
+  "2": {
+   "window": 2,
+   "t_peak_ms": 575.6400227546692,
+   "label": "?",
+   "time": "2026-09-29 11:41:56",
+   "hash": "d5c077f3f64b",
+   "preload": "September line of this event (buffer 1)",
+   "source_buffer": 4,
+   "points_src_mm": [
+    [
+     23.715311050782873,
+     65.89573265350174
+    ],
+    [
+     -4.185029346324882,
+     56.65845779229713
+    ]
+   ],
+   "points4_mm": [
+    [
+     23.715311050782873,
+     65.89573265350174
+    ],
+    [
+     -4.185029346324882,
+     56.65845779229713
+    ]
+   ],
+   "motion_correction": false,
+   "mapping": null,
+   "mapping_other": {
+    "1": {
+     "shift_mm": 8.290213162518805,
+     "dx": 5.043199999999999,
+     "dz": 6.579800000000006,
+     "agree": 0.6666666666666666,
+     "known_err_mm": 15.976048184704501,
+     "corr": 0.46351813322291635,
+     "corr0": 0.36836624126671313,
+     "reliable": false
+    },
+    "3": {
+     "shift_mm": 1.5325536466956062,
+     "dx": -1.4578000000000007,
+     "dz": 0.47279999999999944,
+     "agree": 0.6666666666666666,
+     "known_err_mm": 1.7905359309435822,
+     "corr": 0.46504351396472454,
+     "corr0": 0.37783252464170813,
+     "reliable": false
+    }
+   },
+   "nudge_mm": [
+    0.0,
+    0.0
+   ],
+   "frames": {
+    "1": {
+     "frame": 69,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 4 (r 0.96)"
+    },
+    "3": {
+     "frame": 3,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 1 (r 0.96)"
+    },
+    "4": {
+     "frame": 533,
+     "n_avg": 9,
+     "phase_ms": 96.10302275489084,
+     "note": "NO VALID ECG (unusable: sparse) - event, R+96 ms"
+    }
+   }
+  },
+  "3": {
+   "window": 3,
+   "t_peak_ms": 757.0800185203552,
+   "label": "?",
+   "time": "2026-09-29 11:42:56",
+   "hash": "70905c662b73",
+   "preload": "September line of this event (buffer 1)",
+   "source_buffer": 4,
+   "points_src_mm": [
+    [
+     23.10979658218932,
+     65.94980032033577
+    ],
+    [
+     -1.9059443446989803,
+     57.20112589781746
+    ]
+   ],
+   "points4_mm": [
+    [
+     23.10979658218932,
+     65.94980032033577
+    ],
+    [
+     -1.9059443446989803,
+     57.20112589781746
+    ]
+   ],
+   "motion_correction": false,
+   "mapping": null,
+   "mapping_other": {
+    "1": {
+     "shift_mm": 5.407425723946655,
+     "dx": -5.122,
+     "dz": -1.7336000000000027,
+     "agree": 0.6666666666666666,
+     "known_err_mm": 6.490238491765926,
+     "corr": 0.6722496104863768,
+     "corr0": 0.5595919247295106,
+     "reliable": false
+    },
+    "3": {
+     "shift_mm": 0.3632500516173371,
+     "dx": -0.23639999999999972,
+     "dz": -0.2757999999999967,
+     "agree": 1.0,
+     "known_err_mm": 0.5688945420726088,
+     "corr": 0.6425248929535368,
+     "corr0": 0.6311081297215496,
+     "reliable": true
+    }
+   },
+   "nudge_mm": [
+    0.0,
+    0.0
+   ],
+   "frames": {
+    "1": {
+     "frame": 76,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 4 (r 0.96)"
+    },
+    "3": {
+     "frame": 5,
+     "n_avg": 1,
+     "phase_ms": NaN,
+     "note": "NO VALID ECG: matched to buffer 1 (r 0.96)"
+    },
+    "4": {
+     "frame": 701,
+     "n_avg": 9,
+     "phase_ms": 38.02201852039434,
+     "note": "NO VALID ECG (unusable: sparse) - event, R+38 ms"
+    }
+   }
+  }
+ }
+}

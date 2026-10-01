@@ -288,6 +288,11 @@ First impressions (C000000023, C000000026, C000000011):
 
 ## Where we left off (2026-09-29) and next steps
 
+> **Update 2026-10-01.** Open decision 1 is done. The windows are now chosen by the valves
+> detector and reviewed by eye ([passive_manual.md](passive_manual.md), "Window review"). The 27
+> folders below are being re-read that way. Their results as evaluated here are kept in
+> `study/logs/passive_manual_reference_2026-10-01_energy/`.
+
 - **State of the reading.** 27 acquisitions read (C000000001-31); 7 windows pending (C000000030,
   C000000031). The next session resumes there. Folders detected from now on use the adopted
   detector; the 27 keep theirs.

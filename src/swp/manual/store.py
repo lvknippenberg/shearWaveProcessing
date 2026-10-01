@@ -11,17 +11,28 @@ file                   written by  content
 =====================  ==========  ============================================================
 general.json/.npz      GUI         general M-line (buffer-4 coordinates) + how it was drawn
 windows.json           worker      detected event windows, keyed by the general line's hash
-events.json            GUI         per-window M-line records, keyed by the windows' hash
+general_st.npz         worker      whole-recording velocity space-time along the general line
+                                   (+ R-peaks), shown by the window review
+review.json/.png       GUI         the event windows as reviewed by hand (moved / added / deleted),
+                                   keyed by the detected windows' hash (detector "valves" only)
+events.json            GUI         per-window M-line records, keyed by the (reviewed) windows' hash
 event<i>_mline.npz     GUI         the line used for window i (buffer-4 coordinates)
 processed.json         worker      per window: hash of the line it was computed from + st hash
 st_win<i>.npz          worker      the five space-times of window i (+ B-mode thumbnail)
 slopes.json            GUI         per window: the hand slope, keyed by the space-time hash
+rois.json/.png         ROI GUI     time windows marked by eye on the general line's whole-recording
+                                   space-time (scripts/passive_roi.py), keyed by the general hash
 log.jsonl              GUI         append-only record of every accept / skip (audit trail)
 =====================  ==========  ============================================================
 
 Staleness propagates through the hashes: a redrawn general line changes ``general.hash`` ->
-windows are re-detected -> ``windows.hash`` changes -> old event lines no longer count -> their
-space-times and slopes no longer count. Nothing is deleted; replaced files are archived.
+windows are re-detected -> ``windows.hash`` changes -> the review and old event lines no longer
+count -> their space-times and slopes no longer count. Nothing is deleted; replaced files are archived.
+
+Windows detected by ``detect.picker: valves`` (swp.passive_valves, the default since 2026-10-01)
+carry ``needs_review``: the session first shows them on the whole-recording space-time to be moved,
+added or deleted, and the REVIEWED windows are the event windows (:func:`event_windows`). Windows
+of the earlier detectors are used as detected.
 """
 from __future__ import annotations
 
@@ -55,6 +66,8 @@ class Paths:
         self.general_json, self.general_npz = j("general.json"), j("general_mline.npz")
         self.windows_json, self.events_json = j("windows.json"), j("events.json")
         self.processed_json, self.slopes_json = j("processed.json"), j("slopes.json")
+        self.rois_json = j("rois.json")
+        self.review_json, self.general_st = j("review.json"), j("general_st.npz")
         self.log = j("log.jsonl")
         self.lock = j("worker.lock")
 
@@ -172,6 +185,24 @@ def downstream_files(p: Paths):
             if n not in keep and not n.startswith("archive_") and os.path.isfile(os.path.join(p.dir, n))]
 
 
+def event_windows(p: Paths, win=None):
+    """The event windows of a folder -> dict(windows, hash, phases, reviewed) or None.
+
+    Windows needing review (detector "valves") count only once reviewed, and then as reviewed;
+    None while the review is missing or stale. Earlier detectors: the detected windows."""
+    win = read_json(p.windows_json) if win is None else win
+    if win is None:
+        return None
+    if not win.get("needs_review"):
+        return dict(windows=win["windows"], hash=win["hash"], reviewed=False,
+                    phases=win.get("window_phases") or [{}] * len(win["windows"]))
+    rev = read_json(p.review_json)
+    if rev is None or rev.get("windows_hash") != win["hash"]:
+        return None
+    return dict(windows=rev["windows"], hash=rev["hash"], reviewed=True, status=rev.get("status"),
+                phases=rev.get("phases") or [{}] * len(rev["windows"]))
+
+
 # ------------------------------------------------------------------ folders
 def find_folders(root=None, folders=(), subject=None):
     """Measurement folders, the ones with September passive lines first (then sorted)."""
@@ -204,8 +235,8 @@ def ready(p: Paths) -> bool:
 def state(folder) -> dict:
     """Where a folder stands. Keys: stage, and the window indices still needing each step.
 
-    stage: not-ready | need-general | skipped | detecting | error | no-windows | need-events |
-           processing | need-slopes | done
+    stage: not-ready | need-general | skipped | detecting | error | need-review | no-windows |
+           need-events | processing | need-slopes | done
     (a window whose processing failed is listed in ``proc_failed`` and does not hold the folder;
     a window below the detection screen without a line is listed in ``screened`` and does not
     hold it either)
@@ -230,14 +261,20 @@ def state(folder) -> dict:
         s["stage"] = "error" if failed else "detecting"
         s["error"] = errs.get("detect", {}).get("error") if failed else None
         return s
-    windows = win["windows"]
+    ew = event_windows(p, win)
+    if ew is None:
+        s["stage"] = "need-review"
+        s["n_windows"] = len(win["windows"])
+        return s
+    windows = ew["windows"]
+    s["review_skipped"] = ew.get("status") == "skipped"
     s["n_windows"] = len(windows)
     if not windows:
         s["stage"] = "no-windows"
         return s
     s["windows"] = windows
     ev = read_json(p.events_json) or {}
-    events = ev.get("events", {}) if ev.get("windows_hash") == win["hash"] else {}
+    events = ev.get("events", {}) if ev.get("windows_hash") == ew["hash"] else {}
     proc = read_json(p.processed_json) or {}
     slopes = read_json(p.slopes_json) or {}
     for i in range(len(windows)):

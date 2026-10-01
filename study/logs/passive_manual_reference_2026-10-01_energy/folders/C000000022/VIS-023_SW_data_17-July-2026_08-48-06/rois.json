@@ -1,0 +1,69 @@
+{
+ "general_hash": "811c9dc3d982",
+ "status": "done",
+ "rois": [
+  {
+   "t0": 0.0019,
+   "t1": 0.07289,
+   "t_mid": 0.03739,
+   "duration_ms": 71.0,
+   "r_mm": 6.08,
+   "label": "MVC",
+   "suggested_label": "MVC",
+   "expected": "MVC",
+   "expected_overlap": 1.0,
+   "phase_ms": 37.4
+  },
+  {
+   "t0": 0.30725,
+   "t1": 0.39479,
+   "t_mid": 0.35102,
+   "duration_ms": 87.54,
+   "r_mm": 6.95,
+   "label": "AVC",
+   "suggested_label": "AVC",
+   "expected": "AVC",
+   "expected_overlap": 1.0,
+   "phase_ms": 351.0
+  },
+  {
+   "t0": 0.90832,
+   "t1": 0.99586,
+   "t_mid": 0.95209,
+   "duration_ms": 87.54,
+   "r_mm": 6.77,
+   "label": "MVC",
+   "suggested_label": "MVC",
+   "expected": "MVC",
+   "expected_overlap": 0.637,
+   "phase_ms": 12.0
+  }
+ ],
+ "clim_pct": 99.5,
+ "source": {
+  "cache": "C000000022__VIS-023_SW_data_17-July-2026_08-48-06.npz",
+  "view": "velocity gauss",
+  "config": "configs/passive_manual.yaml"
+ },
+ "time": "2026-10-01 12:10:18",
+ "host": "EEMATLAB-OP02",
+ "provenance": {
+  "swp_version": "0.1.0",
+  "swp_git_commit": "aabd30a9a42c6cff4577d9896a10d7c8658393ac",
+  "swp_git_branch": "main",
+  "swp_git_dirty": "4 modified: docs/passive_manual.md, src/swp/manual/store.py, study/analysis/passive_general_screen.py, tests/test_manual.py",
+  "swp_git_diff_sha256": "1f790f02f57849f984d24205938f52547e6b74d43c61466f08251a27173da9b9",
+  "zea_version": "0.1.1",
+  "zea_source": "D:/Luuk van Knippenberg/Github/zea",
+  "zea_git_commit": "8c2699fd32b969582049d0f704ac3edb862910be",
+  "zea_git_branch": "verasonics-multibuffer-clean",
+  "zea_git_dirty": "",
+  "numpy": "2.5.0",
+  "scipy": "1.18.0",
+  "python": "3.12.13",
+  "host": "EEMATLAB-OP02",
+  "created_utc": "2026-10-01T10:10:18+00:00",
+  "keras_backend": "",
+  "command": "passive_roi.py session"
+ }
+}

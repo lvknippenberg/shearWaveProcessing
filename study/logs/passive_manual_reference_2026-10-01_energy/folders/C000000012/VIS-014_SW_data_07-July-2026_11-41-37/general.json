@@ -1,0 +1,75 @@
+{
+ "hash": "fc28e72ea0c9",
+ "sync": "rpeak",
+ "preload": "September line (buffer 1)",
+ "time": "2026-09-29 12:42:32",
+ "source_buffer": 4,
+ "points_src_mm": [
+  [
+   18.507724461219652,
+   79.38359455186304
+  ],
+  [
+   -4.0649777246264875,
+   61.86004943390354
+  ]
+ ],
+ "points4_mm": [
+  [
+   18.507724461219652,
+   79.38359455186304
+  ],
+  [
+   -4.0649777246264875,
+   61.86004943390354
+  ]
+ ],
+ "motion_correction": false,
+ "mapping": null,
+ "mapping_other": {
+  "1": {
+   "shift_mm": 1.175414990545893,
+   "dx": -1.1425999999999998,
+   "dz": 0.2758000000000038,
+   "agree": 1.0,
+   "known_err_mm": 0.23099134182908362,
+   "corr": 0.8588141881259714,
+   "corr0": 0.8042748331673557,
+   "reliable": true
+  },
+  "3": {
+   "shift_mm": 3.339484127825734,
+   "dx": -3.152,
+   "dz": -1.103200000000001,
+   "agree": 1.0,
+   "known_err_mm": 0.10883602344812243,
+   "corr": 0.9146485514973323,
+   "corr0": 0.7888198692501249,
+   "reliable": true
+  }
+ },
+ "nudge_mm": [
+  0.0,
+  0.0
+ ],
+ "frames": {
+  "1": {
+   "frame": 47,
+   "n_avg": 1,
+   "phase_ms": NaN,
+   "note": "NO VALID ECG: matched to buffer 4 (r 0.96)"
+  },
+  "3": {
+   "frame": 23,
+   "n_avg": 1,
+   "phase_ms": NaN,
+   "note": "NO VALID ECG: matched to buffer 1 (r 0.94)"
+  },
+  "4": {
+   "frame": 889,
+   "n_avg": 9,
+   "phase_ms": 0.0800000005401671,
+   "note": "NO VALID ECG (unusable: sparse) - R-peak +0 ms"
+  }
+ }
+}

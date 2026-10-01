@@ -5,16 +5,20 @@
     python scripts/passive_manual.py export  --root "Z:/raw_data"          # -> study/logs/passive_manual_slopes.csv
     python scripts/passive_manual.py archive --tag <why>                   # move all outputs aside, start over
     python scripts/passive_manual.py worker  --root "Z:/raw_data" --watch  # only with session --workers 0
+    python scripts/passive_manual.py redetect [--folder <f>]               # move folders of the old detector to the valves detector
 
 Per folder: (1) a general M-line with buffers 1 | 3 | 4 shown at the R-peak -> (2, unattended)
-valve-event detection along it -> (3) one M-line per event with the buffers at that event's cardiac
-phase -> (4, unattended) five space-times per event -> (5) the hand slope, drawn once and mirrored
-on all five. ``session`` starts two background workers for (2) and (4) and stops them on exit.
+automatic MVC / AVC windows along it (swp.passive_valves) -> (3) the window review: the whole-
+recording space-time with the 120 ms windows, moved / added / deleted by hand -> (4) one M-line per
+window with the buffers at that event's cardiac phase -> (5, unattended) five space-times per
+event -> (6) the hand slope, drawn once and mirrored on all five. ``session`` starts two
+background workers for (2) and (5) and stops them on exit.
 
 Stop any time (q or close the window); everything accepted is on disk and the next session resumes.
 ``b`` goes back one prompt. To redo a finished step later:
 
     python scripts/passive_manual.py session --folder "<folder>" --redo general
+    python scripts/passive_manual.py session --folder "<folder>" --redo review
     python scripts/passive_manual.py session --folder "<folder>" --redo event --window 2
     python scripts/passive_manual.py session --folder "<folder>" --redo slope --window 2
 
@@ -56,7 +60,8 @@ def cmd_status(a):
                   + (f"  ERROR {s['error']}" if s.get("error") else ""))
         rows.append(s)
     print("  " + ", ".join(f"{k}: {v}" for k, v in sorted(counts.items())))
-    print(f"  windows {sum(r['n_windows'] for r in rows)}, event lines to draw "
+    print(f"  window reviews to do {sum(r['stage'] == 'need-review' for r in rows)}, "
+          f"windows {sum(r['n_windows'] for r in rows)}, event lines to draw "
           f"{sum(len(r['need_events']) for r in rows)}, being processed "
           f"{sum(len(r['need_proc']) for r in rows)}, slopes to draw "
           f"{sum(len(r['need_slopes']) for r in rows)}, slopes done "
@@ -94,8 +99,8 @@ def cmd_session(a):
     redo = []
     if a.redo:
         for f in folders[: (1 if a.folder else len(folders))]:
-            if a.redo == "general":
-                redo.append(("general", f, None))
+            if a.redo in ("general", "review"):
+                redo.append((a.redo, f, None))
             else:
                 if a.window is None:
                     raise SystemExit("--redo event/slope needs --window")
@@ -131,9 +136,12 @@ def cmd_export(a):
         win = S.read_json(p.windows_json) or {}
         ecg = win.get("ecg") or {}
         gen = S.read_json(p.general_json) or {}
-        wins = win.get("windows") or []
-        phases = win.get("window_phases") or [{}] * len(wins)
+        ew = S.event_windows(p, win) if win else None
+        wins = (ew or {}).get("windows") or []
+        phases = (ew or {}).get("phases") or [{}] * len(wins)
         picker = (win.get("key", {}).get("detect") or {}).get("picker", "energy")
+        if (ew or {}).get("reviewed"):
+            picker += "+review"
         for i in s["screened"]:                     # detected, below the screen: no line, no slope
             w, ph = wins[i], phases[i] if i < len(phases) else {}
             rows.append(dict(subject=Path(f).parent.name, folder=Path(f).name, window=i,
@@ -205,22 +213,49 @@ def cmd_archive(a):
                                            f"session and run again)" if busy else ""))
 
 
+def cmd_redetect(a):
+    """Move folders detected with an earlier detector onto the current one (detect.picker of
+    configs/passive_manual.yaml, valves since 2026-10-01): their windows, window review, event lines,
+    space-times and slopes are archived (never deleted) as archive_<time>_<tag>/, the general line
+    and the ROIs marked by eye (rois.json, the review's first proposal) stay. The worker then detects
+    again and the session asks the window review. Refuses while a worker holds a folder."""
+    from swp.viz import runconfig as rc
+    picker = str(rc.load_config(S.CONFIG).get("detect", {}).get("picker", "energy"))
+    moved, busy = 0, []
+    for f in _folders(a):
+        p = S.Paths(f)
+        win = S.read_json(p.windows_json)
+        if win is None or (win.get("key", {}).get("detect") or {}).get("picker", "energy") == picker:
+            continue
+        if os.path.exists(p.lock):
+            busy.append(f)
+            continue
+        names = [n for n in S.downstream_files(p) if n not in ("rois.json", "rois.png")]
+        dest = S.archive(p, names, a.tag if a.tag != "restart" else f"redetect_{picker}")
+        S.append_log(p, dict(task="redetect", picker=picker, archived=os.path.basename(dest or "")))
+        moved += 1
+        print(f"  {Path(f).parent.name}/{Path(f).name}: {len(names)} file(s) -> {os.path.basename(dest)}")
+    print(f"{moved} folder(s) moved to detector '{picker}'" + (
+        f"; {len(busy)} skipped (a worker holds them - close the session and run again)" if busy else ""))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["session", "worker", "status", "export", "archive"])
+    ap.add_argument("command", choices=["session", "worker", "status", "export", "archive", "redetect"])
     ap.add_argument("--tag", default="restart", help="archive: suffix of the archive folder name")
     ap.add_argument("--root", default=None)
     ap.add_argument("--folder", action="append", default=[])
     ap.add_argument("--subject", default=None)
-    ap.add_argument("--task", default="auto", choices=["auto", "lines", "events", "slopes", "lines+events"],
-                    help="session: which prompts to serve (auto: slopes, then event lines, then general)")
+    ap.add_argument("--task", default="auto", choices=["auto", "lines", "windows", "events", "slopes", "lines+events"],
+                    help="session: which prompts to serve (auto: slopes, then event lines, then window "
+                         "reviews, then general lines)")
     ap.add_argument("--workers", type=int, default=2, help="session: background workers to start (0: none)")
     ap.add_argument("--no-wait", action="store_true",
                     help="session: exit instead of waiting when only the worker has work left")
     ap.add_argument("--retry-skipped", action="store_true", help="session: also offer skipped prompts")
     ap.add_argument("--include-screened", action="store_true",
                     help="session: also ask event lines for windows below the detection screen")
-    ap.add_argument("--redo", choices=["general", "event", "slope"], default=None)
+    ap.add_argument("--redo", choices=["general", "review", "event", "slope"], default=None)
     ap.add_argument("--window", type=int, default=None)
     ap.add_argument("--watch", action="store_true", help="worker: keep polling for new work")
     ap.add_argument("--out", default=None, help="export: CSV path")
@@ -229,7 +264,7 @@ def main():
     if not a.root and not a.folder:
         a.root = os.environ.get("SWP_RAW_DATA", "Z:/raw_data")
     {"session": cmd_session, "worker": cmd_worker, "status": cmd_status, "export": cmd_export,
-     "archive": cmd_archive}[a.command](a)
+     "archive": cmd_archive, "redetect": cmd_redetect}[a.command](a)
 
 
 if __name__ == "__main__":

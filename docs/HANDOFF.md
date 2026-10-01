@@ -1,9 +1,36 @@
 # shearWaveProcessing — handoff
 
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
-for the full passive-SWE investigation record. Last updated 2026-09-28.
+for the full passive-SWE investigation record. Last updated 2026-10-01.
 
-## 0. LATEST (2026-09-28): buffer-3 unwrap VERSION 2 applied to the whole study
+## 0. LATEST (2026-10-01): event windows by the valves detector + a window review
+
+See **`docs/passive_manual.md`** ("Window review", "Marking ROIs by eye", "Automatic MVC / AVC
+windows").
+- **The detector's window choice was a major source of error.** The user marked the windows by
+  eye on the whole-recording space-time of the general line (`scripts/passive_roi.py`, 27
+  folders, 81 ROIs).
+- **`swp.passive_valves`** reproduces those marks for MVC / AVC. Leave-one-subject-out, a fixed
+  120 ms window fully contains 24/24 AVC and 41/42 MVC ROIs. It works by:
+  - taking the peak of the 20 ms along-line energy in each search window;
+  - weighting it by the typical timing;
+  - placing a 120 ms window on it;
+  - screening the window out at a semblance below 0.3.
+
+  Atrial kicks are left out on purpose.
+- **Manual study:** `detect.picker: valves` is now the default. After the general line, the session
+  shows the windows on the whole-recording space-time to be moved, added or deleted (`review.json`).
+  Those reviewed windows are the events.
+- **The 27 folders read with the old detector are re-read** (`passive_manual.py redetect`).
+  Their old results are kept for reference:
+  `study/logs/passive_manual_reference_2026-10-01_energy/` (records + slopes CSV), a full copy in
+  `D:\Luuk van Knippenberg\Claude\passive_manual_reference_2026-10-01_energy\`, and the
+  in-folder `archive_*_redetect_valves/`.
+- Scripts: `study/analysis/passive_roi_prelim.py` (ROI integrity, 100 ms fit),
+  `passive_roi_auto_features.py` + `passive_roi_auto.py` (the picker study). Figure:
+  `study/montages/passive_roi_prelim/auto_vs_rois.png`.
+
+## 0. (2026-09-28): buffer-3 unwrap VERSION 2 applied to the whole study
 
 See `docs/buffer3_unwrap.md`, the 2026-09-28 sections.
 - **Trigger-log bug fixed.** `triggerlog.parse_sequence` now assigns every trigger to its mode

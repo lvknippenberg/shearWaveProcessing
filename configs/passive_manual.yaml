@@ -55,11 +55,19 @@ pipeline:
 #     (session --include-screened asks them anyway).
 # picker: semblance (pick the time by that score) was tried and rejected - see
 # docs/passive_manual_prelim_2026-09-29.md. Folders detected before 2026-09-29 keep their windows.
+#
+# picker: valves (the DEFAULT since 2026-10-01, swp.passive_valves): MVC / AVC only, fitted to the
+# ROIs marked by eye. In each search window, the peak of the 20 ms along-line energy of screen_view
+# (weighted by the typical timing) gets a fixed window_ms window; below screen_min it is screened.
+# The windows are then REVIEWED by hand in the session (moved / added / deleted) before the event
+# lines. band / quantity / mode / top_up / screen apply to picker: energy only. Folders detected
+# with picker: energy keep their windows until `passive_manual.py redetect`.
 detect:
   band: [5, 150]
   quantity: displacement
   mode: phase
-  picker: energy
+  picker: valves
+  window_ms: 120
   min_inside: 0.5
   top_up: true                # fill to 4 windows with the largest other energy bursts (as before)
   screen: true

@@ -56,8 +56,70 @@ def failed(p, what, key):
 
 
 # ------------------------------------------------------------------ detection
+def _r_peaks_buffer4(folder):
+    """(R-peaks on the buffer-4 clock [s], RR [s]) from the trigger log; (empty, None) without a
+    usable record (as study/analysis/passive_general_screen.py)."""
+    from ..acquisition.triggerlog import buffer_timing, clean_r_peaks
+    bt = buffer_timing(folder, 4)
+    if bt is not None:
+        kept, rr_ms = clean_r_peaks(bt.r_peaks_ms)
+        if kept is not None and rr_ms is not None and np.isfinite(rr_ms):
+            return (np.asarray(kept, float) - bt.t0_ms) * 1e-3, float(rr_ms) * 1e-3
+    return np.array([]), None
+
+
+def window_phases(windows, r_peaks_s, rr_s):
+    """Per window: label + phase of its t_peak since the preceding R-peak (keys as
+    swp.acquisition.triggerlog.label_event, which the slope prompt and the export read)."""
+    rp = np.asarray(r_peaks_s, float)
+    hr = 60.0 / rr_s if rr_s else np.nan
+    out = []
+    for w in windows:
+        before = rp[rp <= w["t_peak"] + 1e-9]
+        out.append(dict(label=w.get("label"),
+                        phase_ms=round(float((w["t_peak"] - before.max()) * 1e3), 1) if before.size else None,
+                        rr_ms=round(rr_s * 1e3, 1) if rr_s else None,
+                        hr_bpm=round(hr, 1) if np.isfinite(hr) else None,
+                        qs2_ms=round(546.0 - 2.1 * hr, 1) if np.isfinite(hr) else None))
+    return out
+
+
+def _detect_valves(folder, p, gen, cfg, acq, ml):
+    """detect.picker "valves": the whole-recording velocity space-time along the general line ->
+    automatic MVC / AVC windows (swp.passive_valves) -> windows.json (needs_review) + general_st.npz."""
+    from ..passive import _build_views
+    from ..passive_valves import WINDOW_S, valve_windows
+    from ..viz.pipeline import run_pipeline
+
+    det = cfg.get("detect", {})
+    view = str(det.get("screen_view", "velocity gauss"))
+    res = run_pipeline(acq, ml, dict(_build_views(cfg, acq))[view], focus=None)
+    v, r, t = np.asarray(res.st.data, np.float32), np.asarray(res.st.r), np.asarray(res.st.t)
+    rp, rr = _r_peaks_buffer4(folder)
+    ws = valve_windows(v, r, t, rp, rr, window_s=float(det.get("window_ms", WINDOW_S * 1e3)) * 1e-3,
+                       screen_min=float(det.get("screen_min", 0.3)))
+    windows = [dict(t_peak=w["t_burst"], t0=w["t0"], t1=w["t1"], label=w["label"], expect=w["label"],
+                    score=None, screen=w["sem"], speed_m_s=w["c"], screened=w["screened"],
+                    search=[w["search_lo"], w["search_hi"]]) for w in ws]
+    np.savez_compressed(p.general_st, v=v, r=r, t=t, r_peaks_s=rp, rr_s=np.array(np.nan if rr is None else rr),
+                        general_hash=np.array(gen["hash"]), view=np.array(view))
+    try:
+        from ..acquisition.rrcheck import assess_rr
+        ecg = assess_rr(folder).as_row()
+    except Exception as exc:                                    # noqa: BLE001 - advisory only
+        ecg = dict(error=str(exc))
+    from ..provenance import provenance
+    S.write_json(p.windows_json, dict(
+        key=dict(general_hash=gen["hash"], detect=det), needs_review=True,
+        hash=S.windows_hash(windows), windows=windows, window_phases=window_phases(windows, rp, rr),
+        ecg=ecg, roi=list(acq.meta["roi"]), provenance=provenance(config=cfg)))
+    return windows
+
+
 def detect(folder):
-    """General line -> event windows (phase-aware, as configs/passive.yaml) -> windows.json."""
+    """General line -> event windows -> windows.json. Default detector since 2026-10-01:
+    ``detect.picker: valves`` (reviewed by hand next); otherwise the earlier phase-aware energy
+    detector (as configs/passive.yaml)."""
     from ..passive import detect_windows, label_windows
     from ..viz.mline import mline_from_points
 
@@ -69,6 +131,8 @@ def detect(folder):
     acq = _load(p, [pts])
     ml = mline_from_points(pts, S.N_SAMPLES)
     det = cfg.get("detect", {})
+    if str(det.get("picker", "energy")).lower() == "valves":
+        return _detect_valves(folder, p, gen, cfg, acq, ml)
     track = None
     if det.get("screen") or str(det.get("picker", "energy")).lower() == "semblance":
         # score every 100 ms window of the general line (swp.passive_screen); since 2026-09-29
@@ -112,7 +176,7 @@ def process(folder, idxs):
     from ._light import display_8bit
 
     p = S.Paths(folder)
-    win = S.read_json(p.windows_json)
+    win = S.event_windows(p)
     ev = S.read_json(p.events_json)["events"]
     lines = {i: S.load_points(p.event_npz(i)) for i in idxs}
     cfg = _cfg()

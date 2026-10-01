@@ -250,7 +250,9 @@ draw-events | reprocess | status` — see **[docs/passive_mlines.md](docs/passiv
 `draw-events --defer-process` (so 2.5 min of processing does not stall every prompt) and then run
 `reprocess`.
 
-**Whole-study manual reading (from 2026-09-25):** `scripts/passive_manual.py session` - M-lines
+**Whole-study manual reading (from 2026-09-25):** `scripts/passive_manual.py session` - general
+M-line -> automatic MVC / AVC windows (`swp.passive_valves`, 120 ms) reviewed by hand on the
+whole-recording space-time (since 2026-10-01) -> M-lines
 with buffers 1 | 3 | 4 side by side at the R-peak / the event's phase (drawn on any, motion-corrected
 onto buffer 4), and one hand slope mirrored on five views (displacement, velocity median/Gaussian,
 Keijzer, acceleration). Resumable at every prompt; see **[docs/passive_manual.md](docs/passive_manual.md)**.
@@ -305,8 +307,11 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                          widebeam buffers - each transmit reconstructs only where it insonified),
                        passive_study.py (passive M-lines + processing + event labels over a study;
                          draw | process | draw-events | reprocess | label | status),
-                       passive_manual.py (whole-study manual reading: 3-buffer M-lines, 5-view
-                         hand slopes, background workers; session | worker | status | export),
+                       passive_manual.py (whole-study manual reading: general line, window
+                         review, 3-buffer M-lines, 5-view hand slopes, background workers;
+                         session | worker | status | export | archive | redetect),
+                       passive_roi.py (ROIs marked by eye on the whole-recording general-line
+                         space-time; session | status | export | auto),
                        linux_validation.py (re-run one folder elsewhere and compare to output/),
                        draw_passive_mlines.py (legacy: buffer-4 cine general M-lines),
                        gif_montage.py (synchronised montage of several GIFs),
@@ -346,6 +351,8 @@ src/swp/
                        pushvoltage.py reads the delivered ARF push voltage (TPC profile) from a folder;
                        triggerlog.py places buffer frames on the ECG and labels cardiac events
   passive.py           passive burst-window workflow (detect / draw / process, montages, labels)
+  passive_valves.py    automatic MVC / AVC windows on the general line (fitted to the ROIs marked by eye)
+  manual/              the whole-study manual reading (store, worker, session, line / slope / window editors)
   mline/               interactive M-line selection, ported from SWI/Zea/swi_mline.py
   viz/                 stage 3 core, ported from iq2sws (io/core/estimators/filters/speed/viz/metrics/pipeline/runconfig)
 ```

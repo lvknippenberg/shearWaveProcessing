@@ -1,0 +1,107 @@
+{
+ "0": {
+  "line_hash": "a510e483921c",
+  "st_hash": "ba9d0e98ab5e",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 3.7953091684434974,
+    "semblance": 0.8771076281876633
+   },
+   "velocity median": {
+    "speed_m_s": 3.384030418250951,
+    "semblance": 0.8382091165336687
+   },
+   "velocity gauss": {
+    "speed_m_s": 3.384030418250951,
+    "semblance": 0.8742411210787101
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 3.384030418250951,
+    "semblance": 0.845655358039962
+   },
+   "acceleration": {
+    "speed_m_s": 3.384030418250951,
+    "semblance": 0.6923208558576482
+   }
+  },
+  "mline_length_mm": 29.50382224359803,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:16:33"
+ },
+ "1": {
+  "line_hash": "2482cb794b3d",
+  "st_hash": "b6776060ac55",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 4.529262086513995,
+    "semblance": 0.3647506642954444
+   },
+   "velocity median": {
+    "speed_m_s": 5.615141955835963,
+    "semblance": 0.18427604987923607
+   },
+   "velocity gauss": {
+    "speed_m_s": 5.297619047619048,
+    "semblance": 0.24132870961954841
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 8.018018018018019,
+    "semblance": 0.22436266387258127
+   },
+   "acceleration": {
+    "speed_m_s": 4.320388349514563,
+    "semblance": 0.16118893616959198
+   }
+  },
+  "mline_length_mm": 29.305997597514548,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:32:07"
+ },
+ "2": {
+  "line_hash": "f72bda16fa85",
+  "st_hash": "5aa2e9eb12e6",
+  "auto": {
+   "displacement gauss": {
+    "speed_m_s": 8.768472906403941,
+    "semblance": 0.8871126050765864
+   },
+   "velocity median": {
+    "speed_m_s": 3.6475409836065578,
+    "semblance": 0.3020227748503341
+   },
+   "velocity gauss": {
+    "speed_m_s": 16.48148148148148,
+    "semblance": 0.44178952659260295
+   },
+   "Keijzer velocity": {
+    "speed_m_s": 2.5538020086083217,
+    "semblance": 0.5870211967599014
+   },
+   "acceleration": {
+    "speed_m_s": -2.486033519553073,
+    "semblance": 0.2622011638204805
+   }
+  },
+  "mline_length_mm": 21.833374254412412,
+  "views": [
+   "displacement gauss",
+   "velocity median",
+   "velocity gauss",
+   "Keijzer velocity",
+   "acceleration"
+  ],
+  "time": "2026-09-29 14:32:54"
+ }
+}

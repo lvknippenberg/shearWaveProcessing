@@ -1,0 +1,142 @@
+{
+ "key": {
+  "general_hash": "91e27c9216c6",
+  "detect": {
+   "band": [
+    5,
+    150
+   ],
+   "quantity": "displacement",
+   "mode": "phase"
+  },
+  "window_ms": 100.0,
+  "max_events": 4,
+  "overview_stride": 2
+ },
+ "hash": "91a757fc188e",
+ "windows": [
+  {
+   "t_peak": 0.04968000203371048,
+   "t0": 0.0010800000745803118,
+   "t1": 0.09968000203371048,
+   "score": 0.00044332602452302593,
+   "label": "MVC",
+   "expect": "MVC"
+  },
+  {
+   "t_peak": 0.44064000248908997,
+   "t0": 0.39064000248909,
+   "t1": 0.49064000248908995,
+   "score": 0.0005940047912240283,
+   "label": "AVC",
+   "expect": "AVC"
+  },
+  {
+   "t_peak": 0.7873200178146362,
+   "t0": 0.7373200178146362,
+   "t1": 0.8373200178146363,
+   "score": 0.0003464070706782759,
+   "label": "MVC",
+   "expect": "MVC"
+  },
+  {
+   "t_peak": 0.9450000524520874,
+   "t0": 0.8950000524520874,
+   "t1": 0.9950000524520874,
+   "score": 7.954415707221481e-05,
+   "label": "AVC",
+   "expect": "AVC"
+  }
+ ],
+ "window_phases": [
+  {
+   "label": "MVC",
+   "phase_ms": 49.7,
+   "to_next_r_ms": 645.3,
+   "rr_ms": 712.0,
+   "hr_bpm": 84.3,
+   "qs2_ms": 369.0,
+   "next_r_logged": true
+  },
+  {
+   "label": "AVC",
+   "phase_ms": 440.6,
+   "to_next_r_ms": 254.4,
+   "rr_ms": 712.0,
+   "hr_bpm": 84.3,
+   "qs2_ms": 369.0,
+   "next_r_logged": true
+  },
+  {
+   "label": "MVC",
+   "phase_ms": 92.3,
+   "to_next_r_ms": 608.7,
+   "rr_ms": 712.0,
+   "hr_bpm": 84.3,
+   "qs2_ms": 369.0,
+   "next_r_logged": true
+  },
+  {
+   "label": "AVC",
+   "phase_ms": 250.0,
+   "to_next_r_ms": 451.0,
+   "rr_ms": 712.0,
+   "hr_bpm": 84.3,
+   "qs2_ms": 369.0,
+   "next_r_logged": true
+  }
+ ],
+ "ecg": {
+  "folder": "Z:\\raw_data\\C000000001\\SWE_01_SW_data_21-April-2026_12-12-54",
+  "status": "ok",
+  "quality": "clean",
+  "messages": "4 beat(s) span the passive block and all are plausible (687-723 ms); record-level irregularities elsewhere do not affect these phases.",
+  "n_triggers": 12,
+  "n_rr": 11,
+  "n_corrected": 0,
+  "n_rr_short": 0,
+  "n_rr_long": 0,
+  "n_rr_outliers": 0,
+  "frac_rr_short": 0.0,
+  "short_rr_median_ms": NaN,
+  "rr_median_ms": 712.0,
+  "rr_sd_ms": 20.65457746476393,
+  "rr_cv": 0.029191873585044742,
+  "rr_min_ms": 675.0,
+  "rr_max_ms": 740.0,
+  "rmssd_ms": 12.17374223482656,
+  "hr_bpm": 84.26966292134831,
+  "gating_error_us": 0.0,
+  "n_rr_local": 4,
+  "n_local_bad": 0,
+  "local_rr_min_ms": 687.0,
+  "local_rr_max_ms": 723.0
+ },
+ "roi": [
+  -0.03582395671876088,
+  0.022678874031955475,
+  0.04235727560583599,
+  0.06625250361952713
+ ],
+ "provenance": {
+  "swp_version": "0.1.0",
+  "swp_git_commit": "b793008ebbda09340e455577bd82989a45a4eb5f",
+  "swp_git_branch": "main",
+  "swp_git_dirty": "3 modified: docs/passive_manual.md, src/swp/manual/store.py, tests/test_manual.py",
+  "swp_git_diff_sha256": "8754fb07c0bc4fd22e0873b54156d17b7772e345ad1d950fdf4021e27a4c8f0d",
+  "zea_version": "0.1.1",
+  "zea_source": "D:/Luuk van Knippenberg/Github/zea",
+  "zea_git_commit": "8c2699fd32b969582049d0f704ac3edb862910be",
+  "zea_git_branch": "verasonics-multibuffer-clean",
+  "zea_git_dirty": "",
+  "numpy": "2.5.0",
+  "scipy": "1.18.0",
+  "python": "3.12.13",
+  "host": "EEMATLAB-OP02",
+  "created_utc": "2026-09-29T08:20:33+00:00",
+  "keras_backend": "torch",
+  "command": "passive_manual.py worker --watch --root Z:/raw_data",
+  "config_sha256": "9fbfe76e13d2b662d4676539e9083b48c10ae97cff676663254d3b8aacfd2370",
+  "config_json": "{\"data\":{\"bmode\":\"CombinedData_buffer4_iq.hdf5\",\"ecg\":null,\"file\":\"CombinedData_buffer4_iq.hdf5\",\"grid_dir\":\"\",\"root\":\"Z:\\\\raw_data\\\\C000000001\\\\SWE_01_SW_data_21-April-2026_12-12-54\\\\output\"},\"detect\":{\"band\":[5,150],\"mode\":\"phase\",\"quantity\":\"displacement\"},\"focus\":{\"mode\":\"auto\"},\"mline\":{\"n_samples\":250,\"npz\":\"mlines/passive_mline.npz\",\"offset_step_mm\":0.5,\"offsets\":5,\"type\":\"manual\"},\"pipeline\":{\"directional\":false,\"directional_mode\":\"leftward\",\"drop_first\":1,\"estimator\":\"loupas\",\"estimator_params\":{},\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"iq_filters\":[],\"mode\":\"frame_to_frame\",\"quantity\":\"velocity\",\"speed\":\"ttp_ransac\"},\"run\":{\"bands\":[[5,150]],\"measurement\":0,\"outdir\":\"swp_passive_manual\",\"views\":[{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":10}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"displacement gauss\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"displacement\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_median\",\"params\":{\"size_x_mm\":2.0,\"size_z_mm\":1.0}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"velocity median\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":15}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}},{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}}],\"name\":\"velocity gauss\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"estimator_params\":{\"kernel_shape\":\"gaussian\",\"kernel_x_mm\":3.0,\"kernel_z_mm\":4.0},\"field_filters\":[{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":100,\"f_lo\":15,\"order\":3}}],\"iq_filters\":[{\"name\":\"iq_slowtime_lowpass\",\"params\":{\"fc_hz\":250.0,\"order\":3}}],\"name\":\"Keijzer velocity\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"velocity\"},{\"directional\":false,\"field_filters\":[{\"name\":\"temporal_moving_mean\",\"params\":{\"window\":3}},{\"name\":\"temporal_bandpass\",\"params\":{\"f_hi\":150,\"f_lo\":10}},{\"name\":\"spatial_smooth\",\"params\":{\"sigma_x_mm\":1.2,\"sigma_z_mm\":0.6}}],\"name\":\"acceleration\",\"offset_step_mm\":0.5,\"offsets\":5,\"quantity\":\"acceleration\"}]}}"
+ }
+}
