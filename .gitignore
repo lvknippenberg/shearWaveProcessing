@@ -44,3 +44,10 @@ study/analysis/unwrap_cache/
 study/analysis/general_screen_cache/
 study/analysis/roi_auto_cache/
 study/montages/passive_general/all_folders.pdf
+
+# 2D wave maps: videos / GIFs / stills stay local (~12 MB per event); the demo event is committed
+study/montages/passive_wave_map/*.mp4
+study/montages/passive_wave_map/*.gif
+study/montages/passive_wave_map/*_still.png
+!study/montages/passive_wave_map/C000000027_MVC_w2.mp4
+!study/montages/passive_wave_map/C000000027_MVC_w2_still.png

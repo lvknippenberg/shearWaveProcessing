@@ -1,0 +1,221 @@
+  2 background worker(s) -> study/logs/passive_manual_worker*_20261001.log
+reading the state of 724 folder(s) ...
+  3 s
+  need-general 697, need-review 27  |  event lines to draw 0, slopes to draw 0, slopes done 0
+  windows: MVC 2-122, AVC 251-371, MVC 667-787
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +3.95 m/s
+  slope 1: confidence 2 (plausible), +9.67 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 331-451
+  event 0: buffer 4
+  event 1: buffer 4
+  windows: MVC 2-122, AVC 308-428
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 2: confidence 3 (clear), +4.76 m/s
+  slope 0: confidence 3 (clear), +5.62 m/s
+  slope 1: confidence 3 (clear), +7.17 m/s
+  windows: MVC 2-122, MVC 808-928
+  event 0: buffer 4
+  slope 0: confidence 1 (guess), +1.29 m/s
+  slope 1: confidence 2 (plausible), +4.76 m/s
+  slope 0: confidence 2 (plausible), +5.62 m/s
+  event 1: buffer 4
+  windows: MVC 105-225, AVC 616-736
+  event 0: buffer 4
+  slope 1: confidence 3 (clear), +4.77 m/s
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +6.23 m/s
+  slope 1: confidence 1 (guess), +3.51 m/s
+  windows: AVC 453-573, MVC 812-932
+  event 0: buffer 4
+  event 1: buffer 4
+  windows: MVC 2-122, AVC 299-419, AK 737-857, MVC 846-966
+  event 0: buffer 4
+  slope 0: confidence 1 (guess), +9.35 m/s
+  slope 1: confidence 3 (clear), +10.81 m/s
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +6.56 m/s
+  slope 1: confidence 2 (plausible), +2.98 m/s
+  event 2: buffer 4
+  event 3: buffer 4
+  slope 2: confidence 1 (guess), +5.65 m/s
+  slope 3: confidence 1 (guess), +6.01 m/s
+  windows: MVC 2-122, AVC 285-405, MVC 700-820
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +2.78 m/s
+  slope 1: confidence 1 (guess), +5.30 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 276-396, AK 702-822, MVC 847-967
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 1 (guess), +2.09 m/s
+  slope 2: confidence 2 (plausible), +1.71 m/s
+  slope 1: confidence 3 (clear), +5.62 m/s
+  event 2: buffer 4
+  event 3: buffer 4
+  slope 2: confidence 1 (guess), +9.90 m/s
+  slope 3: confidence 2 (plausible), +2.49 m/s
+  windows: MVC 2-122, AVC 733-853, AVC 857-977
+  back to review C000000012/VIS-014_SW_data_07-July-2026_11-41-37
+  windows: MVC 2-122, AK 733-853, AVC 857-977
+  event 0: buffer 4
+  event 1: buffer 4
+  event 2: buffer 4
+  slope 0: confidence 2 (plausible), +3.16 m/s
+  slope 1: confidence 3 (clear), +1.47 m/s
+  slope 2: confidence 3 (clear), +3.07 m/s
+  windows: MVC 2-122, AVC 260-380, MVC 638-758
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +4.32 m/s
+  slope 1: confidence 3 (clear), +4.32 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 366-486, MVC 1005-1125
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +5.80 m/s
+  slope 2: confidence 2 (plausible), +1.51 m/s
+  slope 1: confidence 3 (clear), +3.96 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 275-395, MVC 614-734, AVC 923-1043
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 2: confidence 3 (clear), +4.77 m/s
+  slope 0: confidence 1 (guess), +7.39 m/s
+  slope 1: confidence 2 (plausible), +8.02 m/s
+  event 2: buffer 4
+  event 3: buffer 4
+  slope 2: confidence 2 (plausible), +3.46 m/s
+  slope 3: confidence 3 (clear), +7.39 m/s
+  windows: MVC 2-122, AVC 324-444, MVC 878-998
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +2.55 m/s
+  slope 1: confidence 3 (clear), +5.97 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 281-401, MVC 686-806, AVC 981-1101
+  event 0: buffer 4
+  event 1: buffer 3, moved 1.0 mm
+  event 2: buffer 4
+  slope 0: confidence 2 (plausible), +3.00 m/s
+  slope 1: confidence 2 (plausible), +2.05 m/s
+  slope 2: confidence 3 (clear), +2.63 m/s
+  slope 2: confidence 2 (plausible), +2.79 m/s
+  event 3: buffer 4
+  windows: MVC 5-125, AVC 392-512
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 3: confidence 3 (clear), +2.05 m/s
+  windows: MVC 10-130, AVC 352-472
+  event 0: buffer 4
+  event 1: buffer 4
+  windows: MVC 14-134, AVC 334-454, MVC 846-966
+  event 0: buffer 4
+  slope 0: confidence 3 (clear), +3.96 m/s
+  slope 1: confidence 3 (clear), +5.01 m/s
+  slope 0: confidence 3 (clear), +2.77 m/s
+  slope 1: confidence 3 (clear), +6.38 m/s
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +2.70 m/s
+  event 2: buffer 4
+  slope 1: confidence 3 (clear), +2.49 m/s
+  slope 2: confidence 2 (plausible), +3.02 m/s
+  windows: MVC 2-122, AVC 291-411, MVC 892-1012
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +5.67 m/s
+  slope 1: confidence 3 (clear), +3.05 m/s
+  event 2: buffer 4
+  windows: MVC 53-173, AVC 390-510, MVC 839-959
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +2.42 m/s
+  slope 1: confidence 3 (clear), +4.76 m/s
+  event 2: buffer 4
+  slope 2: confidence 2 (plausible), +6.79 m/s
+  windows: MVC 2-122, AVC 299-419, MVC 812-932
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +3.38 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 294-414, MVC 868-988
+  slope 2: confidence 3 (clear), +2.78 m/s
+  slope 1: confidence 3 (clear), +4.03 m/s
+  slope 2: confidence 3 (clear), +3.96 m/s
+  event 0: buffer 4
+  event 1: buffer 4
+  event 2: buffer 4
+  slope 0: confidence 1 (guess), +7.10 m/s
+  slope 1: confidence 3 (clear), +6.38 m/s
+  slope 2: confidence 2 (plausible), +2.25 m/s
+  windows: MVC 2-122, AVC 324-444, MVC 864-984
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 3 (clear), +3.05 m/s
+  event 2: buffer 4
+  slope 1: confidence 3 (clear), +3.80 m/s
+  windows: MVC 2-122, AVC 296-416, MVC 1079-1199
+  event 0: buffer 4
+  slope 2: confidence 3 (clear), +3.05 m/s
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +3.50 m/s
+  slope 1: confidence 3 (clear), +4.26 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 281-401, MVC 845-965
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 2: confidence 3 (clear), +2.37 m/s
+  slope 0: confidence 1 (guess), +5.62 m/s
+  slope 1: confidence 1 (guess), +4.29 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 338-458, MVC 827-947
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 2: confidence 1 (guess), +11.25 m/s
+  slope 0: confidence 1 (guess), -9.67 m/s
+  slope 1: confidence 2 (plausible), +6.12 m/s
+  event 2: buffer 4
+  windows: MVC 6-126, AVC 364-484, MVC 906-1026
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +2.50 m/s
+  slope 1: confidence 3 (clear), +6.85 m/s
+  event 2: buffer 4
+  general line: buffer 4
+  general line: buffer 4
+  slope 2: confidence 1 (guess), -8.12 m/s
+  slope 2: confidence 2 (plausible), +5.60 m/s
+  windows: MVC 2-122, AVC 401-521, MVC 800-920
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +6.50 m/s
+  slope 1: confidence 0 (none)
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 355-475, AK 1020-1140
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +7.00 m/s
+  slope 2: confidence 1 (guess), +3.00 m/s
+  slope 1: confidence 2 (plausible), +6.10 m/s
+  event 2: buffer 4
+  general line: buffer 4
+  slope 2: confidence 3 (clear), +1.29 m/s
+  general line: buffer 4
+  general line: buffer 4
+  general line: buffer 4
+  general line: buffer 4
+  general line: buffer 4
+  general line: buffer 4
+  windows: MVC 2-122, AVC 348-468, MVC 1054-1174
+  event 0: buffer 4
+  event 1: buffer 4
+  slope 0: confidence 2 (plausible), +2.51 m/s
+  slope 1: confidence 2 (plausible), +5.86 m/s
+  event 2: buffer 4
+  windows: MVC 2-122, AVC 413-533, MVC 836-956
+  event 0: buffer 4
+stopped - everything accepted so far is saved; run again to continue.

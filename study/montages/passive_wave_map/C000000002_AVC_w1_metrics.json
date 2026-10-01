@@ -1,0 +1,19 @@
+{
+ "subject": "C000000002",
+ "folder": "Z:/raw_data/C000000002/SWE02_SW_data_28-April-2026_10-09-45",
+ "window": 1,
+ "label": "AVC",
+ "confidence": 3,
+ "hand_m_s": 7.173913043478262,
+ "ref_pixels": 169,
+ "c2d": 11.521339797922355,
+ "theta_deg": 25.448876695156148,
+ "c_line_pred": 12.759396024532737,
+ "c_line_tau": 22.652976709704625,
+ "r2": 0.48805705097633323,
+ "n_fit": 1986,
+ "frac_coherent": 0.8114886731391586,
+ "origin_to_star_mm": 3.7481792470609587,
+ "origin_off_line_mm": 0.43054190112293844,
+ "origin_r_mm": 3.7323794503187413
+}

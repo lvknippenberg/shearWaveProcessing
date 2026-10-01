@@ -41,6 +41,9 @@ machine.
 pre-loaded, so ENTER accepts them. After that come the remaining folders, sorted. `Strain_data`
 folders are not listed (no passive buffer).
 
+**Preliminary results of the re-reading, the "two slopes" pattern and the 2D wave maps:**
+[passive_manual_prelim_2026-10-01.md](passive_manual_prelim_2026-10-01.md).
+
 **Re-read from 2026-10-01 with the window review.** The 27 folders read with the energy
 detector (C000000001-31) were moved onto the valves detector with `redetect`. Their general lines
 and ROIs stay. Windows, event lines, space-times and slopes were archived in each folder
@@ -122,9 +125,12 @@ same machine is released immediately (another host's lock after 3 h).
   otherwise buffer 1, otherwise buffer 3.
 - Points can be clicked in any order; the first click is r = 0 (the yellow star).
 - While drawing, the other panels show the same coordinates dashed.
-- ENTER registers the drawn buffer onto the others (`swp.mline.transfer`: anatomy-scale phase
-  correlation in a box around the line, an ensemble of box sizes, and a known-shift check). This
-  shows:
+- **Drawn on buffer 4** (the usual case since 2026-10-01: all lines are drawn on buffer 4, with
+  buffers 1 and 3 only to read the anatomy): **one ENTER accepts.** The saved line is exactly the
+  one drawn, so there is nothing to register and no review step.
+- **Drawn on buffer 1 or 3:** the first ENTER registers the line onto buffer 4
+  (`swp.mline.transfer`: anatomy-scale phase correlation in a box around the line, an ensemble of
+  box sizes, and a known-shift check). This shows:
   - the moved lines on the other buffers (orange);
   - the line that will be saved on buffer 4 (green);
   - whether the registration is **trusted**: ensemble agreement ≥ 0.6 and known-shift error
@@ -135,7 +141,7 @@ same machine is released immediately (another host's lock after 3 h).
 | key | |
 |---|---|
 | click / drag / right-click | add / move / delete a point |
-| ENTER | map and review; ENTER again accepts |
+| ENTER | buffer 4: accept. Buffer 1 / 3: map and review; ENTER again accepts |
 | `c` | clear the line (to draw on another buffer) |
 | arrows, shift+arrows | nudge the green buffer-4 line by 0.25 / 1 mm (review) |
 | `i` | motion correction on / off (review) |
@@ -162,10 +168,11 @@ same machine is released immediately (another host's lock after 3 h).
 - **No valid ECG.** When `swp.acquisition.rrcheck` rejects the R-peak record (for example
   C000000005: "unusable: sparse"), every "R-peak" / "R+x ms" is meaningless. The titles then say
   NO VALID ECG, and buffer 1 is chosen by anatomy match to buffer 4.
-- **Every mirrored line carries a verdict.** In review, each non-source panel shows the registered
-  line (orange = trusted, red dotted = not trusted, verdict in the title) and the uncorrected
-  coordinates (dashed white). When you draw on buffer 4, the saved line is exactly what you drew;
-  the registration only moves the display lines on buffers 1 and 3.
+- **Every mirrored line carries a verdict** (lines drawn on buffer 1 / 3). In review, each
+  non-source panel shows the registered line (orange = trusted, red dotted = not trusted, verdict
+  in the title) and the uncorrected coordinates (dashed white). Lines drawn on buffer 4 are saved
+  as drawn. Since 2026-10-01 they are accepted without this review, because it only moved the
+  display lines on buffers 1 and 3.
 
 **Why the registration.** Buffers 1 and 3 are recorded in other heartbeats than buffer 4. At the
 same cardiac phase the heart still sits a median 0.8 mm (buffer 1) to 3.1 mm (buffer 3) away, and

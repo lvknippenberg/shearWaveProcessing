@@ -1,0 +1,19 @@
+{
+ "subject": "C000000007",
+ "folder": "Z:/raw_data/C000000007/VIS-007_SW_data_30-June-2026_11-45-50",
+ "window": 1,
+ "label": "MVC",
+ "confidence": 3,
+ "hand_m_s": 10.809999999999999,
+ "ref_pixels": 167,
+ "c2d": 5.324217121158161,
+ "theta_deg": 89.16222472034893,
+ "c_line_pred": Infinity,
+ "c_line_tau": 77.23996594951295,
+ "r2": 0.2373899351077684,
+ "n_fit": 2793,
+ "frac_coherent": 0.8861574480538484,
+ "origin_to_star_mm": 30.916124375869664,
+ "origin_off_line_mm": 7.697639785246317,
+ "origin_r_mm": 29.94009290287931
+}

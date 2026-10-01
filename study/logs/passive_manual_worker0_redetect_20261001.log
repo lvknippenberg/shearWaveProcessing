@@ -1,0 +1,34 @@
+worker on 724 folder(s)
+  detect  Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-12-54
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+    3 window(s), 63 s
+  detect  Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-09-45
+    2 window(s), 8 s
+  detect  Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-09-42
+    2 window(s), 10 s
+  detect  Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_10-58-59
+    3 window(s), 8 s
+  detect  Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-20
+    0 window(s), 5 s
+  detect  Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-45-50
+    0 window(s), 7 s
+  detect  Z:\raw_data\C000000008\VIS-010_SW_data_03-July-2026_10-36-33
+    3 window(s), 7 s
+  detect  Z:\raw_data\C000000010\vis-006_SW_data_30-June-2026_09-43-28
+    3 window(s), 8 s
+  detect  Z:\raw_data\C000000011\VIS-11_SW_data_07-July-2026_08-40-05
+    3 window(s), 8 s
+  detect  Z:\raw_data\C000000012\VIS-014_SW_data_07-July-2026_11-41-37
+    0 window(s), 7 s
+  detect  Z:\raw_data\C000000013\VIS-016_SW_data_10-July-2026_10-11-11
+    4 window(s), 8 s
+  detect  Z:\raw_data\C000000014\VIS-008_SW_data_10-July-2026_08-36-06
+    0 window(s), 8 s
+  detect  Z:\raw_data\C000000015\VIS-017_SW_data_10-July-2026_10-53-28
+    4 window(s), 9 s
+  detect  Z:\raw_data\C000000016\VIS-015_SW_data_10-July-2026_09-24-32
+    3 window(s), 7 s
+  detect  Z:\raw_data\C000000018\VIS-012_SW_data_07-July-2026_09-21-31
+    4 window(s), 10 s
+  detect  Z:\raw_data\C000000019\VIS-027_SW_data_21-July-2026_11-19-20
+    2 window(s), 7 s

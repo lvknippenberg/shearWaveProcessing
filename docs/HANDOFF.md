@@ -3,7 +3,21 @@
 Session-to-session context for continuing this repo. **Read this first**, then `docs/passive_search.md`
 for the full passive-SWE investigation record. Last updated 2026-10-01.
 
-## 0. LATEST (2026-10-01): event windows by the valves detector + a window review
+## 0. LATEST (2026-10-01, later): re-reading results, two slopes, 2D wave maps
+
+See **`docs/passive_manual_prelim_2026-10-01.md`**.
+- 30 folders / 86 windows re-read with the window review: AVC usable 44 % -> 84 %, 16 -> 1 zero
+  scores. MVC is scored more strictly (usable 85 -> 80 %). Speeds: MVC 3.4, AVC 4.9 m/s (medians).
+- "Two slopes" (C11): rigid in-phase motion of the basal block (a 2D region), then the shear wave
+  runs on. Occurs in 26/86 windows. Fit the distal slope.
+- 2D wave maps (`study/analysis/passive_wave_map.py`, demo video
+  `study/montages/passive_wave_map/C000000027_MVC_w2.mp4`). On the 39 confidence-3 events the
+  arrival-time slope along the line matches the hand slope (median 1.03), independent of the
+  slider. Waves start at the base, 4-6 mm off the line, and run towards the apex.
+- **Anchoring:** 39/85 slopes are at exactly the automatic start tilt. Open point.
+- M-line editor: a line drawn on buffer 4 is accepted with ONE ENTER (no registration review).
+
+## 0. (2026-10-01): event windows by the valves detector + a window review
 
 See **`docs/passive_manual.md`** ("Window review", "Marking ROIs by eye", "Automatic MVC / AVC
 windows").

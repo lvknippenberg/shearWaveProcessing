@@ -1,0 +1,9 @@
+40 events (MVC 20, AVC 18, AK 2); plane fit R2 >= 0.5 in 34 (median R2 0.85, coherent fraction of the septum band median 0.69)
+arrival slope along the line / hand slope: median 1.03 (IQR 0.96-1.21, n=40)
+direction-predicted along-line speed / hand: median 1.21 (IQR 0.99-1.35, n=34)
+2D speed / hand: median 0.97 (IQR 0.84-1.22, n=34)
+  AK (n=1): 2D speed median 1.79 m/s, hand 1.47 m/s, angle to the line median 33 deg (IQR 33-33), origin 4 mm off the line, 0 mm along it
+  AVC (n=15): 2D speed median 4.51 m/s, hand 4.26 m/s, angle to the line median 32 deg (IQR 24-39), origin 6 mm off the line, 0 mm along it
+  MVC (n=18): 2D speed median 3.16 m/s, hand 3.22 m/s, angle to the line median 34 deg (IQR 28-40), origin 4 mm off the line, 0 mm along it
+angle > 30 deg (along-line speed >= 15 % above the 2D speed): 23/34; wave travelling towards r = 0 (angle > 90 deg): 0
+C000000011 two-slope MVC: hand 2.09, arrival slope on the line 2.15, 2D 1.81 m/s at 42 deg (R2 0.81), origin 6 mm off the line at r = 0 mm

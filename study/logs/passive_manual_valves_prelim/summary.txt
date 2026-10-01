@@ -1,0 +1,16 @@
+new reading: 30 folders, 86 windows with a score (MVC 51, AVC 31, AK 4)
+  new (valves + review): AVC n=31 usable(>=2) 84% clear 58% zero 1; MVC n=51 usable(>=2) 80% clear 37% zero 0
+  old (energy), same folders: AVC n=34 usable(>=2) 44% clear 29% zero 16; MVC n=39 usable(>=2) 85% clear 59% zero 3
+  matched to an old window (same label, peak < 60 ms): 48 of 86; confidence up 4, same 31, down 13
+  both usable (40): new/old speed median 1.00, |diff| median 0.47 m/s
+window review (30 folders): proposed 77, accepted 87: kept 74, moved 1 (median 6 ms), added 12, deleted 2
+  fully automatic windows vs the accepted MVC/AVC windows: 55/83 (>= 95 % overlap), 71/83 >= 80 %, none 10
+hand speed AVC (conf >= 2, n=26): median 4.89 m/s, IQR 3.84-6.31; >= 6 m/s (lower bound) 9
+hand speed MVC (conf >= 2, n=41): median 3.38 m/s, IQR 2.70-5.60; >= 6 m/s (lower bound) 6
+MVC beat to beat (both usable, 14 folders): |diff| / mean median 17 %
+auto velocity gauss / hand (conf >= 2, not railed 61): median 1.00
+auto Keijzer velocity / hand (conf >= 2, not railed 61): median 1.09
+auto displacement gauss / hand (conf >= 2, not railed 63): median 0.94
+in-phase basal segment (velocity gauss): >= 10 mm in 26/86 windows (MVC 13/51, AVC 12/31); median 7 mm
+  auto/hand in-phase >= 10 mm (n=14): median 1.00
+  auto/hand in-phase < 10 mm (n=48): median 1.00
