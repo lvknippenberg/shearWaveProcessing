@@ -1,0 +1,18 @@
+27 folders done, 81 ROIs (MVC 43, AVC 24, other 14)
+integrity: no problems
+duration ms: median 80, IQR 71-89, range 57-134; 75 expand, 6 trim
+to 100 ms: change median +20 ms, |change| > 20 ms in 43
+trimmed ROIs keep (centre placement) 92 % of the ROI (min 74 %)
+energy vs centre placement: |shift| median 4 ms, > 10 ms in 15, max 19 ms
+semblance vs centre placement: |shift| median 4 ms, > 10 ms in 14, max 17 ms
+centre window clipped at a record end: 18
+ROIs starting in the first 30 ms (filter edge): 25 (C000000001 MVC, C000000002 MVC, C000000003 MVC, C000000004 MVC, C000000008 MVC, C000000010 MVC, C000000011 MVC, C000000012 other, C000000013 MVC, C000000014 other, C000000015 MVC, C000000016 MVC, C000000018 MVC, C000000019 MVC, C000000020 MVC, C000000021 MVC, C000000022 MVC, C000000023 MVC, C000000025 MVC, C000000026 MVC, C000000027 MVC, C000000028 MVC, C000000029 MVC, C000000030 MVC, C000000031 MVC)
+general-line semblance at the centre window: median 0.75; < 0.3 (the old screen) in 0
+covered >= 50 % by a detector window: 56 of 81; no detector window at all: 15
+  where both: detector centre - ROI centre median +4 ms, |.| median 14 ms
+  C000000014: detector window ? at 623 ms scored 2 has no ROI
+  C000000014: detector window ? at 937 ms scored 2 has no ROI
+  C000000022: detector window AK at 796 ms scored 3 has no ROI
+  C000000025: detector window AVC at 1146 ms scored 2 has no ROI
+  C000000027: detector window AVC at 465 ms scored 3 has no ROI
+mean normalised RMS over all 27 cached folders: first 30 ms 1.39, 30-100 ms 1.38, 100-950 ms 0.71

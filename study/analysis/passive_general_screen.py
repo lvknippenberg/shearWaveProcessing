@@ -90,14 +90,22 @@ def main():
     ap.add_argument("--root", default="Z:/raw_data")
     ap.add_argument("--part", default="0/1", help="i/N: this process takes every N-th folder")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--any-general", action="store_true",
+                    help="every folder with a general line, detected or not (input of scripts/passive_roi.py); "
+                         "a cache of a since redrawn general line is recomputed")
     a = ap.parse_args()
     i, n = (int(x) for x in a.part.split("/"))
-    folders = [f for f in S.find_folders(a.root) if S.state(f)["stage"] in ("done", "need-slopes", "need-events",
-                                                                             "processing")]
+    stages = ("done", "need-slopes", "need-events", "processing")
+    if a.any_general:
+        stages += ("detecting", "error", "no-windows")
+    folders = [f for f in S.find_folders(a.root) if S.state(f)["stage"] in stages]
     folders = folders[i::n]
     print(f"{len(folders)} folder(s) in part {a.part}", flush=True)
     for f in folders:
-        if os.path.exists(cache_path(f)) and not a.force:
+        fresh = os.path.exists(cache_path(f)) and (
+            not a.any_general
+            or str(np.load(cache_path(f))["general_hash"]) == S.read_json(S.Paths(f).general_json)["hash"])
+        if fresh and not a.force:
             print(f"  cached  {f}", flush=True)
             continue
         t = time.time()

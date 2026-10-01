@@ -42,4 +42,5 @@ study/analysis/unwrap_cache/
 
 # general-line screen cache of the manual passive study (2026-09-29; regenerable, ~2 MB/folder)
 study/analysis/general_screen_cache/
+study/analysis/roi_auto_cache/
 study/montages/passive_general/all_folders.pdf
