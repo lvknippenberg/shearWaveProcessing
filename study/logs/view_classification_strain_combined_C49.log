@@ -1,0 +1,45 @@
+=== CombinedData.mat: 14 folder(s), 0 already built, 14 to build, 3 job(s) ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  [13/14] ok      2.7 min  Z:\raw_data\C000000049\VIS-046_Strain_data_28-August-2026_09-11-21
+        (24 min elapsed, 1.84 min/folder, ~2 min left)
+base config: D:\Luuk van Knippenberg\SWI\Base config files\S5_1_SWI_PulseInversion_P15-xx_runtime.mat
+[Warning: Cannot load an object of class 'vsv.extio.const.CountPerPulseValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.ZIndexPhase':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.AcqTypeValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.AcqTriggerValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.AcqTriggerValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.RepeatValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.AcqTriggerValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class 'vsv.extio.const.RepeatValue':
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class "SimpleCommandQue":
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class "DefaultMapModel":
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class "ScriptRestartData":
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Cannot load an object of class "ErrorDlgMessenger":
+Its class cannot be found.] 
+[> In make_combined_data (line 110)] 
+[Warning: Figure is saved in CombinedData.mat, which might result in a large file size or unexpected behavior when loading the figure. To reduce file size, avoid saving graphics
+objects by specifying which data variables to save. To save a graphics figure with additional options for loading, use the savefig function.] 
+[> In make_combined_data (line 110)]
+  [CombinedData] done -> Z:\raw_data\C000000049\VIS-046_Strain_data_28-August-2026_09-11-59\CombinedData.mat (RcvBuffer layout verified)

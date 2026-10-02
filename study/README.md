@@ -19,6 +19,15 @@ buffer-3 radial-striation investigation, and the reconstruction comparisons.
 > - Analysis steps: `analysis/passive_manual_prelim*`, `analysis/passive_general_*`,
 >   `analysis/passive_detector_v2_check.py`, `analysis/passive_speed_resolution.py`.
 >
+> **View classification (2026-10-02): PLAX / PSAX / Apical per acquisition.**
+> See `analysis/view_classification/README.md`.
+> - First pass: EchoPrime's off-the-shelf view classifier run on the buffer-3 GIFs of all 724 SW folders.
+> - Every subject follows a protocol of about 6 PLAX, then about 9 PSAX. Apical views are in Strain_data only.
+> - Three passive-manual readings sit on PSAX or off-axis folders (C1, C33, C35).
+> - The user is not convinced by these results. Next step: a binary PLAX/PSAX classifier that uses the
+>   full-cycle loop; its plan is under review.
+> - Tables: `logs/view_classification/`. Nothing on `Z:` was restructured.
+>
 > Sections 0-8 below are the September processing record.
 
 
