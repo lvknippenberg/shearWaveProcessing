@@ -226,17 +226,18 @@ def load_spacetimes(path):
 
 
 # ------------------------------------------------------------------ loop
-def work_once(folder):
-    """Do whatever unattended work a folder needs. Returns True if anything was done."""
+def work_once(folder, view_filter=True):
+    """Do whatever unattended work a folder needs. Returns True if anything was done.
+    ``view_filter``: as :func:`store.state` (non-PLAX folders get no detection / processing)."""
     p = S.Paths(folder)
-    s = S.state(folder)
+    s = S.state(folder, view_filter)
     if s["stage"] not in ("detecting",) and not s["need_proc"]:
         return False
     with S.folder_lock(p) as got:
         if not got:
             return False
         did = False
-        s = S.state(folder)
+        s = S.state(folder, view_filter)
         if s["stage"] == "detecting":
             gh = S.read_json(p.general_json)["hash"]
             if failed(p, "detect", gh):
@@ -250,7 +251,7 @@ def work_once(folder):
                 traceback.print_exc()
                 _record_error(p, "detect", gh, exc)
             did = True
-            s = S.state(folder)
+            s = S.state(folder, view_filter)
         if s["need_proc"]:
             ev = S.read_json(p.events_json)["events"]
             key = {str(i): ev[str(i)]["hash"] for i in s["need_proc"]}
@@ -269,12 +270,12 @@ def work_once(folder):
         return did
 
 
-def run(folders, watch=False, poll_s=20.0):
+def run(folders, watch=False, poll_s=20.0, view_filter=True):
     while True:
         did = False
         for f in folders:
             try:
-                if work_once(f):
+                if work_once(f, view_filter):
                     did = True
                     break              # rescan from the top: earlier folders in the queue first
             except Exception:                                   # noqa: BLE001

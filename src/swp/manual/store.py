@@ -54,8 +54,13 @@ N_SAMPLES = 250
 
 RUNTIME_MAT = "AcquisitionParametersAndECG.mat"
 COMBINED_MAT = "CombinedData.mat"
-# EchoPrime view call per SW folder (study/analysis/view_classification); only shown as a hint
+# View per SW folder (study/analysis/view_classification). The manual review (label PLAX / PSAX /
+# Apical / Unclear, all 724 loops, 2026-10-02) is the ground truth: folders labelled anything but
+# PASSIVE_VIEWS are left out of the study (stage "not-plax"). The EchoPrime first pass is only a
+# hint for folders the review does not list.
+VIEWS_MANUAL_CSV = REPO / "study" / "logs" / "view_classification" / "sw_views_manual.csv"
 VIEWS_CSV = REPO / "study" / "logs" / "view_classification" / "all_sw_views.csv"
+PASSIVE_VIEWS = ("PLAX", "Unclear")          # Unclear: still prompted, decide on the image (v)
 
 
 # ------------------------------------------------------------------ paths
@@ -233,20 +238,31 @@ def ready(p: Paths) -> bool:
             and os.path.exists(os.path.join(p.output, "CombinedData_buffer4_iq.gif")))
 
 
-_VIEWS = None
+_VIEWS = {}
+
+
+def _views(path):
+    if path not in _VIEWS:
+        _VIEWS[path] = {}
+        if path.is_file():
+            import csv
+            with open(path, newline="") as fh:
+                _VIEWS[path] = {(r["subject"], r["folder"]): r for r in csv.DictReader(fh)}
+    return _VIEWS[path]
+
+
+def view_label(folder) -> str | None:
+    """The manually reviewed view of a folder (PLAX / PSAX / Apical / Unclear), or None."""
+    r = _views(VIEWS_MANUAL_CSV).get((Path(folder).parent.name, Path(folder).name))
+    return r["label"] if r else None
 
 
 def view_hint(folder) -> str | None:
-    """The automatic view call of a folder, e.g. 'PSAX p 1.00 (EchoPrime)', or None."""
-    global _VIEWS
-    if _VIEWS is None:
-        _VIEWS = {}
-        if VIEWS_CSV.is_file():
-            import csv
-            with open(VIEWS_CSV, newline="") as fh:
-                for r in csv.DictReader(fh):
-                    _VIEWS[(r["subject"], r["folder"])] = r
-    r = _VIEWS.get((Path(folder).parent.name, Path(folder).name))
+    """The view of a folder for the prompt title: the manual label, else the EchoPrime call."""
+    label = view_label(folder)
+    if label:
+        return f"{label} (manual review)"
+    r = _views(VIEWS_CSV).get((Path(folder).parent.name, Path(folder).name))
     if r is None:
         return None
     unsure = "" if r.get("confident") == "True" else ", not confident"
@@ -254,14 +270,15 @@ def view_hint(folder) -> str | None:
 
 
 # ------------------------------------------------------------------ state
-def state(folder) -> dict:
+def state(folder, view_filter=True) -> dict:
     """Where a folder stands. Keys: stage, and the window indices still needing each step.
 
-    stage: not-ready | need-general | skipped | excluded | detecting | error | need-review |
-           no-windows | need-events | processing | need-slopes | done
+    stage: not-ready | not-plax | need-general | skipped | excluded | detecting | error |
+           need-review | no-windows | need-events | processing | need-slopes | done
     (``skipped`` = no usable septum, offered again by ``--retry-skipped``; ``excluded`` = the
     measurement is left out on purpose, e.g. a PSAX view, and is never offered again - only
-    ``--redo general`` reopens it)
+    ``--redo general`` reopens it; ``not-plax`` = the manual view review labels it other than
+    PASSIVE_VIEWS: nothing is asked and nothing on disk is touched, ``view_filter=False`` lifts it)
     (a window whose processing failed is listed in ``proc_failed`` and does not hold the folder;
     a window below the detection screen without a line is listed in ``screened`` and does not
     hold it either)
@@ -272,6 +289,11 @@ def state(folder) -> dict:
              screened=[])
     if not ready(p):
         return s
+    if view_filter:
+        label = view_label(folder)
+        if label is not None and label not in PASSIVE_VIEWS:
+            s["stage"], s["view"] = "not-plax", label
+            return s
     gen = read_json(p.general_json)
     if gen is None:
         s["stage"] = "need-general"

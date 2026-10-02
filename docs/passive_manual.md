@@ -32,7 +32,8 @@ machine.
   - one folder: `--folder <f> --redo general`, `--redo review`, or `--redo event --window i` /
     `--redo slope --window i`;
   - everything you skipped: `--retry-skipped`. Measurements excluded with `v` (not PLAX) are
-    not offered again; `--folder <f> --redo general` reopens one;
+    not offered again; `--folder <f> --redo general` reopens one. Folders the view review labels
+    PSAX / Apical: `--all-views`;
   - MVC lines reused without a prompt (step 4): `--redo event --window i`, or `--no-reuse` to
     switch reuse off;
   - windows the detector screened out (below the semblance threshold, see step 2):
@@ -63,11 +64,16 @@ same machine is released immediately (another host's lock after 3 h).
 
 1. **General M-line.** Buffers 1 | 3 | 4 at the R-peak, each at the frame nearest a logged R-peak
    (buffer 4: frame 0). This line is used to detect the valve events.
-   - **Not a PLAX view? Press `v`** to exclude the whole measurement (added 2026-10-02). The SW
-     protocol records about 6 PLAX and then about 9 PSAX acquisitions per subject, and only PLAX is
-     used for passive SWE. The title shows the automatic view call from
-     `study/logs/view_classification/all_sw_views.csv` (EchoPrime) when that file
-     exists. It is a hint only. Nothing is excluded automatically.
+   - **Only PLAX is read (since 2026-10-02).** The SW protocol records about 6 PLAX and then
+     about 9 PSAX acquisitions per subject, and only PLAX is used for passive SWE. The view of
+     every SW loop was reviewed by hand (`study/logs/view_classification/sw_views_manual.csv`,
+     label PLAX / PSAX / Apical / Unclear). Folders labelled PSAX or Apical get the stage
+     `not-plax`. No prompt is asked for them, the worker leaves them alone, and nothing on disk
+     changes. At the time of the review that was 421 of 724 folders. PLAX and Unclear folders are
+     read, and the title shows the label (`view: PLAX (manual review)`). For a folder not in the
+     review, the title shows the EchoPrime call from `all_sw_views.csv` as a hint. To read the
+     filtered folders anyway: `session --all-views` (also passed to the workers it starts).
+   - **Not a PLAX view after all (e.g. Unclear)? Press `v`** to exclude the whole measurement.
    - `general.json` then records `skipped: true, excluded: "not PLAX"` and the view call. The
      folder's stage is `excluded`, not `skipped`, so `--retry-skipped` leaves it alone. If the
      folder already had windows, lines or slopes, they are archived

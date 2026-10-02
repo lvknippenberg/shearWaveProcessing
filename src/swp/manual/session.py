@@ -270,12 +270,15 @@ def review_hash(windows):
 # ------------------------------------------------------------------ session
 class Session:
     def __init__(self, folders, mode="auto", retry_skipped=False, redo=(), include_screened=False,
-                 reuse=True):
+                 reuse=True, view_filter=True):
         """``redo``: tasks ``(kind, folder, window)`` to re-open first, with their answers pre-loaded.
         ``include_screened``: also ask event lines for windows below the detection screen.
         ``reuse``: reuse the general line for MVC events near the R-peak (``events.reuse_general``);
-        False always prompts."""
+        False always prompts.
+        ``view_filter``: leave out folders the manual view review labels other than PLAX / Unclear
+        (:data:`store.PASSIVE_VIEWS`)."""
         self.reuse = reuse_config() if reuse else None
+        self.view_filter = view_filter
         self.queue = list(redo)
         self.folders = list(folders)
         self.kinds = KINDS[mode]
@@ -289,8 +292,7 @@ class Session:
         self.n_done = 0
         print(f"reading the state of {len(self.folders)} folder(s) ...", flush=True)
         t0 = time.perf_counter()
-        for f in self.folders:
-            self.states[f] = S.state(f)
+        self.refresh()
         print(f"  {time.perf_counter() - t0:.0f} s\n  " + self.summary(), flush=True)
 
     # ------------------------------------------------ bookkeeping
@@ -306,7 +308,7 @@ class Session:
 
     def refresh(self, folders=None):
         for f in (folders if folders is not None else self.folders):
-            self.states[f] = S.state(f)
+            self.states[f] = S.state(f, self.view_filter)
 
     def refresh_waiting(self):
         self.refresh([f for f, s in self.states.items() if s["stage"] in WAITING or s["need_proc"]])

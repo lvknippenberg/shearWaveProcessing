@@ -87,6 +87,26 @@ def test_excluded_measurement_is_never_offered_again(tmp_path):
     assert S.state(f)["stage"] == "skipped" and ses.next_task() == ("general", f, None)
 
 
+def test_manual_view_label_filters_non_plax_folders(tmp_path, monkeypatch):
+    from swp.manual.session import Session
+    f = _ready_folder(tmp_path)                                   # C1/SW_data_x
+    csv = tmp_path / "views.csv"
+    monkeypatch.setattr(S, "VIEWS_MANUAL_CSV", csv)
+    for label, stage in (("PSAX", "not-plax"), ("Apical", "not-plax"), ("PLAX", "need-general"),
+                         ("Unclear", "need-general")):
+        csv.write_text(f"subject,folder,label\nC1,SW_data_x,{label}\n")
+        S._VIEWS.clear()
+        assert S.state(f)["stage"] == stage, label
+        assert S.view_hint(f) == f"{label} (manual review)"
+    csv.write_text("subject,folder,label\nC1,SW_data_x,PSAX\n")
+    S._VIEWS.clear()
+    assert S.state(f, view_filter=False)["stage"] == "need-general"
+    assert Session([f]).next_task() is None
+    assert Session([f], view_filter=False).next_task() == ("general", f, None)
+    assert not os.path.exists(S.Paths(f).dir)                     # nothing written for a filtered folder
+    S._VIEWS.clear()
+
+
 def test_mvc_near_r_peak_reuses_the_general_line_without_a_prompt(tmp_path):
     from swp.manual.session import Session
     f = _ready_folder(tmp_path)

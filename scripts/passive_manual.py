@@ -82,6 +82,8 @@ def _spawn_workers(a, n):
         args += ["--folder", f]
     if a.subject:
         args += ["--subject", a.subject]
+    if a.all_views:
+        args += ["--all-views"]
     procs = []
     for k in range(n):
         log = open(logdir / f"passive_manual_worker{k}_{time.strftime('%Y%m%d')}.log", "a")
@@ -108,7 +110,8 @@ def cmd_session(a):
     workers = _spawn_workers(a, a.workers)
     try:
         Session(folders, mode=a.task, retry_skipped=a.retry_skipped, redo=redo,
-                include_screened=a.include_screened, reuse=not a.no_reuse).run(wait=not a.no_wait)
+                include_screened=a.include_screened, reuse=not a.no_reuse,
+                view_filter=not a.all_views).run(wait=not a.no_wait)
     finally:
         for p, log in workers:
             p.terminate()
@@ -122,7 +125,7 @@ def cmd_worker(a):
     if os.environ.get("SWP_MANUAL_WORKER", "0") not in ("0", ""):
         folders = folders[::-1]
     print(f"worker on {len(folders)} folder(s){' (watching)' if a.watch else ''}", flush=True)
-    worker.run(folders, watch=a.watch)
+    worker.run(folders, watch=a.watch, view_filter=not a.all_views)
 
 
 def cmd_export(a):
@@ -256,6 +259,8 @@ def main():
     ap.add_argument("--retry-skipped", action="store_true", help="session: also offer skipped prompts")
     ap.add_argument("--no-reuse", action="store_true",
                     help="session: draw every event line (no automatic reuse of the general line for MVC)")
+    ap.add_argument("--all-views", action="store_true",
+                    help="session / worker: also take folders the manual view review labels PSAX / Apical")
     ap.add_argument("--include-screened", action="store_true",
                     help="session: also ask event lines for windows below the detection screen")
     ap.add_argument("--redo", choices=["general", "review", "event", "slope"], default=None)
