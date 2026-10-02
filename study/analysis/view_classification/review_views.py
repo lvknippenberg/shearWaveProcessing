@@ -16,9 +16,12 @@ q                      save what is accepted and quit
 =====================  =====================================================================
 
 Unclear = off-axis / poor window / cannot tell; it is kept out of training and sorting.
-Subjects with something to decide come first, then the unanimous ones (stop whenever you like:
-every accepted subject is saved at once). Re-running resumes; accepted subjects are skipped
-unless --all is given.
+Subjects come in ID order (C1, C2, ...); every accepted subject is saved at once, so stop whenever
+you like. Re-running resumes; accepted subjects are skipped unless --all is given.
+
+Speed (it runs over remote desktop on a loaded machine): plain Tk, no matplotlib. Each loop's frames
+become Tk images once per subject; playing only swaps which pre-made image a tile shows. The next
+subject's GIFs are read from Z: in the background while the current one is reviewed.
 
 Usage:
   python review_views.py                       # study defaults
@@ -29,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import numpy as np
@@ -40,7 +44,10 @@ LOGS = HERE.parents[1] / "logs" / "view_classification"
 LABELS = ("PLAX", "PSAX", "Apical", "Unclear")
 COL = {"PLAX": "#2a78d6", "PSAX": "#eb6834", "Apical": "#1f9e6e", "Unclear": "#8a8983"}
 REVIEW_EDGE = "#d62728"
-TILE_H = 200                       # px height a loop is shown at
+TILE_H = 190                       # px height a loop is shown at
+HEAD = 30                          # px strip above each loop for its title
+GAP = 6                            # px between tiles
+NCOLS = 6
 FPS = 12
 
 
@@ -90,88 +97,117 @@ def proposals(cons: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-class SubjectReview:
-    def __init__(self, rows: pd.DataFrame, gifs: dict, title: str):
-        import matplotlib.pyplot as plt
-        self.plt = plt
+class TkReview:
+    """The review window (plain Tk, one for the whole session). Each loop's frames become Tk images
+    once per subject; playing only swaps which pre-made image a tile shows, so a tick costs ~nothing
+    even on a loaded machine over remote desktop."""
+
+    def __init__(self):
+        import tkinter as tk
+        self.tk = tk
+        self.root = tk.Tk()
+        self.root.title("SW view review")
+        self.header = tk.Label(self.root, font=("Segoe UI", 10), justify="center")
+        self.header.pack(side="top", fill="x")
+        self.cv = tk.Canvas(self.root, bg="black", highlightthickness=0)
+        self.cv.pack(side="top")
+        self.cv.bind("<Button-1>", self.on_click)
+        self.cv.bind("<Motion>", self.on_motion)
+        for k in ("1", "2", "3", "4"):
+            self.root.bind(k, self.on_number)
+        self.root.bind("<Return>", lambda e: self._finish("accept"))
+        self.root.bind("b", lambda e: self._finish("back"))
+        self.root.bind("q", lambda e: self._finish("quit"))
+        self.root.bind("<space>", lambda e: setattr(self, "playing", not self.playing))
+        self.root.protocol("WM_DELETE_WINDOW", lambda: self._finish("quit"))
+        self.hover, self.after_id = None, None
+        self.done = tk.StringVar(master=self.root)
+
+    def show(self, rows: pd.DataFrame, loops: list, title: str):
+        """Review one subject; returns (result, labels), result in accept / back / quit."""
+        from PIL import Image, ImageTk
+        cv = self.cv
+        cv.delete("all")
         self.rows = rows.reset_index(drop=True)
         self.labels = list(self.rows.label)
-        self.loops = [load_loop(gifs[f]) for f in self.rows.folder]
-        n = len(self.rows)
-        self.ncols = min(6, n)
+        n = len(loops)
+        self.ncols = min(NCOLS, n)
         nrows = int(np.ceil(n / self.ncols))
-        w = max(v.shape[2] for v in self.loops)
-        self.fig, axs = plt.subplots(nrows, self.ncols, figsize=(self.ncols * w / 90, nrows * (TILE_H + 75) / 90),
-                                     squeeze=False)
-        self.axes = list(axs.ravel())
-        for ax in self.axes:
-            ax.set_axis_off()
-        self.ims, self.frame, self.playing, self.result = [], 0, True, None
-        for i, (ax, v) in enumerate(zip(self.axes, self.loops)):
-            self.ims.append(ax.imshow(v[0], cmap="gray", vmin=0, vmax=255))
-            ax.set_axis_on()
-            ax.set_xticks([]); ax.set_yticks([])
+        tw = max(v.shape[2] for v in loops)
+        self.cell_w, self.cell_h = tw + GAP, HEAD + TILE_H + GAP
+        cv.config(width=self.ncols * self.cell_w, height=nrows * self.cell_h)
+        self.header.config(text=title + "\nclick: cycle label  |  1-4: PLAX / PSAX / Apical / Unclear under "
+                                        "the mouse  |  ENTER: accept  |  b: back  |  space: pause  |  q: quit")
+        self.frames, self.items, self.texts, self.boxes = [], [], [], []
+        for i, v in enumerate(loops):
+            r, c = divmod(i, self.ncols)
+            x0 = c * self.cell_w + GAP // 2 + (tw - v.shape[2]) // 2
+            y0 = r * self.cell_h + HEAD
+            self.frames.append([ImageTk.PhotoImage(Image.fromarray(f), master=self.root) for f in v])
+            self.items.append(cv.create_image(x0, y0, anchor="nw", image=self.frames[-1][0]))
+            self.boxes.append(cv.create_rectangle(x0 - 2, y0 - 2, x0 + v.shape[2] + 1, y0 + TILE_H + 1))
+            self.texts.append(cv.create_text(x0 + v.shape[2] / 2, y0 - 3, anchor="s", justify="center",
+                                             font=("Segoe UI", 8)))
             self._style(i)
-        self.fig.suptitle(title + "\nclick: cycle label | 1-4: PLAX/PSAX/Apical/Unclear under mouse | "
-                          "ENTER: accept | b: back | space: pause | q: quit", fontsize=9)
-        self.fig.tight_layout(rect=(0, 0, 1, 0.94), h_pad=2.5)
-        self.fig.canvas.mpl_connect("button_press_event", self.on_click)
-        self.fig.canvas.mpl_connect("key_press_event", self.on_key)
-        self.fig.canvas.mpl_connect("close_event", lambda e: self._finish(self.result or "quit"))
-        from matplotlib.animation import FuncAnimation
-        self.anim = FuncAnimation(self.fig, self._step, interval=1000 // FPS, blit=False, cache_frame_data=False)
+        self.tick_n, self.playing, self.result = 0, True, None
+        self._tick()
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+        self.done.set("")
+        self.root.wait_variable(self.done)                # Tk event loop until accept / back / quit
+        if self.after_id is not None:
+            self.root.after_cancel(self.after_id)
+            self.after_id = None
+        return self.result, self.labels
 
     def _style(self, i):
-        r, lab, ax = self.rows.iloc[i], self.labels[i], self.axes[i]
+        r, lab = self.rows.iloc[i], self.labels[i]
         changed = lab != r.proposed
-        ax.set_title(f"{r.folder.split('_')[-1]}  {lab}{' *' if changed else ''}\n"
-                     f"votes {r.votes}{'  ' + r.reason if r.reason else ''}", fontsize=8, color=COL[lab])
-        for s in ax.spines.values():
-            s.set_edgecolor(REVIEW_EDGE if r.needs_review else COL[lab])
-            s.set_linewidth(4 if r.needs_review else 1.5)
+        self.cv.itemconfigure(self.texts[i], fill=COL[lab],
+                              text=f"{r.folder.split('_')[-1]}  {lab}{' *' if changed else ''}\n"
+                                   f"votes {r.votes}{'  ' + r.reason if r.reason else ''}")
+        self.cv.itemconfigure(self.boxes[i], outline=REVIEW_EDGE if r.needs_review else COL[lab],
+                              width=4 if r.needs_review else 2)
 
-    def _step(self, _):
+    def _tick(self):
         if self.playing:
-            self.frame += 1
-            for im, v in zip(self.ims, self.loops):
-                im.set_data(v[self.frame % len(v)])
-        return self.ims
+            self.tick_n += 1
+            for item, fr in zip(self.items, self.frames):
+                self.cv.itemconfigure(item, image=fr[self.tick_n % len(fr)])
+        self.after_id = self.root.after(1000 // FPS, self._tick)
 
-    def _tile(self, event):
-        return self.axes.index(event.inaxes) if event.inaxes in self.axes[:len(self.loops)] else None
+    def _tile_at(self, x, y):
+        c, r = int(x // self.cell_w), int(y // self.cell_h)
+        i = r * self.ncols + c
+        return i if 0 <= c < self.ncols and 0 <= i < len(self.items) else None
 
-    def on_click(self, event):
-        i = self._tile(event)
-        if i is not None and event.button == 1:
-            self.labels[i] = LABELS[(LABELS.index(self.labels[i]) + 1) % len(LABELS)]
-            self._style(i)
-            self.fig.canvas.draw_idle()
+    def on_motion(self, e):
+        self.hover = self._tile_at(e.x, e.y)
 
-    def on_key(self, event):
-        if event.key in ("1", "2", "3", "4"):
-            i = self._tile(event)
-            if i is not None:
-                self.labels[i] = LABELS[int(event.key) - 1]
-                self._style(i)
-                self.fig.canvas.draw_idle()
-        elif event.key == "enter":
-            self._finish("accept")
-        elif event.key == "b":
-            self._finish("back")
-        elif event.key == "q":
-            self._finish("quit")
-        elif event.key == " ":
-            self.playing = not self.playing
+    def on_click(self, e):
+        i = self._tile_at(e.x, e.y)
+        if i is not None:
+            self._set(i, LABELS[(LABELS.index(self.labels[i]) + 1) % len(LABELS)])
+
+    def on_number(self, e):
+        if self.hover is not None:
+            self._set(self.hover, LABELS[int(e.keysym) - 1])
+
+    def _set(self, i, lab):
+        self.labels[i] = lab
+        self._style(i)
 
     def _finish(self, result):
         if self.result is None:
             self.result = result
-            self.anim.event_source.stop()
-            self.plt.close(self.fig)
+            self.done.set(result)
 
-    def run(self):
-        self.plt.show()
-        return self.result or "quit", self.labels
+    def close(self):
+        try:
+            self.root.destroy()
+        except Exception:                                   # noqa: BLE001 - already gone
+            pass
 
 
 def save(manual_csv: Path, sub: pd.DataFrame, labels):
@@ -184,9 +220,14 @@ def save(manual_csv: Path, sub: pd.DataFrame, labels):
     pd.concat([old, sub]).sort_values(["subject", "folder"]).to_csv(manual_csv, index=False)
 
 
+def subject_rows(prop, s, done):
+    sub = prop[prop.subject == s].reset_index(drop=True)          # already in acquisition order
+    prev = done[done.subject == s].set_index("folder").label if done is not None else None
+    sub["label"] = [prev.get(f, p) if prev is not None else p for f, p in zip(sub.folder, sub.proposed)]
+    return sub
+
+
 def main():
-    import matplotlib
-    matplotlib.use("TkAgg", force=True)
     ap = argparse.ArgumentParser()
     ap.add_argument("--consensus", default=str(LOGS / "sw_views_consensus.csv"))
     ap.add_argument("--views", default=str(LOGS / "all_sw_views.csv"), help="for the GIF paths")
@@ -201,26 +242,33 @@ def main():
     out = Path(a.out)
     done = pd.read_csv(out) if out.is_file() else None
 
-    order = prop.groupby("subject").needs_review.sum().sort_index()
-    subjects = list(order[order > 0].index) + list(order[order == 0].index)
-    if a.subject:
-        subjects = a.subject
-    elif done is not None and not a.all:
+    flagged = prop.groupby("subject").needs_review.sum()
+    subjects = a.subject or sorted(flagged.index)
+    if not a.subject and done is not None and not a.all:
         subjects = [s for s in subjects if s not in set(done.subject)]
     print(f"{len(subjects)} subject(s) to review "
-          f"({int((order[subjects] > 0).sum())} with flagged loops, {int(order[subjects].sum())} flagged loops)")
+          f"({int((flagged[subjects] > 0).sum())} with flagged loops, {int(flagged[subjects].sum())} flagged loops)")
 
+    pool = ThreadPoolExecutor(max_workers=2)
+    pending = {}
+
+    def fetch(s):                                                 # background read of a subject's GIFs
+        if s not in pending:
+            folders = list(prop.folder[prop.subject == s])
+            pending[s] = pool.submit(lambda fs: [load_loop(gifs[f]) for f in fs], folders)
+        return pending[s]
+
+    ui = TkReview()
     i = 0
     while 0 <= i < len(subjects):
         s = subjects[i]
-        sub = prop[prop.subject == s].copy()
-        sub["time"] = sub.folder.str.split("_").str[-1]
-        sub = sub.sort_values("time").drop(columns="time").reset_index(drop=True)
-        prev = done[done.subject == s].set_index("folder").label if done is not None else None
-        sub["label"] = [prev.get(f, p) if prev is not None else p for f, p in zip(sub.folder, sub.proposed)]
+        loops = fetch(s).result()
+        if i + 1 < len(subjects):
+            fetch(subjects[i + 1])
+        sub = subject_rows(prop, s, done)
         title = f"{s}  ({i + 1}/{len(subjects)}, {int(sub.needs_review.sum())} flagged)"
         print(title, flush=True)
-        result, labels = SubjectReview(sub, gifs, title).run()
+        result, labels = ui.show(sub, loops, title)
         if result == "accept":
             save(out, sub, labels)
             done = pd.read_csv(out)
@@ -229,6 +277,8 @@ def main():
             i = max(i - 1, 0)
         else:
             break
+    ui.close()
+    pool.shutdown(wait=False, cancel_futures=True)
     print(f"labels: {out}")
 
 
