@@ -108,7 +108,7 @@ class SubjectReview:
             ax.set_axis_off()
         self.ims, self.frame, self.playing, self.result = [], 0, True, None
         for i, (ax, v) in enumerate(zip(self.axes, self.loops)):
-            self.ims.append(ax.imshow(v[0], cmap="gray", vmin=0, vmax=255, animated=True))
+            self.ims.append(ax.imshow(v[0], cmap="gray", vmin=0, vmax=255))
             ax.set_axis_on()
             ax.set_xticks([]); ax.set_yticks([])
             self._style(i)
