@@ -48,6 +48,17 @@ folders are not listed (no passive buffer).
 **Preliminary results of the re-reading, the "two slopes" pattern and the 2D wave maps:**
 [passive_manual_prelim_2026-10-01.md](passive_manual_prelim_2026-10-01.md).
 
+**2026-10-02: view filter, MVC line reuse and one exclusion.**
+- **View filter.** Only folders the manual view review labels PLAX (or Unclear) are read. That
+  leaves 303 of 724 folders; the other 421 have the stage `not-plax`.
+- **MVC line reuse.** MVC lines near the R-peak reuse the general line (step 4).
+- **Folders flagged as possibly PSAX.** Three already-read folders were flagged by EchoPrime and
+  checked on the general-line prompt:
+  - C000000001 12-18-31 is PSAX and was excluded with `v`. Its readings (3 slopes, all confidence 0)
+    are in `archive_20261002_155832_general_excluded/`.
+  - C000000033 08-43-33 and C000000035 10-54-57 are PLAX and kept their readings. The manual
+    review agrees with all three.
+
 **Re-read from 2026-10-01 with the window review.** The 27 folders read with the energy
 detector (C000000001-31) were moved onto the valves detector with `redetect`. Their general lines
 and ROIs stay. Windows, event lines, space-times and slopes were archived in each folder
@@ -201,6 +212,13 @@ same machine is released immediately (another host's lock after 3 h).
     transmit, and the centre is ~5.7 ms (buffer 1), ~19.7 ms (buffer 3) or ~0.5 ms (buffer 4) later.
   - The lines drawn earlier on 2026-09-25 (C000000001-5) were archived
     (`passive_manual.py archive --tag buffer3_unwrap`) and are drawn again.
+- **A phase buffer 3 does not hold (known limitation, left as is).** A 26-frame buffer 3 spans
+  about 1.0 s. When the RR interval is longer than that, part of the cycle has no buffer-3 frame,
+  and the nearest frame can be far off. Example: C000000002 10-13-12, logged RR about 1.3 s
+  (44-52 bpm), buffer 3 covers R+333 to R+1319 only. For an MVC at R+75 the panel showed R+333
+  ("+258 vs event"). The offset is in the panel title. Draw on buffer 4 or 1 then. The phase
+  match does not wrap to the next R-peak. A fix was not made, because such slow logged rates are
+  exceptional or a triggering error (2026-10-02).
 - **No valid ECG.** When `swp.acquisition.rrcheck` rejects the R-peak record (for example
   C000000005: "unusable: sparse"), every "R-peak" / "R+x ms" is meaningless. The titles then say
   NO VALID ECG, and buffer 1 is chosen by anatomy match to buffer 4.

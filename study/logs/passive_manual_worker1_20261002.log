@@ -1,0 +1,70 @@
+
+=== worker 1 started Fri Oct  2 11:28:18 2026 ===
+worker on 724 folder(s) (watching)
+  process Z:\raw_data\C000000037\VIS-042_SW_data_07-August-2026_08-39-39  windows [0]
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+    win0: disp +14.0, velo -8.0, velo -16.5, Keij -20.0, acce +4.3
+    30 s
+  process Z:\raw_data\C000000037\VIS-042_SW_data_07-August-2026_08-39-39  windows [1]
+    win1: disp +5.6, velo +4.3, velo +4.3, Keij +20.0, acce +5.6
+    11 s
+  process Z:\raw_data\C000000037\VIS-042_SW_data_07-August-2026_08-39-39  windows [2]
+    win2: disp +8.8, velo +3.5, velo +4.3, Keij +20.0, acce +3.0
+    12 s
+  process Z:\raw_data\C000000039\VIS-040_SW_data_04-August-2026_11-46-05  windows [2]
+    win2: disp +2.6, velo +1.6, velo +1.6, Keij +2.0, acce +1.5
+    11 s
+  process Z:\raw_data\C000000040\VIS-039_SW_data_04-August-2026_10-57-58  windows [1]
+    win1: disp +1.3, velo +2.0, velo +2.0, Keij +1.9, acce +2.4
+    10 s
+  process Z:\raw_data\C000000042\VIS-036_SW_data_28-July-2026_14-07-08  windows [0]
+    win0: disp +1.1, velo +1.8, velo -8.8, Keij -20.0, acce -14.0
+    14 s
+  process Z:\raw_data\C000000045\VIS-033_SW_data_28-July-2026_09-25-55  windows [1]
+    win1: disp -2.7, velo -20.0, velo -20.0, Keij -20.0, acce -20.0
+    8 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-14-11  windows [1]
+    win1: disp +4.1, velo +7.4, velo +8.0, Keij +5.6, acce +5.6
+    9 s
+  detect  Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-16-46
+    3 window(s), 15 s
+  detect  Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-17-37
+    3 window(s), 16 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-14-53  windows [0]
+    win0: disp +4.0, velo +2.4, velo +2.4, Keij +2.1, acce +2.8
+    8 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-15-49  windows [1]
+    win1: disp +3.5, velo +4.0, velo +4.1, Keij +3.5, acce +4.3
+    9 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-16-46  windows [0]
+    win0: disp +2.9, velo +2.1, velo +2.3, Keij +2.1, acce +2.6
+    12 s
+  process Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-17-37  windows [0, 1, 2]
+    win0: disp +3.0, velo +3.8, velo +4.5, Keij +4.5, acce +4.5
+    win1: disp +2.6, velo +5.3, velo +6.0, Keij +5.3, acce +5.3
+    win2: disp +2.1, velo +4.3, velo +4.5, Keij +4.3, acce +4.5
+    25 s
+  detect  Z:\raw_data\C000000001\SWE_01_SW_data_21-April-2026_12-19-36
+    3 window(s), 16 s
+
+=== worker 1 started Fri Oct  2 17:02:42 2026 ===
+worker on 724 folder(s) (watching)
+  detect  Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-12-32
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+    2 window(s), 45 s
+  detect  Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-13-45
+    2 window(s), 15 s
+  detect  Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-14-30
+    2 window(s), 20 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-11-53  windows [0]
+    win0: disp +4.5, velo +3.2, velo +3.2, Keij +3.5, acce +3.2
+    11 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-11-53  windows [1]
+    win1: disp +5.0, velo +5.0, velo +6.4, Keij +6.8, acce +5.0
+    7 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-12-32  windows [0]
+    win0: disp -1.1, velo +3.4, velo +3.4, Keij +2.9, acce +3.4
+    9 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-12-32  windows [1]
+    win1: disp +3.1, velo +3.8, velo +3.8, Keij +4.8, acce +3.8
+    10 s
