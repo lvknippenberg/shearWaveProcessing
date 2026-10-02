@@ -76,6 +76,50 @@ model, and it is *not* the answer. Next step:
 * The EchoPrime output is not ground truth. At most it is a pre-label to correct by hand, and a
   zero-training baseline to beat.
 
+## Second pass: label-free consensus + review (2026-10-02)
+
+Goal (user): **sorting the data**, as far as possible without labels. Temporal content is used.
+Each loop is about one cardiac cycle (26 or 32 frames at 25.4 Hz) and is not ECG-gated.
+
+`extract_features.py` caches the following per loop (locally, `features_sw_v1.npz`, about 13 min):
+* per-frame EchoPrime frame-classifier features (1024-d) and its 11-class probabilities;
+* EchoPrime **video-encoder** embeddings: MViT-v2-S, 16 frames spanning the loop, 4 start offsets.
+
+`label_free_sort.py` runs **four voters** with no human labels anywhere:
+
+| voter | what | agreement with `ep` |
+|---|---|---|
+| `ep` | EchoPrime frame classifier, averaged over the loop (first pass) | – |
+| `clu_f` | per-subject 2-cluster split of [mean, temporal std] of frame features, centred on the subject | 0.91 |
+| `clu_v` | the same on video embeddings | 0.88 |
+| `self` | logistic regression trained on the *other* subjects' confident (≥ 0.95) EchoPrime loops (pseudo-labels, leave-subject-out), on the subject-centred features | 0.97 |
+
+A cluster is named PLAX or PSAX by its members' summed EchoPrime log-odds.
+
+**Unanimous → auto: 584/724 (238 PLAX, 346 PSAX).** The other 140 need review:
+* 128 split votes, 11 "other?" and 1 "apical?";
+* spread over 31 subjects (C5, C32, C33, C37, C42 and C43 have the most).
+
+Protocol plausibility, without labels: extra view switches beyond the single PLAX→PSAX switch occur
+in 6–13 subjects per voter, but in 1 subject for the consensus.
+
+**What label-free methods cannot do:** say which side of a split vote is right, or prove that the
+unanimous 81 % is correct. Clustering alone is weaker than hoped, because PSAX at different levels
+does not always form one tight group within a subject. So labels are still needed, but only as a
+review.
+
+`review_views.py` is the review UI, one subject per screen:
+* every loop **plays**;
+* flagged loops have a red frame and show their votes;
+* proposed labels = the unanimous label, else the majority vote, with 2–2 ties going to the
+  subject's PLAX-then-PSAX block fit;
+* click, or press 1–4, to set PLAX / PSAX / Apical / Unclear; ENTER accepts the subject.
+
+The 31 flagged subjects come first, then the 17 unanimous ones (a glance validates the auto set).
+Labels go to `study/logs/view_classification/sw_views_manual.csv`, and the tool resumes where it
+stopped. Example screen: `sheets/review_ui_C000000020.png`, where the proposals match by eye
+(8 PLAX, then 9 PSAX).
+
 ## Restructuring caveat (not done)
 
 `Z:\raw_data` is the verified 1:1 mirror of DataHub P000000569. Moving folders into `PLAX/`, `PSAX/` and
