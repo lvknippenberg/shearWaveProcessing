@@ -31,7 +31,10 @@ machine.
 - **Revisit later:**
   - one folder: `--folder <f> --redo general`, `--redo review`, or `--redo event --window i` /
     `--redo slope --window i`;
-  - everything you skipped: `--retry-skipped`;
+  - everything you skipped: `--retry-skipped`. Measurements excluded with `v` (not PLAX) are
+    not offered again; `--folder <f> --redo general` reopens one;
+  - MVC lines reused without a prompt (step 4): `--redo event --window i`, or `--no-reuse` to
+    switch reuse off;
   - windows the detector screened out (below the semblance threshold, see step 2):
     `--include-screened`.
 - **Folders still being beamformed:** they are picked up automatically. A folder counts as ready
@@ -60,6 +63,15 @@ same machine is released immediately (another host's lock after 3 h).
 
 1. **General M-line.** Buffers 1 | 3 | 4 at the R-peak, each at the frame nearest a logged R-peak
    (buffer 4: frame 0). This line is used to detect the valve events.
+   - **Not a PLAX view? Press `v`** to exclude the whole measurement (added 2026-10-02). The SW
+     protocol records about 6 PLAX and then about 9 PSAX acquisitions per subject, and only PLAX is
+     used for passive SWE. The title shows the automatic view call from
+     `study/logs/view_classification/all_sw_views.csv` (EchoPrime) when that file
+     exists. It is a hint only. Nothing is excluded automatically.
+   - `general.json` then records `skipped: true, excluded: "not PLAX"` and the view call. The
+     folder's stage is `excluded`, not `skipped`, so `--retry-skipped` leaves it alone. If the
+     folder already had windows, lines or slopes, they are archived
+     (`archive_<time>_general_excluded/`).
 2. *(worker)* **Detection, since 2026-10-01** (`detect.picker: valves`): the automatic MVC / AVC
    windows of `swp.passive_valves` (fixed 120 ms; see "Automatic MVC / AVC windows" below), and
    the whole-recording "velocity gauss" space-time along the general line (`general_st.npz`).
@@ -116,6 +128,23 @@ same machine is released immediately (another host's lock after 3 h).
    - otherwise the general line as drawn.
 
    The general line is also shown as a dashed magenta reference on buffer 4.
+
+   **MVC near the R-peak: no prompt (since 2026-10-02).** An MVC window gets the general line
+   automatically, with no prompt, when three conditions hold
+   (`events.reuse_general` in `configs/passive_manual.yaml`; evidence in
+   [passive_mvc_line_reuse.md](passive_mvc_line_reuse.md)):
+   - it is at most R+50 ms (`max_phase_ms`);
+   - its buffer-4 anatomy moved at most 1 mm across the general line (`max_perp_mm`) and at most
+     3 mm in total (`max_shift_mm`) since the general line's frame. This is measured with the
+     line-transfer registration, which must also pass its own checks;
+   - the window has no answer yet.
+
+   Otherwise the prompt appears as before, for example when the probe or breathing moved the
+   septum between the beats. The terminal prints `event i: general line, reused without a
+   prompt (MVC R+31 ms, anatomy moved 0.3 mm across the line, ...)`. `events.json` stores the
+   registration as `auto_reuse`, and the export has `line_reused_general`. A prompted MVC keeps
+   the check that failed as `reuse_check`. To look at a reused line, run `--redo event --window i`
+   (that always opens the editor). `session --no-reuse` draws every event line.
 5. *(worker)* **Five space-times** per event, over the window ± 20 ms.
 6. **Slope** on the five views plus the buffer-4 B-mode.
 
@@ -148,7 +177,8 @@ same machine is released immediately (another host's lock after 3 h).
 | `z` | zoom all panels on the line ± 25 mm / full sector |
 | `[` `]` | step the frame of the panel under the mouse (buffer 4: 5 frames) |
 | `a` | buffer-4 averaging (9 frames ≈ 10 ms) on / off |
-| `x` | skip: no usable septum. For a general line this skips the whole folder |
+| `x` | skip: no usable septum. For a general line this skips the whole folder (`--retry-skipped` offers it again) |
+| `v` | general line only: exclude the measurement, not a PLAX view (never offered again) |
 | `b` / `q` | back / quit |
 
 **How the buffer 1 / 3 frames are chosen (changed 2026-09-25, after the first folders).**

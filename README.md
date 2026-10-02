@@ -255,7 +255,10 @@ M-line -> automatic MVC / AVC windows (`swp.passive_valves`, 120 ms) reviewed by
 whole-recording space-time (since 2026-10-01) -> M-lines
 with buffers 1 | 3 | 4 side by side at the R-peak / the event's phase (drawn on any, motion-corrected
 onto buffer 4), and one hand slope mirrored on five views (displacement, velocity median/Gaussian,
-Keijzer, acceleration). Resumable at every prompt; see **[docs/passive_manual.md](docs/passive_manual.md)**.
+Keijzer, acceleration). An MVC within R+50 ms reuses the general line when the anatomy has not moved
+across it (no prompt, [docs/passive_mvc_line_reuse.md](docs/passive_mvc_line_reuse.md)); `v` on the
+general-line prompt excludes a non-PLAX measurement. Resumable at every prompt; see
+**[docs/passive_manual.md](docs/passive_manual.md)**.
 
 **Reading the speed.** The automatic slant-stack fit is biased high (+11–76 % against hand-drawn
 wavefronts) and on average places its line where a line through noise would sit — use it to rank

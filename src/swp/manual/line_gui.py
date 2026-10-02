@@ -21,7 +21,8 @@ Mouse: left-click adds a point (any order), drag moves one, right-click deletes 
 Keys: ENTER accept (buffer 4) or review / accept (buffer 1 / 3) | c clear | backspace remove last point | arrows nudge the green
 buffer-4 line 0.25 mm (shift: 1 mm) | i toggle motion correction | z zoom all panels on the line /
 full sector | [ ] step the frame of the panel under the mouse | a toggle buffer-4 averaging |
-x skip (no usable septum) | b back | q quit.
+x skip (no usable septum) | v exclude the measurement (general line only: not a PLAX view) |
+b back | q quit.
 """
 from __future__ import annotations
 
@@ -33,6 +34,7 @@ from ._light import order_points, transfer
 HELP = ("click: add point | drag: move | right-click: delete | ENTER: accept (buffer 1/3: review first) | "
         "c: clear | arrows: nudge green line | i: motion correction on/off | z: zoom on line / full | "
         "[ ]: frame of panel under mouse | a: buffer-4 averaging | x: skip (no septum) | b: back | q: quit")
+HELP_EXCLUDE = " | v: exclude measurement (not PLAX)"
 ZOOM_MM = 25.0
 
 
@@ -43,14 +45,16 @@ def _spline_mm(points_mm, n=250):
 
 
 class LineEditor:
-    """One prompt. ``run()`` -> dict(action=accept|skip|back|quit, ...)."""
+    """One prompt. ``run()`` -> dict(action=accept|skip|exclude|back|quit, ...)."""
 
-    def __init__(self, panels, title, reload_panel, preload=None, reference=None, maximize=True):
+    def __init__(self, panels, title, reload_panel, preload=None, reference=None, maximize=True,
+                 exclude=False):
         """
         panels        {buffer: frames.Panel or None}
         reload_panel  callable(buffer, frame, n_avg) -> Panel (frame stepping / averaging)
         preload       dict(source=buffer, points_mm=(k, 2), what=str) - editable starting line
         reference     (label, points_mm on buffer 4) drawn dashed magenta on buffer 4 only
+        exclude       offer ``v``: exclude the whole measurement (wrong view), action "exclude"
         """
         import matplotlib.pyplot as plt
 
@@ -61,7 +65,9 @@ class LineEditor:
         axs = np.atleast_1d(axs)
         self.ax = dict(zip(self.bufs, axs))
         self.fig.suptitle(title, fontsize=10)
-        self.fig.text(0.5, 0.012, HELP, ha="center", fontsize=8, color="0.3")
+        self.exclude = exclude
+        self.fig.text(0.5, 0.012, HELP + (HELP_EXCLUDE if exclude else ""), ha="center", fontsize=8,
+                      color="0.3")
         self.status = self.fig.text(0.5, 0.045, "", ha="center", fontsize=10,
                                     bbox=dict(facecolor="0.95", lw=0))
         self.im, self.art = {}, {}
@@ -360,6 +366,8 @@ class LineEditor:
             self._reload(4, pn.frame, 1 if pn.n_avg > 1 else F.AVG4)
         elif k == "x":
             self._finish("skip")
+        elif k == "v" and self.exclude:
+            self._finish("exclude")
         elif k == "b":
             self._finish("back")
         elif k == "q":
@@ -401,7 +409,7 @@ class LineEditor:
         self.fig.canvas.stop_event_loop()
 
     def run(self, snapshot=None):
-        """Block until accept / skip / back / quit. ``snapshot``: path to save the figure on accept."""
+        """Block until accept / skip / exclude / back / quit. ``snapshot``: path to save the figure on accept."""
         import matplotlib.pyplot as plt
         plt.show(block=False)
         self.fig.canvas.start_event_loop(timeout=0)

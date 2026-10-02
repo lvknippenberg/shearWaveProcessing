@@ -54,6 +54,8 @@ N_SAMPLES = 250
 
 RUNTIME_MAT = "AcquisitionParametersAndECG.mat"
 COMBINED_MAT = "CombinedData.mat"
+# EchoPrime view call per SW folder (study/analysis/view_classification); only shown as a hint
+VIEWS_CSV = REPO / "study" / "logs" / "view_classification" / "all_sw_views.csv"
 
 
 # ------------------------------------------------------------------ paths
@@ -231,12 +233,35 @@ def ready(p: Paths) -> bool:
             and os.path.exists(os.path.join(p.output, "CombinedData_buffer4_iq.gif")))
 
 
+_VIEWS = None
+
+
+def view_hint(folder) -> str | None:
+    """The automatic view call of a folder, e.g. 'PSAX p 1.00 (EchoPrime)', or None."""
+    global _VIEWS
+    if _VIEWS is None:
+        _VIEWS = {}
+        if VIEWS_CSV.is_file():
+            import csv
+            with open(VIEWS_CSV, newline="") as fh:
+                for r in csv.DictReader(fh):
+                    _VIEWS[(r["subject"], r["folder"])] = r
+    r = _VIEWS.get((Path(folder).parent.name, Path(folder).name))
+    if r is None:
+        return None
+    unsure = "" if r.get("confident") == "True" else ", not confident"
+    return f"{r['view']} p {float(r['p_view']):.2f} (EchoPrime{unsure})"
+
+
 # ------------------------------------------------------------------ state
 def state(folder) -> dict:
     """Where a folder stands. Keys: stage, and the window indices still needing each step.
 
-    stage: not-ready | need-general | skipped | detecting | error | need-review | no-windows |
-           need-events | processing | need-slopes | done
+    stage: not-ready | need-general | skipped | excluded | detecting | error | need-review |
+           no-windows | need-events | processing | need-slopes | done
+    (``skipped`` = no usable septum, offered again by ``--retry-skipped``; ``excluded`` = the
+    measurement is left out on purpose, e.g. a PSAX view, and is never offered again - only
+    ``--redo general`` reopens it)
     (a window whose processing failed is listed in ``proc_failed`` and does not hold the folder;
     a window below the detection screen without a line is listed in ``screened`` and does not
     hold it either)
@@ -252,7 +277,7 @@ def state(folder) -> dict:
         s["stage"] = "need-general"
         return s
     if gen.get("skipped"):
-        s["stage"] = "skipped"
+        s["stage"] = "excluded" if gen.get("excluded") else "skipped"
         return s
     errs = read_json(os.path.join(p.dir, "worker_errors.json"), {})
     win = read_json(p.windows_json)

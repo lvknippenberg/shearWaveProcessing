@@ -9,6 +9,10 @@ then general lines, each in queue order (the September folders first). The windo
 "valves", since 2026-10-01) shows the whole-recording space-time of the general line with the
 automatic MVC / AVC windows, to be moved / added / deleted before the event lines are drawn. The data for the next prompt is loaded in a
 background thread while the current one is open.
+
+An MVC event close to the R-peak reuses the general line without a prompt when the buffer-4
+anatomy has not moved since the general line's frame (``events.reuse_general`` in
+configs/passive_manual.yaml, :func:`reuse_general`; docs/passive_mvc_line_reuse.md).
 """
 from __future__ import annotations
 
@@ -102,8 +106,58 @@ def _onto_buffer4(pre, panels):
     return dict(source=4, points_mm=pts, what=f"{what} - CHECK its position on buffer 4")
 
 
+# ------------------------------------------------------------------ reuse of the general line
+def reuse_config():
+    """``events.reuse_general`` of configs/passive_manual.yaml (read without the zea stack)."""
+    import yaml
+    with open(S.CONFIG) as fh:
+        cfg = (yaml.safe_load(fh).get("events") or {}).get("reuse_general") or {}
+    return cfg if cfg.get("enabled") else None
+
+
+def reuse_general(f, p, w, ph, cfg, t4=None):
+    """Whether event window ``w`` can take the general line without a prompt -> (ok, info).
+
+    The window's label must be in ``cfg['labels']`` and its phase <= ``max_phase_ms``; then the
+    buffer-4 envelope at the general line's frame is registered onto the one at the event (rigid,
+    in a box around the general line, :func:`swp.mline.transfer.transfer_line`). It passes when
+    the registration is trusted, the anatomy moved <= ``max_perp_mm`` ACROSS the line (the
+    component that takes the line off the septum; motion along the line only slides it along the
+    septum) and <= ``max_shift_mm`` in total. Probe or breathing motion between the general
+    frame and the event fails it, and the line is drawn by hand."""
+    phase = (ph or {}).get("phase_ms")
+    info = dict(label=w.get("label"), phase_ms=phase, max_phase_ms=cfg.get("max_phase_ms"),
+                max_perp_mm=cfg.get("max_perp_mm"), max_shift_mm=cfg.get("max_shift_mm"))
+    if w.get("label") not in cfg.get("labels", ()) or phase is None or phase > cfg["max_phase_ms"]:
+        return False, dict(info, why="label / phase")
+    gen = S.read_json(p.general_json) or {}
+    kg = ((gen.get("frames") or {}).get("4") or {}).get("frame")
+    if kg is None:
+        return False, dict(info, why="general frame unknown")
+    t4 = F.buffer4_times(p.bmode(4)) if t4 is None else t4
+    ke = int(np.argmin(np.abs(np.asarray(t4) - w["t_peak"])))
+    from ._light import transfer
+    g4 = S.load_points(p.general_npz) * 1e3
+    a = F.load_panel(f, p.bmode(4), 4, int(kg), "general")
+    b = F.load_panel(f, p.bmode(4), 4, ke, "event")
+    try:
+        r = transfer().transfer_line(g4, (a.env, a.x_mm, a.z_mm), (b.env, b.x_mm, b.z_mm), check=True)
+    except Exception as exc:                                        # noqa: BLE001
+        return False, dict(info, why=f"registration failed: {exc}")
+    u = g4[-1] - g4[0]
+    u = u / np.linalg.norm(u)
+    perp = float(abs(-u[1] * r.transform.dx + u[0] * r.transform.dz))
+    info.update(frame_general=int(kg), frame_event=ke, gap_ms=float(abs(t4[ke] - t4[int(kg)]) * 1e3),
+                shift_mm=r.shift_mm, perp_mm=perp, dx=r.transform.dx, dz=r.transform.dz,
+                reliable=r.reliable(), agree=r.agree, known_err_mm=r.known_err_mm)
+    ok = r.reliable() and perp <= cfg["max_perp_mm"] and r.shift_mm <= cfg["max_shift_mm"]
+    why = ("ok" if ok else "registration not trusted" if not r.reliable()
+           else "anatomy moved across the line" if perp > cfg["max_perp_mm"] else "anatomy moved")
+    return ok, dict(info, why=why)
+
+
 # ------------------------------------------------------------------ task data (thread-safe: no GUI)
-def load_task(task):
+def load_task(task, reuse=None):
     kind, f, i = task
     p = S.Paths(f)
     if kind == "general":
@@ -121,18 +175,26 @@ def load_task(task):
         win = S.event_windows(p)
         w = win["windows"][i]
         t4 = F.buffer4_times(p.bmode(4))
-        panels = F.load_panels(f, p, F.event_targets(f, w["t_peak"], t4))
-        gen = S.read_json(p.general_json)
         g4 = S.load_points(p.general_npz) * 1e3
         ev = (S.read_json(p.events_json) or {})
         cur = ev.get("events", {}).get(str(i)) if ev.get("windows_hash") == win["hash"] else None
+        reuse_info = None
+        if reuse and cur is None:                   # never for an answered (or skipped) window
+            ok, reuse_info = reuse_general(f, p, w, win["phases"][i], reuse, t4)
+            if ok:
+                what = (f"general line, reused without a prompt ({w.get('label')} R+"
+                        f"{reuse_info['phase_ms']:.0f} ms, anatomy moved {reuse_info['perp_mm']:.1f} mm "
+                        f"across the line, {reuse_info['shift_mm']:.1f} mm in total)")
+                return dict(auto_reuse=reuse_info, points4_mm=g4, preload=dict(source=4, what=what),
+                            window=w, phase=win["phases"][i])
+        panels = F.load_panels(f, p, F.event_targets(f, w["t_peak"], t4))
         if cur and not cur.get("skipped"):          # redo: the saved buffer-4 line
             pre = dict(source=4, points_mm=np.asarray(cur["points4_mm"]), what="current line (redo)")
         else:
             pre = _onto_buffer4(_legacy_event(p, w["t_peak"]), panels) or dict(
                 source=4, points_mm=g4, what="general line (buffer 4, R-peak anatomy)")
         return dict(panels=panels, preload=pre, reference=("general line (buffer 4)", g4),
-                    window=w, phase=win["phases"][i])
+                    window=w, phase=win["phases"][i], reuse_check=reuse_info)
     if kind == "slope":
         from .worker import load_spacetimes
         win = S.event_windows(p)
@@ -207,9 +269,13 @@ def review_hash(windows):
 
 # ------------------------------------------------------------------ session
 class Session:
-    def __init__(self, folders, mode="auto", retry_skipped=False, redo=(), include_screened=False):
+    def __init__(self, folders, mode="auto", retry_skipped=False, redo=(), include_screened=False,
+                 reuse=True):
         """``redo``: tasks ``(kind, folder, window)`` to re-open first, with their answers pre-loaded.
-        ``include_screened``: also ask event lines for windows below the detection screen."""
+        ``include_screened``: also ask event lines for windows below the detection screen.
+        ``reuse``: reuse the general line for MVC events near the R-peak (``events.reuse_general``);
+        False always prompts."""
+        self.reuse = reuse_config() if reuse else None
         self.queue = list(redo)
         self.folders = list(folders)
         self.kinds = KINDS[mode]
@@ -278,12 +344,12 @@ class Session:
                 return fut.result()
             except Exception as exc:                                  # noqa: BLE001
                 print(f"  (prefetch failed: {exc}; loading again)")
-        return load_task(task)
+        return load_task(task, self.reuse)
 
     def _prefetch(self, exclude):
         nxt = self.next_task(exclude=exclude)
         if nxt is not None and nxt not in self.prefetched:
-            self.prefetched = {nxt: self.pool.submit(load_task, nxt)}
+            self.prefetched = {nxt: self.pool.submit(load_task, nxt, self.reuse)}
 
     # ------------------------------------------------ main loop
     def run(self, wait=True):
@@ -348,6 +414,15 @@ class Session:
             return self._prompt_slope(p, i, data)
         if kind == "review":
             return self._prompt_review(p, data)
+        if data.get("auto_reuse"):
+            pts = np.asarray(data["points4_mm"]).tolist()
+            info = data["auto_reuse"]
+            res = dict(action="accept", source_buffer=4, points_src_mm=pts, points4_mm=pts,
+                       motion_correction=False, mapping=None, mapping_other={}, nudge_mm=[0.0, 0.0],
+                       frames={"4": dict(frame=info["frame_event"], phase_ms=info["phase_ms"])},
+                       auto_reuse=info)
+            self._save_event(p, i, res, data)
+            return "accept"
         from .line_gui import LineEditor
 
         def reload_panel(b, frame, n_avg):
@@ -357,17 +432,21 @@ class Session:
 
         if kind == "general":
             what = "GENERAL M-line, all buffers at the R-peak (used to detect the valve events)"
+            hint = S.view_hint(f)
+            if hint:
+                what += f"  |  view: {hint}"
         else:
             w, ph = data["window"], data.get("phase") or {}
             phs = "" if ph.get("phase_ms") is None else f" (R+{ph['phase_ms']:.0f} ms)"
             what = (f"EVENT {i + 1}: {w.get('label') or '?'} at {w['t_peak'] * 1e3:.0f} ms{phs}"
                     " - buffers at the event's cardiac phase")
         ed = LineEditor(data["panels"], self._title(task, what), reload_panel,
-                        preload=data.get("preload"), reference=data.get("reference"))
+                        preload=data.get("preload"), reference=data.get("reference"),
+                        exclude=kind == "general")
         snap = os.path.join(p.dir, "general.png" if kind == "general" else f"event{i}.png")
         os.makedirs(p.dir, exist_ok=True)
         res = ed.run(snapshot=snap)
-        if res["action"] in ("accept", "skip"):
+        if res["action"] in ("accept", "skip", "exclude"):
             (self._save_general if kind == "general" else self._save_event)(p, i, res, data)
         return res["action"]
 
@@ -390,11 +469,17 @@ class Session:
             print(f"  general line: buffer {res['source_buffer']}"
                   + (f", moved {mi.get('shift_mm', 0):.1f} mm to buffer 4" if res["motion_correction"] else ""))
         else:
+            excl = res["action"] == "exclude"
             if cur is not None:
-                S.archive(p, S.downstream_files(p), "general_skipped")
-            S.write_json(p.general_json, dict(skipped=True, hash=None, time=time.strftime("%Y-%m-%d %H:%M:%S")))
-            S.append_log(p, dict(task="general", action="skip"))
-            print("  folder skipped (no usable septum)")
+                dest = S.archive(p, S.downstream_files(p), "general_excluded" if excl else "general_skipped")
+                if dest:
+                    print(f"  earlier windows / lines / slopes archived -> {os.path.basename(dest)}")
+            rec = dict(skipped=True, hash=None, time=time.strftime("%Y-%m-%d %H:%M:%S"))
+            if excl:
+                rec.update(excluded="not PLAX", view_hint=S.view_hint(p.folder))
+            S.write_json(p.general_json, rec)
+            S.append_log(p, dict(task="general", action=res["action"]))
+            print("  measurement excluded (not PLAX)" if excl else "  folder skipped (no usable septum)")
 
     def _prompt_review(self, p, data):
         from .roi_gui import RoiEditor
@@ -437,9 +522,14 @@ class Session:
             S.save_line(p.event_npz(i), pts)
             rec = dict(base, hash=S.points_hash(pts), preload=(data.get("preload") or {}).get("what"),
                        **{k: v for k, v in res.items() if k != "action"})
-            print(f"  event {i}: buffer {res['source_buffer']}"
-                  + (f", moved {(res.get('mapping') or {}).get('shift_mm', 0):.1f} mm"
-                     if res["motion_correction"] else ""))
+            if data.get("reuse_check") is not None:      # prompted although reuse was checked: why
+                rec["reuse_check"] = data["reuse_check"]
+            if res.get("auto_reuse"):
+                print(f"  event {i}: {rec['preload']}")
+            else:
+                print(f"  event {i}: buffer {res['source_buffer']}"
+                      + (f", moved {(res.get('mapping') or {}).get('shift_mm', 0):.1f} mm"
+                         if res["motion_correction"] else ""))
         else:
             rec = dict(base, skipped=True)
             print(f"  event {i}: skipped")
@@ -468,6 +558,7 @@ class Session:
                        line_source_buffer=ev.get("source_buffer"),
                        line_motion_corrected=ev.get("motion_correction"),
                        line_mapping_reliable=(ev.get("mapping") or {}).get("reliable"),
+                       line_reused_general=bool(ev.get("auto_reuse")),
                        time=time.strftime("%Y-%m-%d %H:%M:%S"))
             if res["action"] == "accept":
                 rec.update({k: v for k, v in res.items() if k != "action"})

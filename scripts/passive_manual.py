@@ -108,7 +108,7 @@ def cmd_session(a):
     workers = _spawn_workers(a, a.workers)
     try:
         Session(folders, mode=a.task, retry_skipped=a.retry_skipped, redo=redo,
-                include_screened=a.include_screened).run(wait=not a.no_wait)
+                include_screened=a.include_screened, reuse=not a.no_reuse).run(wait=not a.no_wait)
     finally:
         for p, log in workers:
             p.terminate()
@@ -168,6 +168,7 @@ def cmd_export(a):
                        line_source_buffer=r.get("line_source_buffer"),
                        line_motion_corrected=r.get("line_motion_corrected"),
                        line_mapping_reliable=r.get("line_mapping_reliable"),
+                       line_reused_general=r.get("line_reused_general"),
                        general_source_buffer=gen.get("source_buffer"), time=r.get("time"),
                        screened=False, detector=picker,
                        screen=(wins[i] if i < len(wins) else {}).get("screen"),
@@ -253,6 +254,8 @@ def main():
     ap.add_argument("--no-wait", action="store_true",
                     help="session: exit instead of waiting when only the worker has work left")
     ap.add_argument("--retry-skipped", action="store_true", help="session: also offer skipped prompts")
+    ap.add_argument("--no-reuse", action="store_true",
+                    help="session: draw every event line (no automatic reuse of the general line for MVC)")
     ap.add_argument("--include-screened", action="store_true",
                     help="session: also ask event lines for windows below the detection screen")
     ap.add_argument("--redo", choices=["general", "review", "event", "slope"], default=None)

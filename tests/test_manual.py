@@ -67,6 +67,55 @@ def test_state_walks_through_every_stage(tmp_path):
     assert s["stage"] == "done" and s["slopes_done"] == [0] and s["slopes_skipped"] == [1]
 
 
+def test_excluded_measurement_is_never_offered_again(tmp_path):
+    from swp.manual.session import Session
+    f = _ready_folder(tmp_path)
+    p = S.Paths(f)
+    pts = np.array([[-0.01, 0.05], [0.0, 0.052], [0.012, 0.047]])
+    _general(p, pts)
+    _windows(p, S.points_hash(pts), [0.05])
+    ses = Session([f], retry_skipped=True)
+    ses._save_general(p, None, dict(action="exclude"), {})        # v on the general-line prompt
+    assert S.state(f)["stage"] == "excluded"
+    assert S.read_json(p.general_json)["excluded"] == "not PLAX"
+    assert not os.path.exists(p.windows_json)                     # downstream archived, not deleted
+    assert any(n.startswith("archive_") and n.endswith("general_excluded") for n in os.listdir(p.dir))
+    ses.refresh()
+    assert ses.next_task() is None                                # even with --retry-skipped
+    ses._save_general(p, None, dict(action="skip"), {})           # x: no septum -> retried
+    ses.refresh()
+    assert S.state(f)["stage"] == "skipped" and ses.next_task() == ("general", f, None)
+
+
+def test_mvc_near_r_peak_reuses_the_general_line_without_a_prompt(tmp_path):
+    from swp.manual.session import Session
+    f = _ready_folder(tmp_path)
+    p = S.Paths(f)
+    pts = np.array([[-0.01, 0.05], [0.0, 0.052], [0.012, 0.047]])
+    _general(p, pts)
+    wh = _windows(p, S.points_hash(pts), [0.05, 0.45])
+    w = S.read_json(p.windows_json)["windows"][0]
+    info = dict(label="MVC", phase_ms=31.0, shift_mm=0.4, frame_event=12, reliable=True, why="ok")
+    ses = Session([f], reuse=False)
+    act = ses.prompt(("event", f, 0), dict(auto_reuse=info, points4_mm=pts * 1e3, window=w, phase={},
+                                           preload=dict(source=4, what="general line, reused")))
+    assert act == "accept"                                        # no editor was opened
+    e = S.read_json(p.events_json)
+    assert e["windows_hash"] == wh and e["events"]["0"]["hash"] == S.points_hash(pts)
+    assert e["events"]["0"]["auto_reuse"]["shift_mm"] == 0.4
+    s = S.state(f)
+    assert s["need_proc"] == [0] and s["need_events"] == [1]      # the worker takes it from here
+
+
+def test_reuse_gate_on_label_and_phase(tmp_path):
+    from swp.manual.session import reuse_general
+    cfg = dict(labels=["MVC"], max_phase_ms=50, max_perp_mm=1.0, max_shift_mm=3.0)
+    p = S.Paths(_ready_folder(tmp_path))                          # no images: must not get that far
+    assert not reuse_general(p.folder, p, dict(label="AVC", t_peak=0.3), dict(phase_ms=20), cfg)[0]
+    assert not reuse_general(p.folder, p, dict(label="MVC", t_peak=0.1), dict(phase_ms=62), cfg)[0]
+    assert not reuse_general(p.folder, p, dict(label="MVC", t_peak=0.1), dict(phase_ms=None), cfg)[0]
+
+
 def test_redrawn_event_line_invalidates_its_space_time_and_slope(tmp_path):
     f = _ready_folder(tmp_path)
     p = S.Paths(f)

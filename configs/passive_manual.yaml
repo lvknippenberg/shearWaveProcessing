@@ -74,6 +74,21 @@ detect:
   screen_view: "velocity gauss"
   screen_min: 0.3
 
+# Event lines (session). An MVC window close to the R-peak reuses the general line instead of a
+# drawing prompt (docs/passive_mvc_line_reuse.md): its phase must be <= max_phase_ms AND the
+# buffer-4 anatomy at the event must not have moved since the general line's frame by more than
+# max_perp_mm ACROSS the line or max_shift_mm in total (swp.mline.transfer registration around
+# the general line, trusted only when its checks pass), so probe or breathing motion between the
+# beats still brings up the prompt. Applies only to windows without an answer yet;
+# `--redo event --window i` always opens the editor; `session --no-reuse` switches it off.
+events:
+  reuse_general:
+    enabled: true
+    labels: [MVC]
+    max_phase_ms: 50
+    max_perp_mm: 1.0
+    max_shift_mm: 3.0
+
 run:
   measurement: 0
   outdir: "swp_passive_manual"
