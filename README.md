@@ -115,7 +115,8 @@ and reports per-folder success/failure in a closing summary — one failure neve
 **On the Linux GPU server** (Docker container `zea-swp`, JAX ~40 % faster than this Windows machine,
 validated against it): setup from scratch, validation and batch commands in
 **[docs/linux_server.md](docs/linux_server.md)**. `CombinedData.mat` still has to be built on Windows
-(MATLAB). `scripts/linux_validation.py` re-runs one folder into `output_linux` and compares it
+(MATLAB; `scripts/build_combined_data.py` batch-builds every missing one). The strain folders
+(`*Strain_data*`, buffers 3 + 6) have their own server command there. `scripts/linux_validation.py` re-runs one folder into `output_linux` and compares it
 dataset by dataset.
 
 ### B-mode GIFs

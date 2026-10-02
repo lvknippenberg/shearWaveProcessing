@@ -30,9 +30,20 @@ no beamforming):
 
 ```
 set KERAS_BACKEND=torch
-python -c "import sys; from swp.acquisition.combined import ensure_combined_data; [ensure_combined_data(f) for f in sys.argv[1:]]" "Z:\raw_data\C0000000xx\<folder>"
+python scripts/build_combined_data.py --root "Z:\raw_data" --dry-run      # what is missing
+python scripts/build_combined_data.py --root "Z:\raw_data" --jobs 4       # build all missing (resumable)
+python scripts/build_combined_data.py --folder "Z:\raw_data\C0000000xx\<folder>"
 python scripts/process_raw_data.py --root "Z:\raw_data" --check      # audit (needs the Windows base-config dir)
 ```
+
+`build_combined_data.py` skips folders that already have the file and keeps going past failures;
+~1.5-1.8 min/folder with 4 jobs, ~535 MB written per folder. Its log only shows the closing summary:
+the per-folder progress lines are lost while worker threads redirect stdout (process-wide), so
+count `CombinedData.mat` files to follow a run.
+
+**Do not beamform a folder while its `CombinedData.mat` is still being built.** MATLAB copies the
+base config first and appends the runtime parameters afterwards, so the file exists before it is
+complete. Start the server batch after the Windows build has printed its summary.
 
 On the server an existing `CombinedData.mat` is only validated (pure Python; `repair_buffer2_receive`
 may open it `r+` but only writes when a repair is needed).
@@ -161,6 +172,33 @@ docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
 - JAX is fastest and matches to float precision; use `KERAS_BACKEND=torch` for bit-identical output.
 - Fully detached alternative to tmux: `docker exec -d ... bash -c "... > log 2>&1"`, follow with
   `tail -f` on the log (it is on the NAS).
+
+### Strain data (2026-10-02)
+
+`Z:\raw_data` holds 533 `*Strain_data*` folders next to the 724 SW folders. They carry buffers 3
+and 6 only (`RF_data_3.bin` + `RF_data_6.bin`, ~5 GB per folder; buffer 6 = `Bmode_strain`, the long
+widebeam recording) and no buffer 4, so the passive tools skip them. Their `CombinedData.mat` files
+were built on Windows on 2026-10-02/03 (`build_combined_data.py --jobs 4`, log
+`study/logs/build_combined_data_strain_20261002.log`).
+
+Beamform them on the server with one command from any terminal. `docker exec -d` runs the job inside
+the container, so it does not depend on the SSH session or tmux; the call returns right away:
+
+```bash
+ssh luuk@bmdserver3 'docker top zea-swp | grep -q process_raw_data && { echo "a batch is still running in zea-swp - not pulling"; exit 1; }; git -C ~/mounts/VISUALIZE/shearWaveProcessing pull --ff-only && docker exec -d -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c "export KERAS_BACKEND=jax XLA_PYTHON_CLIENT_PREALLOCATE=false; args=(); for d in /mnt/z/VISUALIZE/raw_data/C*/*Strain_data*; do args+=(--folder \"\$d\"); done; python scripts/process_raw_data.py \"\${args[@]}\" > study/logs/batch_strain_server_\$(date +%Y%m%d).log 2>&1" && echo started'
+```
+
+- The guard refuses to pull while another batch runs from this clone (its code must not change
+  underneath it). Only Strain folders are passed (`--folder` per folder).
+- Resumable: rerun the same command after an interruption or failures; folders with IQ + GIFs are
+  skipped. A buffer failure aborts its folder before any GIF is written, so failed folders are
+  retried.
+- Follow it in `Z:\shearWaveProcessing\study\logs\batch_strain_server_<date>.log`.
+- **First run on strain data.** Before 2026-10-02 no strain folder had been beamformed; check the
+  first folders in the log before leaving it for days. The SW batch took ~6.6 min/folder, so expect
+  2-3 days for all 533 on one worker.
+- Buffer-3 unwrap runs automatically during beamforming but was validated on SW acquisitions only.
+  When it cannot resolve the head, the folder keeps buffer 3 in stored order (not an error).
 
 ### Buffer-3 unwrap (2026-09-25)
 

@@ -94,7 +94,7 @@ Roughly 4.8 GB per measurement folder, so budget ~210 GB for all 44.
 | 3 | focused B-mode, ~25 Hz | all frames @ 25 fps |
 | 4 | ultrafast diverging-wave, ~926 Hz (passive source) | sub-sampled ~50/926 @ 50 fps |
 | 5 | B-mode, one frame per push — **rate is `SW.ActualFPS` (~18 Hz)**, not `Bmode_WB.ActualFPS` | all frames @ 20 fps |
-| 6 | strain | often **not saved** — no `RF_data_6.bin` |
+| 6 | strain (`Bmode_strain`, long widebeam, ~3 beats) | not saved in SW folders — no `RF_data_6.bin`. `*Strain_data*` folders carry buffers 3 + 6 only ([linux_server.md](linux_server.md#strain-data-2026-10-02)) |
 
 A missing `RF_data_k.bin` means that buffer was not dumped; that is not an error. Check with
 `RF_rows[k] * RF_cols[k] * RF_frames[k] * 2` bytes against the file size.
