@@ -120,6 +120,59 @@ Labels go to `study/logs/view_classification/sw_views_manual.csv`, and the tool 
 stopped. Example screen: `sheets/review_ui_C000000020.png`, where the proposals match by eye
 (8 PLAX, then 9 PSAX).
 
+## Review result (2026-10-02): ground truth for all 724 SW loops
+
+The user reviewed all 48 subjects with `review_views.py`. **`study/logs/view_classification/sw_views_manual.csv`
+is the view label of every SW acquisition** (column `label`): 294 PLAX, 420 PSAX, 9 Unclear, 1 Apical.
+It is the table to sort and filter on. Scores: `score_voters.py` → `voter_scores.txt`.
+
+Changes to the proposals:
+* 15 changes in total: 9 of the 140 flagged loops and 6 of the 584 unanimous loops.
+* All 6 unanimous changes are in **C38**: 3 PLAX that every voter called PSAX, and 3 marked Unclear.
+* Unclear: C5 09-27-12, C38 (7 loops), C39 12-13-36.
+* Apical: C9 10-02-09.
+
+Accuracy on the 714 PLAX/PSAX loops:
+
+| | accuracy |
+|---|---|
+| EchoPrime frame classifier | 0.966 |
+| clustering, frame features | 0.926 |
+| clustering, video embeddings | 0.909 |
+| self-trained head | 0.979 |
+| **unanimous consensus (the 81 % auto set)** | **0.995** (3 wrong, all C38) |
+| review proposals | 0.992 |
+| first-pass "confident" EchoPrime (p ≥ 0.8) | 0.997 (2 wrong of 587) |
+
+So the voters are individually mediocre (the clustering most of all), but their **agreement is a
+reliable "safe to auto-sort" signal**. Its errors came as a whole subject with poor windows (C38),
+not as scattered loops.
+
+**Supervised head on frozen features** (`supervised_probe.py`, leave-one-subject-out on these labels):
+
+| features | accuracy |
+|---|---|
+| frame mean | 0.982 |
+| + temporal std | 0.983 |
+| video embedding | 0.968 |
+| all | 0.987 |
+
+With frozen EchoPrime features, the **temporal information adds about 1 loop**: the anatomy in a
+single frame already carries the view, and the errors are poor or atypical windows. Three C7 loops
+labelled PLAX (11-47-50, 11-53-29, 11-54-10) are confidently called PSAX (p ≤ 0.05) and may be worth
+a second look.
+
+**For future subjects:**
+1. `extract_features.py`.
+2. Four voters; the self-trained head is replaced by the supervised head trained on these labels.
+3. Unanimous → sorted automatically.
+4. Everything else → `review_views.py --subject …`.
+
+**Passive manual study:**
+* All 42 folders with slopes are PLAX by these labels. C33 08-43-33 and C35 10-54-57, flagged as
+  doubtful in the first pass, are PLAX.
+* The 4 C1 PSAX folders no longer carry slopes.
+
 ## Restructuring caveat (not done)
 
 `Z:\raw_data` is the verified 1:1 mirror of DataHub P000000569. Moving folders into `PLAX/`, `PSAX/` and
@@ -141,5 +194,6 @@ that the tools filter on, or a view tree of junctions outside `raw_data`.
 | `study/logs/view_classification_strain_combined_C49.log` | CombinedData.mat build for the 14 C49 Strain_data folders on Z: (14/14 validated afterwards) |
 | `extract_features.py` | EchoPrime frame + video-encoder features per loop (cached locally) |
 | `label_free_sort.py` | four label-free voters + consensus → `study/logs/view_classification/sw_views_consensus.csv` |
-| `review_views.py` | review UI → `study/logs/view_classification/sw_views_manual.csv` |
+| `review_views.py` | review UI → `study/logs/view_classification/sw_views_manual.csv` (**the labels**) |
+| `score_voters.py`, `supervised_probe.py` | voters vs labels; supervised head LOSO → `voter_scores.txt` |
 | `sheets/` | contact sheets of C49 and of the uncertain subjects, plus confident-vs-block cases |

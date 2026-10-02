@@ -1,0 +1,46 @@
+724 loops, 48 subjects; manual labels {'PSAX': 420, 'PLAX': 294, 'Unclear': 9, 'Apical': 1}
+proposals changed by the reviewer: 15 (flagged 9/140, unanimous 6/584)
+
+binary accuracy on the 714 PLAX/PSAX-labelled loops (unclear/apical excluded):
+  EchoPrime frame classifier               0.966  (24 wrong)
+  cluster frame features                   0.926  (53 wrong)
+  cluster video embeddings                 0.909  (65 wrong)
+  self-trained head                        0.979  (15 wrong)
+  review proposal (majority + block fit)   0.992  (6 wrong)
+  unanimous consensus (auto set)           0.995  (3 wrong of 581)
+  first pass 'confident' EchoPrime         0.997  (2 wrong of 587)
+
+unclear / apical by the reviewer:
+  C000000005 09-27-12  Unclear  proposed PLAX  flagged True  votes L L L S  split vote
+  C000000009 10-02-09  Apical   proposed Apical flagged True  votes S L L S  apical?
+  C000000038 12-30-31  Unclear  proposed PSAX  flagged False  votes S S S S  
+  C000000038 12-31-04  Unclear  proposed PSAX  flagged False  votes S S S S  
+  C000000038 12-31-47  Unclear  proposed PSAX  flagged False  votes S S S S  
+  C000000038 12-42-06  Unclear  proposed PSAX  flagged True  votes S L L S  other?
+  C000000038 12-42-56  Unclear  proposed PSAX  flagged True  votes S L L S  other?
+  C000000038 12-43-38  Unclear  proposed PSAX  flagged True  votes S L L S  other?
+  C000000038 12-44-12  Unclear  proposed PSAX  flagged True  votes S L L S  other?
+  C000000039 12-13-36  Unclear  proposed PSAX  flagged True  votes S S L S  split vote
+
+changed proposals:
+  C000000005 09-27-12  PLAX  -> Unclear  flagged True  votes L L L S
+  C000000007 11-53-29  PSAX  -> PLAX     flagged True  votes S L L S
+  C000000007 11-54-10  PSAX  -> PLAX     flagged True  votes S L L S
+  C000000033 08-48-57  PSAX  -> PLAX     flagged True  votes S S S L
+  C000000038 12-28-28  PSAX  -> PLAX     flagged False  votes S S S S
+  C000000038 12-29-03  PSAX  -> PLAX     flagged False  votes S S S S
+  C000000038 12-29-40  PSAX  -> PLAX     flagged False  votes S S S S
+  C000000038 12-30-31  PSAX  -> Unclear  flagged False  votes S S S S
+  C000000038 12-31-04  PSAX  -> Unclear  flagged False  votes S S S S
+  C000000038 12-31-47  PSAX  -> Unclear  flagged False  votes S S S S
+  C000000038 12-42-06  PSAX  -> Unclear  flagged True  votes S L L S
+  C000000038 12-42-56  PSAX  -> Unclear  flagged True  votes S L L S
+  C000000038 12-43-38  PSAX  -> Unclear  flagged True  votes S L L S
+  C000000038 12-44-12  PSAX  -> Unclear  flagged True  votes S L L S
+  C000000039 12-13-36  PSAX  -> Unclear  flagged True  votes S S L S
+
+supervised head on frozen EchoPrime features, leave-one-subject-out on the manual labels:
+frame      LOSO accuracy 0.982 (13 wrong of 714); p<0.1|>0.9: 95% of loops, 4 wrong
+frame+std  LOSO accuracy 0.983 (12 wrong of 714); p<0.1|>0.9: 97% of loops, 8 wrong
+video      LOSO accuracy 0.968 (23 wrong of 714); p<0.1|>0.9: 89% of loops, 7 wrong
+all        LOSO accuracy 0.987 (9 wrong of 714); p<0.1|>0.9: 97% of loops, 4 wrong
