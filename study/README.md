@@ -21,12 +21,14 @@ buffer-3 radial-striation investigation, and the reconstruction comparisons.
 >
 > **View classification (2026-10-02): PLAX / PSAX / Apical per acquisition.**
 > See `analysis/view_classification/README.md`.
-> - First pass: EchoPrime's off-the-shelf view classifier run on the buffer-3 GIFs of all 724 SW folders.
-> - Every subject follows a protocol of about 6 PLAX, then about 9 PSAX. Apical views are in Strain_data only.
-> - Three passive-manual readings sit on PSAX or off-axis folders (C1, C33, C35).
-> - The user is not convinced by these results. Next step: a binary PLAX/PSAX classifier that uses the
->   full-cycle loop; its plan is under review.
-> - Tables: `logs/view_classification/`. Nothing on `Z:` was restructured.
+> - **Done:** every SW acquisition has a reviewed label in `logs/view_classification/sw_views_manual.csv`
+>   (294 PLAX, 420 PSAX, 9 Unclear, 1 Apical). `Z:` is not restructured; tools filter on the CSV.
+> - How: four voters (EchoPrime, two per-subject clusterings, a binary head), then a review of every
+>   subject in a Tk window. Unanimous votes: 82 % of loops, 0 errors leave-one-subject-out.
+> - Every subject follows a protocol of about 6 PLAX, then about 9 PSAX. Apical views are in
+>   Strain_data only.
+> - For new data: `scripts/view_sort.py run` (`docs/view_sorting.md`).
+> - Montages to confirm the labels with a colleague, ranked by confidence: `analysis/view_classification/review_montages.py`.
 >
 > Sections 0-8 below are the September processing record.
 

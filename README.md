@@ -52,6 +52,20 @@ Stages 1 and 2 share one RF read, so `beamform` also produces the converted file
 separately only if you want the zea database copies without beamforming. Because each stage skips
 inputs that already exist, you can **start from stage 3** whenever the IQ files are present.
 
+### View sorting (PLAX / PSAX / Apical)
+
+Every SW acquisition has a view label in `study/logs/view_classification/sw_views_manual.csv`
+(column `label`). Tools filter on it; `Z:\raw_data` is not restructured. For new data, after
+`beamform`:
+
+```
+python scripts/view_sort.py run --root "Z:/raw_data"
+```
+
+This extracts EchoPrime features, runs four voters and opens a review window for the new subjects.
+Unanimous votes are 100 % correct leave-one-subject-out on 82 % of loops. Workflow, keys and numbers:
+[docs/view_sorting.md](docs/view_sorting.md).
+
 ### Building `CombinedData.mat`
 
 If the folder has only the runtime `AcquisitionParametersAndECG.mat` (the dynamic parameters saved
@@ -314,6 +328,8 @@ scripts/               process_raw_data.py (batch stages 1-2 over a raw-data tre
                        passive_manual.py (whole-study manual reading: general line, window
                          review, 3-buffer M-lines, 5-view hand slopes, background workers;
                          session | worker | status | export | archive | redetect),
+                       view_sort.py (PLAX / PSAX / Apical labels: features | classify | review |
+                         run | status | train-head | evaluate | download-weights),
                        passive_roi.py (ROIs marked by eye on the whole-recording general-line
                          space-time; session | status | export | auto),
                        linux_validation.py (re-run one folder elsewhere and compare to output/),
@@ -338,6 +354,7 @@ docs/                  HANDOFF.md, invivo_processing.md (in-vivo runbook + base-
                          should reconstruct; +5 dB dynamic range at no resolution cost),
                        passive_mlines.md (where/how to draw passive M-lines, study workflow, results),
                        passive_manual.md (the whole-study manual reading tool: keys, files, resume),
+                       view_sorting.md (PLAX / PSAX / Apical label per acquisition: voters, review, new data),
                        passive_speed_estimation.md (automatic vs hand-drawn slopes, tracking score,
                          why the slant stack misses the wave and what to change),
                        ecg_timing.md (what is gated, trigger log, buffer phases, MVC/AVC/AK labels),
@@ -357,6 +374,8 @@ src/swp/
   passive.py           passive burst-window workflow (detect / draw / process, montages, labels)
   passive_valves.py    automatic MVC / AVC windows on the general line (fitted to the ROIs marked by eye)
   manual/              the whole-study manual reading (store, worker, session, line / slope / window editors)
+  views/               echo-view sorting: EchoPrime features, four voters + consensus, Tk review window,
+                         the trained binary head (view_head.npz)
   mline/               interactive M-line selection, ported from SWI/Zea/swi_mline.py
   viz/                 stage 3 core, ported from iq2sws (io/core/estimators/filters/speed/viz/metrics/pipeline/runconfig)
 ```

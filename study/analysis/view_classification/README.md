@@ -71,8 +71,14 @@ model, and it is *not* the answer. Next step:
   apical SW acquisition is C9 10-02-09.
 * **Use the temporal content.** Each buffer-3 loop covers about one cardiac cycle: 32 frames at
   25.4 Hz = 1.22 s, unwrapped into chronological order.
-* Plan under review: `D:\Luuk van Knippenberg\Claude\view_classification\Plan.txt` (a ResNet-18 /
-  CNN+pooling / CNN-LSTM / R(2+1)D comparison with patient-grouped CV), plus the review of it.
+* The user's plan, `D:\Luuk van Knippenberg\Claude\view_classification\Plan.txt`, was a supervised
+  ResNet-18 / CNN+pooling / CNN-LSTM / R(2+1)D comparison with patient-grouped CV. After review it
+  was **not implemented**:
+  - the goal is sorting, not a methods comparison;
+  - it assumed labels that did not exist.
+
+  The user asked for as much as possible label-free, with labels only through a review UI.
+  That is the second pass below.
 * The EchoPrime output is not ground truth. At most it is a pre-label to correct by hand, and a
   zero-training baseline to beat.
 
@@ -108,7 +114,8 @@ unanimous 81 % is correct. Clustering alone is weaker than hoped, because PSAX a
 does not always form one tight group within a subject. So labels are still needed, but only as a
 review.
 
-`review_views.py` is the review UI, one subject per screen:
+`review_views.py` was the review UI, one subject per screen. It is now `swp.views.review`, run with
+`scripts/view_sort.py review`; the study script was removed after the move.
 * every loop **plays**;
 * flagged loops have a red frame and show their votes;
 * proposed labels = the unanimous label, else the majority vote, with 2–2 ties going to the
@@ -122,7 +129,7 @@ stopped. Example screen: `sheets/review_ui_C000000020.png`, where the proposals 
 
 ## Review result (2026-10-02): ground truth for all 724 SW loops
 
-The user reviewed all 48 subjects with `review_views.py`. **`study/logs/view_classification/sw_views_manual.csv`
+The user reviewed all 48 subjects in the review window. **`study/logs/view_classification/sw_views_manual.csv`
 is the view label of every SW acquisition** (column `label`): 294 PLAX, 420 PSAX, 9 Unclear, 1 Apical.
 It is the table to sort and filter on. Scores: `score_voters.py` → `voter_scores.txt`.
 
@@ -159,27 +166,61 @@ not as scattered loops.
 
 With frozen EchoPrime features, the **temporal information adds about 1 loop**: the anatomy in a
 single frame already carries the view, and the errors are poor or atypical windows. Three C7 loops
-labelled PLAX (11-47-50, 11-53-29, 11-54-10) are confidently called PSAX (p ≤ 0.05) and may be worth
-a second look.
+labelled PLAX (11-47-50, 11-53-29, 11-54-10) are confidently called PSAX (p ≤ 0.05). The user
+re-reviewed C7: all 8 are PLAX, as "not always clear, but all attempts at PLAX". Labels are
+unchanged.
 
-**For future subjects:**
-1. `extract_features.py`.
-2. Four voters; the self-trained head is replaced by the supervised head trained on these labels.
-3. Unanimous → sorted automatically.
-4. Everything else → `review_views.py --subject …`.
+**For future subjects: now in the repo** as `src/swp/views/` + `scripts/view_sort.py`
+(runbook: `docs/view_sorting.md`). The fourth voter is a supervised head trained on these labels
+(`view_head.npz`), replacing the self-trained head.
+
+Leave-one-subject-out through the packaged pipeline (`view_sort.py evaluate`):
+
+| | accuracy |
+|---|---|
+| ep | 0.966 |
+| clu_f | 0.931 |
+| clu_v | 0.916 |
+| sup | 0.987 |
+| proposal | 0.990 |
+
+**Unanimous: 82 % of loops, 0 errors.** C38's three all-wrong loops are now flagged instead of
+auto-labelled.
+
+Features moved to a per-folder cache: `<DATA_ROOT>/view_classification/features/<subject>/<folder>.npz`,
+split from `features_sw_v1.npz` and bit-identical to a fresh extraction.
 
 **Passive manual study:**
 * All 42 folders with slopes are PLAX by these labels. C33 08-43-33 and C35 10-54-57, flagged as
   doubtful in the first pass, are PLAX.
 * The 4 C1 PSAX folders no longer carry slopes.
 
-## Restructuring caveat (not done)
+## Decision: labels stay a CSV, `Z:\raw_data` is not restructured (user, 2026-10-02)
 
-`Z:\raw_data` is the verified 1:1 mirror of DataHub P000000569. Moving folders into `PLAX/`, `PSAX/` and
-`Apical/` breaks the mirror's path mapping: a future `mdr_webdav --refresh` run would download the moved
-folders again (TBs). Other tools also assume `<subject>/<acquisition>`: `swp.manual.store` listing,
-`batch_prepare`, and the server batch. Alternatives: a per-subject `views.csv` manifest (this table)
-that the tools filter on, or a view tree of junctions outside `raw_data`.
+`study/logs/view_classification/sw_views_manual.csv` is the sorting manifest, and tools filter on its
+`label`. The manual passive study already does this (`a1927b6`). Reasons:
+* `Z:\raw_data` is the verified 1:1 mirror of DataHub P000000569. Moving folders into view subfolders
+  would make a future `mdr_webdav --refresh` download them again.
+* The swp tools assume `<subject>/<acquisition>`.
+
+## Review montages: confirming the labels with a colleague
+
+`review_montages.py` writes one GIF per patient to
+`D:\Luuk van Knippenberg\Claude\view_classification\review_montages\`. The GIFs are 4–8 MB each and are
+not in git.
+* Each GIF is the review screen as a movie: every SW acquisition in order, its buffer-3 loop playing in
+  real time, with the reviewed label.
+* Files are **ranked by confidence, lowest first** (`01_<subject>_conf….gif`), and
+  `index.csv` lists the ranking (copy: `study/logs/view_classification/review_montages_index.csv`).
+
+How the confidence is computed:
+* **Per loop:** the probability that the leave-one-subject-out supervised head, trained *without*
+  that patient, gives the reviewed label. Unclear counts as 0.5, and Apical uses EchoPrime's apical
+  probability.
+* **Per patient:** the mean over its loops; the lowest loop is shown as well.
+* A red frame marks a loop where the model disagrees with the label (< 0.5).
+* The ranking therefore shows where the model and the reviewer differ. It is not a measure of image
+  quality.
 
 ## Files
 
@@ -194,6 +235,7 @@ that the tools filter on, or a view tree of junctions outside `raw_data`.
 | `study/logs/view_classification_strain_combined_C49.log` | CombinedData.mat build for the 14 C49 Strain_data folders on Z: (14/14 validated afterwards) |
 | `extract_features.py` | EchoPrime frame + video-encoder features per loop (cached locally) |
 | `label_free_sort.py` | four label-free voters + consensus → `study/logs/view_classification/sw_views_consensus.csv` |
-| `review_views.py` | review UI → `study/logs/view_classification/sw_views_manual.csv` (**the labels**) |
+| (moved) | review UI → `swp.views.review` / `scripts/view_sort.py`; labels in `study/logs/view_classification/sw_views_manual.csv` |
 | `score_voters.py`, `supervised_probe.py` | voters vs labels; supervised head LOSO → `voter_scores.txt` |
+| `review_montages.py` | one ranked review-montage GIF per patient (outside git) + `review_montages_index.csv` |
 | `sheets/` | contact sheets of C49 and of the uncertain subjects, plus confident-vs-block cases |

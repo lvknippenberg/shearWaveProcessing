@@ -51,6 +51,9 @@ def main():
                 + txt + "\n")
     bad = d[keep & ((d.p_plax_sup > 0.5) != (d.label == "PLAX"))]
     print(bad[["subject", "folder", "label", "p_plax_sup"]].to_string(index=False))
+    # per-loop LOSO probabilities (input to the confidence ranking of the review montages)
+    d[["subject", "folder", "label", "p_plax_sup", "p_apical"]].round(4).to_csv(
+        LOGS / "sw_views_probe.csv", index=False)
 
 
 if __name__ == "__main__":
