@@ -95,4 +95,7 @@ that the tools filter on, or a view tree of junctions outside `raw_data`.
 | `local_strain_buffer3.py` | buffer-3 beamform of Strain_data on a LOCAL copy (only 09-00-18 was run; the beamform moved to the server) |
 | `study/logs/view_classification/` | `all_sw_views.csv` (724 SW folders), `C000000049_views.csv` (with the proposed paths, not applied) |
 | `study/logs/view_classification_strain_combined_C49.log` | CombinedData.mat build for the 14 C49 Strain_data folders on Z: (14/14 validated afterwards) |
+| `extract_features.py` | EchoPrime frame + video-encoder features per loop (cached locally) |
+| `label_free_sort.py` | four label-free voters + consensus → `study/logs/view_classification/sw_views_consensus.csv` |
+| `review_views.py` | review UI → `study/logs/view_classification/sw_views_manual.csv` |
 | `sheets/` | contact sheets of C49 and of the uncertain subjects, plus confident-vs-block cases |
