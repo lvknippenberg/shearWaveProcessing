@@ -37,13 +37,15 @@ python scripts/process_raw_data.py --root "Z:\raw_data" --check      # audit (ne
 ```
 
 `build_combined_data.py` skips folders that already have the file and keeps going past failures;
-~1.5-1.8 min/folder with 4 jobs, ~535 MB written per folder. Its log only shows the closing summary:
-the per-folder progress lines are lost while worker threads redirect stdout (process-wide), so
-count `CombinedData.mat` files to follow a run.
+~1.3-1.8 min/folder with 4 jobs, ~535 MB written per folder. **With `--jobs > 1` its log is not
+reliable:** worker threads redirect stdout (`contextlib.redirect_stdout` is process-wide, and
+overlapping redirects restore in the wrong order), so per-folder progress lines and even the closing
+summary can vanish. Judge a run by the process ending and by counting `CombinedData.mat` files;
+find failures by listing folders that still lack one.
 
 **Do not beamform a folder while its `CombinedData.mat` is still being built.** MATLAB copies the
 base config first and appends the runtime parameters afterwards, so the file exists before it is
-complete. Start the server batch after the Windows build has printed its summary.
+complete. Start the server batch only after the Windows build process has exited.
 
 On the server an existing `CombinedData.mat` is only validated (pure Python; `repair_buffer2_receive`
 may open it `r+` but only writes when a repair is needed).
@@ -178,8 +180,18 @@ docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
 `Z:\raw_data` holds 533 `*Strain_data*` folders next to the 724 SW folders. They carry buffers 3
 and 6 only (`RF_data_3.bin` + `RF_data_6.bin`, ~5 GB per folder; buffer 6 = `Bmode_strain`, the long
 widebeam recording) and no buffer 4, so the passive tools skip them. Their `CombinedData.mat` files
-were built on Windows on 2026-10-02/03 (`build_combined_data.py --jobs 4`, log
-`study/logs/build_combined_data_strain_20261002.log`).
+were built on Windows on 2026-10-02/03 (`build_combined_data.py --jobs 4`, 519 folders in 11.5 h,
+~1.33 min/folder). **529 of 533 have one.** The four without are all `C000000012` and cannot be
+built:
+
+| folder | why |
+|---|---|
+| `VIS-014_Strain_data_07-July-2026_12-08-12` | RF bins complete, but `AcquisitionParametersAndECG.mat` (13.5 MB) is corrupt: MATLAB lists 5 small variables, then `load` fails ("File might be corrupt") |
+| `..._12-11-03`, `..._12-15-43`, `..._12-17-19` | only a 0.5-4.6 kB runtime `.mat`, no RF (same at the DataHub source) |
+
+The mirror matches DataHub by size, so this happened at acquisition, not in the download. The first
+folder could only be rescued by reconstructing its runtime parameters from a sibling acquisition.
+`process_raw_data.py` reports these four as failed; that is expected.
 
 Beamform them on the server with one command from any terminal. `docker exec -d` runs the job inside
 the container, so it does not depend on the SSH session or tmux; the call returns right away:
