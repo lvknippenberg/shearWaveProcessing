@@ -18,6 +18,10 @@ buffer-3 radial-striation investigation, and the reconstruction comparisons.
 > - Tables: `logs/passive_manual_prelim/`.
 > - Analysis steps: `analysis/passive_manual_prelim*`, `analysis/passive_general_*`,
 >   `analysis/passive_detector_v2_check.py`, `analysis/passive_speed_resolution.py`.
+> - **Evaluation 2026-10-05 (126 folders, 363 slopes), re-runnable on a new snapshot:**
+>   `analysis/passive_manual_eval/` (`REPORT_2026-10-05.md`, `run_all.py`). Covers reproducibility
+>   within and between acquisitions, M-lines, septal thickness, events, slopes and the quality
+>   metric. The session changes it led to (2026-10-06): `docs/passive_manual.md`.
 >
 > **View classification (2026-10-02): PLAX / PSAX / Apical per acquisition.**
 > See `analysis/view_classification/README.md`.

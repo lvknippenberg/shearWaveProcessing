@@ -51,3 +51,13 @@ study/montages/passive_wave_map/*.gif
 study/montages/passive_wave_map/*_still.png
 !study/montages/passive_wave_map/C000000027_MVC_w2.mp4
 !study/montages/passive_wave_map/C000000027_MVC_w2_still.png
+
+# evaluation of the manual passive reading (2026-10-05): results are the record (figures, summaries,
+# tables); the frozen snapshots of Z: (~0.4 GB each) and the heavy caches are regenerable
+!study/analysis/passive_manual_eval/results/
+study/analysis/passive_manual_eval/snapshots/
+study/analysis/passive_manual_eval/scratch/
+study/analysis/passive_manual_eval/results/*/03_mline/raw*.json
+study/analysis/passive_manual_eval/results/*/04_septum/measurements*.csv
+study/analysis/passive_manual_eval/results/*/06_slopes/estimates.csv
+study/analysis/passive_manual_eval/results/*.txt

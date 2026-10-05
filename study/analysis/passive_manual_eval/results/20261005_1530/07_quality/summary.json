@@ -1,0 +1,151 @@
+{
+ "n": 363,
+ "confidence_counts": {
+  "0.0": 5,
+  "1.0": 49,
+  "2.0": 130,
+  "3.0": 179
+ },
+ "current_metric_event_line_semblance": {
+  "spearman": 0.47289214083265374,
+  "auc_usable": 0.697950377562028,
+  "auc_clear": 0.7779329608938548,
+  "n": 363
+ },
+ "current_metric_general_line_screen": {
+  "spearman": 0.3420945908583313,
+  "auc_usable": 0.6386791322066403,
+  "auc_clear": 0.7024228807384018,
+  "n": 363
+ },
+ "simple_metric_loso": {
+  "spearman": 0.6020015658636225,
+  "auc_usable": 0.7611770346398178,
+  "auc_clear": 0.851044449842118,
+  "n": 363
+ },
+ "model_loso": {
+  "spearman": 0.6643231974745826,
+  "auc_usable": 0.8167925206760158,
+  "auc_clear": 0.8787648773378675,
+  "n": 363,
+  "auc_usable_p": 0.7818530504614647,
+  "auc_clear_p": 0.8757894097643916
+ },
+ "E_current_exact": 0.5454545454545454,
+ "E_current_mae": 0.5515960946903555,
+ "E_simple_exact": 0.6363636363636364,
+ "E_simple_mae": 0.4551938602947388,
+ "E_model_exact": 0.6556473829201102,
+ "E_model_mae": 0.43236318943450625,
+ "reader_retest_confidence": {
+  "confidence_exact_agreement": 0.6444444444444445,
+  "confidence_within_one": 0.9777777777777777,
+  "confidence_weighted_kappa": 0.5622119815668203,
+  "n_matched": 45
+ },
+ "model_clear_coefficients_std": {
+  "vmed_bests_score": 0.395,
+  "vg_bests_score": 0.121,
+  "acc_bests_score": 0.668,
+  "keij_bests_score": 0.274,
+  "acc_sem": 0.528,
+  "vmed_sem": 0.364,
+  "vg_sem": -0.074,
+  "c_spread": -0.058,
+  "neg_auto": -0.758,
+  "vg_burst": -0.203,
+  "acc_flat": -0.173,
+  "vmed_best_coh": 0.596,
+  "is_avc": -0.219,
+  "is_ak": 0.149,
+  "gen_sem": -0.123,
+  "log_xframes": 0.46,
+  "fast_auto": -0.272
+ },
+ "outliers": {
+  "n": 30,
+  "n_both_metrics": 19,
+  "by_given": {
+   "1.0": 4,
+   "2.0": 21,
+   "3.0": 5
+  },
+  "rule": "given 3 & E<1.9 | given 2 & (E<1.45 | E>2.75) | given 0-1 & E>2.35 (E = LOSO model)"
+ },
+ "drift_by_date": [
+  {
+   "date": "2026-10-01",
+   "n": 86,
+   "mean_given": 2.256,
+   "mean_expected": 2.457,
+   "mean_resid": -0.202,
+   "frac_clear": 0.453
+  },
+  {
+   "date": "2026-10-02",
+   "n": 92,
+   "mean_given": 2.304,
+   "mean_expected": 2.253,
+   "mean_resid": 0.051,
+   "frac_clear": 0.467
+  },
+  {
+   "date": "2026-10-05",
+   "n": 185,
+   "mean_given": 2.405,
+   "mean_expected": 2.31,
+   "mean_resid": 0.095,
+   "frac_clear": 0.524
+  }
+ ],
+ "drift_kruskal_p": 4.0693587476656316e-05,
+ "anchor_view_by_date": {
+  "Keijzer velocity": {
+   "2026-10-01": 6,
+   "2026-10-02": 26,
+   "2026-10-05": 56
+  },
+  "acceleration": {
+   "2026-10-01": 34,
+   "2026-10-02": 24,
+   "2026-10-05": 64
+  },
+  "velocity gauss": {
+   "2026-10-01": 4,
+   "2026-10-02": 15,
+   "2026-10-05": 22
+  },
+  "velocity median": {
+   "2026-10-01": 41,
+   "2026-10-02": 25,
+   "2026-10-05": 42
+  }
+ },
+ "clear_vs_anchor_view": [
+  {
+   "anchor_view": "Keijzer velocity",
+   "n": 88,
+   "frac_clear": 0.25,
+   "mean_E": 2.06
+  },
+  {
+   "anchor_view": "acceleration",
+   "n": 122,
+   "frac_clear": 0.885,
+   "mean_E": 2.663
+  },
+  {
+   "anchor_view": "velocity gauss",
+   "n": 41,
+   "frac_clear": 0.268,
+   "mean_E": 2.076
+  },
+  {
+   "anchor_view": "velocity median",
+   "n": 108,
+   "frac_clear": 0.352,
+   "mean_E": 2.303
+  }
+ ]
+}
