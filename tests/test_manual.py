@@ -527,6 +527,65 @@ def test_line_on_buffer1_is_still_registered_and_reviewed_first():
 
 
 # ------------------------------------------------------------------ 2026-10-06: auto tilt + registered pre-loads
+def _wave_st(c=3.0, length_mm=40.0, prf=925.9, t_mid=0.06):
+    """A single Gaussian velocity band travelling at c m/s along the line (+ = away from r = 0)."""
+    t = np.arange(0, 0.13, 1 / prf)
+    r = np.linspace(0, length_mm * 1e-3, 250)
+    arrival = t_mid + (r - r.mean()) / c
+    d = np.exp(-0.5 * ((t[:, None] - arrival[None, :]) / 0.004) ** 2)
+    d -= 0.6 * np.exp(-0.5 * ((t[:, None] - arrival[None, :] - 0.012) / 0.004) ** 2)
+    return d, t, r
+
+
+@pytest.mark.parametrize("c", [1.5, 3.0, -4.0])
+def test_auto_tilt_follows_the_band_through_the_anchor(c):
+    from swp.manual.slope_gui import auto_tilt
+    d, t, r = _wave_st(c)
+    r_a = 12e-3
+    t_a = 0.06 + (r_a - r.mean()) / c
+    got = auto_tilt(d, t, r, t_a * 1e3, r_a * 1e3)
+    assert np.sign(got) == np.sign(c) and abs(got / c - 1) < 0.08
+
+
+def _slope_editor(auto_tilt):
+    import matplotlib
+    matplotlib.use("Agg")
+    from swp.manual.slope_gui import SlopeEditor
+    d, t, r = _wave_st(2.0)
+    views = [dict(name=n, quantity="velocity", data=d, r=r, t=t) for n in
+             ("displacement gauss", "velocity median", "velocity gauss", "Keijzer velocity", "acceleration")]
+    ed = SlopeEditor(dict(views=views), "test", init_speed=6.0, maximize=False, auto_tilt=auto_tilt)
+    ed.fig.canvas.stop_event_loop = lambda: None
+    return ed, t, r
+
+
+def test_first_click_auto_tilts_later_clicks_keep_the_tilt_and_t_repeats_it():
+    from types import SimpleNamespace
+    ed, t, r = _slope_editor(True)
+    r_a = 10e-3
+    t_a = 0.06 + (r_a - r.mean()) / 2.0
+    ev = SimpleNamespace(inaxes=ed.st_axes[4], button=1, xdata=t_a * 1e3, ydata=r_a * 1e3)
+    ed.on_click(ev)
+    sp = ed.lines["shared"]["speed"]
+    assert abs(sp / 2.0 - 1) < 0.08 and ed.auto["shared"]["view"] == "acceleration"
+    ed.on_key(SimpleNamespace(key="up"))                         # the reader tilts by hand
+    ed.on_click(SimpleNamespace(inaxes=ed.st_axes[1], button=1, xdata=t_a * 1e3, ydata=r_a * 1e3))
+    assert abs(ed.lines["shared"]["speed"] - (sp + 0.5)) < 1e-9  # a re-anchor keeps the hand tilt
+    ed.on_key(SimpleNamespace(key="t"))                          # t: auto tilt again
+    assert abs(ed.lines["shared"]["speed"] / 2.0 - 1) < 0.08
+    ed.on_key(SimpleNamespace(key="3"))
+    rec = ed.result["shared"]
+    assert rec["auto_tilt"]["speed_m_s"] == pytest.approx(rec["speed_m_s"])
+    assert rec["crossing_frames"] == pytest.approx(40.0 / abs(rec["speed_m_s"]) / (1e3 / 925.9), rel=0.02)
+
+
+def test_without_auto_tilt_the_click_keeps_the_slider_start():
+    from types import SimpleNamespace
+    ed, t, r = _slope_editor(False)
+    ed.on_click(SimpleNamespace(inaxes=ed.st_axes[4], button=1, xdata=60.0, ydata=20.0))
+    assert ed.lines["shared"]["speed"] == pytest.approx(6.0) and not ed.auto
+
+
 def _b4_file(folder, shifts_mm, seed=0):
     """A zea-layout buffer-4 file whose frames are one smooth speckle image shifted in z."""
     from scipy.ndimage import gaussian_filter, shift as ndshift

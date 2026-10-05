@@ -684,14 +684,19 @@ class Session:
     def _prompt_slope(self, p, i, data):
         from .slope_gui import SlopeEditor
         w, ph, proc = data["window"], data.get("phase") or {}, data["proc"]
-        auto = proc.get("auto", {}).get("velocity gauss", {}).get("speed_m_s", 3.0)
+        scfg = manual_config().get("slope") or {}
+        init_view = scfg.get("init_view", "velocity gauss")
+        autos = proc.get("auto", {})
+        auto = (autos.get(init_view) or autos.get("velocity gauss") or {}).get("speed_m_s", 3.0)
+        auto = 3.0 if auto is None else auto
         init = auto if (np.isfinite(auto) and 1.05 < abs(auto) < 19.5) else 3.0
         phs = f" R+{ph['phase_ms']:.0f} ms" if ph.get("phase_ms") is not None else ""
         data["data"]["bmode_title"] = (f"buffer 4 at the event (box around the line), "
                                        f"M-line {proc.get('mline_length_mm', 0):.0f} mm")
         what = f"SLOPE, event {i + 1}: {w.get('label') or '?'} at {w['t_peak'] * 1e3:.0f} ms{phs}"
         task = ("slope", p.folder, i)
-        ed = SlopeEditor(data["data"], self._title(task, what), preload=data.get("preload"), init_speed=init)
+        ed = SlopeEditor(data["data"], self._title(task, what), preload=data.get("preload"), init_speed=init,
+                         auto_tilt=bool(scfg.get("auto_tilt", False)))
         res = ed.run(snapshot=os.path.join(p.dir, f"slope{i}.png"))
         if res["action"] in ("accept", "skip"):
             slopes = S.read_json(p.slopes_json) or {}
@@ -704,6 +709,7 @@ class Session:
                        line_mapping_reliable=(ev.get("mapping") or {}).get("reliable"),
                        line_reused_general=bool(ev.get("auto_reuse")),
                        time=time.strftime("%Y-%m-%d %H:%M:%S"))
+            rec.update(slider_init=dict(view=init_view, speed_m_s=float(init)))
             if res["action"] == "accept":
                 rec.update({k: v for k, v in res.items() if k != "action"})
                 sh, dp = res["shared"], res["disp"]
