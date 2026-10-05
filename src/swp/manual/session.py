@@ -107,6 +107,129 @@ def _onto_buffer4(pre, panels):
     return dict(source=4, points_mm=pts, what=f"{what} - CHECK its position on buffer 4")
 
 
+# ------------------------------------------------------------------ registered pre-loads (2026-10-06)
+# A pre-load is only a proposal: the editor opens on it and ENTER accepts it, as before. Evidence:
+# study/analysis/passive_manual_eval/REPORT_2026-10-05.md, point 3. Registering the general line onto
+# the event frame halves its distance to the line the reader draws (event lines 2.3 -> 1.5 mm; MVC /
+# AK ~0.8-1.0 mm, AVC 3.7 -> 1.8 mm with rotation); the previous acquisition's general line
+# registered onto a new acquisition lands 1.09 mm from the drawn one (the reader's own redraw
+# scatter: 1.06 mm). Switches: ``events.preload`` / ``general.preload`` in configs/passive_manual.yaml.
+_CFG = {}
+
+
+def manual_config():
+    """configs/passive_manual.yaml as a dict (read once, without the zea stack)."""
+    if "cfg" not in _CFG:
+        import yaml
+        with open(S.CONFIG) as fh:
+            _CFG["cfg"] = yaml.safe_load(fh) or {}
+    return _CFG["cfg"]
+
+
+def _reg_note(r):
+    rot = f", rotated {r.transform.angle:+.0f} deg" if abs(r.transform.angle) >= 0.5 else ""
+    trust = "" if r.reliable() else " - registration NOT trusted, CHECK it"
+    return f"moved {r.shift_mm:.1f} mm{rot}{trust}", dict(
+        shift_mm=r.shift_mm, angle_deg=r.transform.angle, reliable=r.reliable(), agree=r.agree,
+        known_err_mm=r.known_err_mm)
+
+
+def registered_general(f, p, label, panel4, g4, cfg):
+    """The general line registered from its own buffer-4 frame onto ``panel4`` (the event frame)
+    -> preload dict, or None. Labels in ``rotate_labels`` (AVC: the septum turns ~7 deg in systole)
+    also search a rotation. The registered line is proposed even when the registration is not
+    trusted (it is still closer than the unchanged line on average), with a CHECK note."""
+    gen = S.read_json(p.general_json) or {}
+    kg = ((gen.get("frames") or {}).get("4") or {}).get("frame")
+    if kg is None or panel4 is None:
+        return None
+    from ._light import transfer
+    amax, step = float(cfg.get("max_angle_deg", 20)), float(cfg.get("angle_step_deg", 2))
+    angles = np.arange(-amax, amax + 1e-9, step) if label in cfg.get("rotate_labels", ()) else (0.0,)
+    a = F.load_panel(f, p.bmode(4), 4, int(kg), "general")
+    try:
+        r = transfer().transfer_line(g4, (a.env, a.x_mm, a.z_mm), (panel4.env, panel4.x_mm, panel4.z_mm),
+                                     check=True, angles=angles)
+    except Exception as exc:                                        # noqa: BLE001
+        return dict(source=4, points_mm=g4, what=f"general line as drawn (registration failed: {exc})")
+    note, reg = _reg_note(r)
+    return dict(source=4, points_mm=np.asarray(r.points, float), registration=reg,
+                what=f"general line registered onto this event ({note})")
+
+
+def _acq_time(name):
+    import re
+    from datetime import datetime
+    m = re.search(r"(\d{1,2})-([A-Za-z]+)-(\d{4})_(\d{2})-(\d{2})-(\d{2})", name)
+    if not m:
+        return None
+    try:
+        return datetime.strptime("-".join(m.groups()), "%d-%B-%Y-%H-%M-%S")
+    except ValueError:
+        return None
+
+
+def previous_acquisition(f):
+    """The other acquisition of the same subject (sibling folder) with an accepted general line,
+    nearest in time and preferably EARLIER -> its folder, or None."""
+    me = _acq_time(os.path.basename(f))
+    parent = os.path.dirname(f)
+    cands = []
+    for n in os.listdir(parent):
+        q = os.path.join(parent, n)
+        if os.path.normcase(q) == os.path.normcase(f) or not os.path.isdir(q):
+            continue
+        gen = S.read_json(S.Paths(q).general_json)
+        if not gen or gen.get("skipped") or not gen.get("points4_mm"):
+            continue
+        t = _acq_time(n)
+        if me is not None and t is not None:
+            dt = (t - me).total_seconds()
+            cands.append(((dt > 0), abs(dt), q))
+        else:
+            cands.append(((n > os.path.basename(f)), 0.0, q))
+    return min(cands)[2] if cands else None
+
+
+def previous_general(f, panel4, cfg):
+    """Pre-load of a GENERAL line from the subject's previous acquisition, registered from that
+    acquisition's buffer-4 R-peak frame onto this one (wider box and shift: the probe moved)."""
+    q = previous_acquisition(f)
+    if q is None or panel4 is None:
+        return None
+    pq = S.Paths(q)
+    gen = S.read_json(pq.general_json)
+    kq = ((gen.get("frames") or {}).get("4") or {}).get("frame")
+    pts = np.asarray(gen["points4_mm"], float)
+    name = os.path.basename(q)
+    if kq is None:
+        return dict(source=4, points_mm=pts, what=f"general line of {name} as drawn - CHECK")
+    from ._light import transfer
+    try:
+        a = F.load_panel(q, pq.bmode(4), 4, int(kq), "previous acquisition")
+        r = transfer().transfer_line(pts, (a.env, a.x_mm, a.z_mm), (panel4.env, panel4.x_mm, panel4.z_mm),
+                                     check=True, margins=tuple(cfg.get("margins_mm", (12.0, 20.0, 30.0))),
+                                     max_shift_mm=float(cfg.get("max_shift_mm", 25.0)))
+    except Exception as exc:                                        # noqa: BLE001
+        return dict(source=4, points_mm=pts, what=f"general line of {name} as drawn (registration "
+                                                   f"failed: {exc}) - CHECK")
+    note, reg = _reg_note(r)
+    return dict(source=4, points_mm=np.asarray(r.points, float), registration=dict(reg, folder=name),
+                what=f"general line of {name} registered onto this acquisition ({note})")
+
+
+def _preload_record(data):
+    """What was proposed (points + registration), kept with the accepted line so the reader's
+    corrections of the automatic proposals can be measured later."""
+    pre = data.get("preload") or {}
+    out = {}
+    if pre.get("points_mm") is not None:
+        out["preload_points4_mm"] = np.round(np.asarray(pre["points_mm"], float), 4).tolist()
+    if pre.get("registration"):
+        out["preload_registration"] = pre["registration"]
+    return out
+
+
 # ------------------------------------------------------------------ reuse of the general line
 def reuse_config():
     """``events.reuse_general`` of configs/passive_manual.yaml (read without the zea stack)."""
@@ -169,6 +292,9 @@ def load_task(task, reuse=None):
             pre = dict(source=4, points_mm=np.asarray(cur["points4_mm"]), what="current line (redo)")
         else:
             pre = _onto_buffer4(_legacy_general(p), panels)
+            gcfg = (manual_config().get("general") or {}).get("preload") or {}
+            if pre is None and gcfg.get("previous_acquisition"):
+                pre = previous_general(f, panels.get(4), gcfg)
         return dict(panels=panels, preload=pre, reference=None)
     if kind == "review":
         return load_review(p)
@@ -192,8 +318,11 @@ def load_task(task, reuse=None):
         if cur and not cur.get("skipped"):          # redo: the saved buffer-4 line
             pre = dict(source=4, points_mm=np.asarray(cur["points4_mm"]), what="current line (redo)")
         else:
-            pre = _onto_buffer4(_legacy_event(p, w["t_peak"]), panels) or dict(
-                source=4, points_mm=g4, what="general line (buffer 4, R-peak anatomy)")
+            pre = _onto_buffer4(_legacy_event(p, w["t_peak"]), panels)
+            ecfg = (manual_config().get("events") or {}).get("preload") or {}
+            if pre is None and ecfg.get("registered"):
+                pre = registered_general(f, p, w.get("label"), panels.get(4), g4, ecfg)
+            pre = pre or dict(source=4, points_mm=g4, what="general line (buffer 4, R-peak anatomy)")
         return dict(panels=panels, preload=pre, reference=("general line (buffer 4)", g4),
                     window=w, phase=win["phases"][i], reuse_check=reuse_info)
     if kind == "slope":
@@ -476,7 +605,7 @@ class Session:
                     print(f"  earlier windows / lines / slopes archived -> {os.path.basename(dest)}")
             S.save_line(p.general_npz, pts)
             rec = dict(hash=h, sync="rpeak", preload=(data.get("preload") or {}).get("what"),
-                       time=time.strftime("%Y-%m-%d %H:%M:%S"),
+                       time=time.strftime("%Y-%m-%d %H:%M:%S"), **_preload_record(data),
                        **{k: v for k, v in res.items() if k != "action"})
             S.write_json(p.general_json, rec)
             S.append_log(p, dict(task="general", action="accept", hash=h, source=res["source_buffer"]))
@@ -536,7 +665,7 @@ class Session:
             pts = np.asarray(res["points4_mm"]) * 1e-3
             S.save_line(p.event_npz(i), pts)
             rec = dict(base, hash=S.points_hash(pts), preload=(data.get("preload") or {}).get("what"),
-                       **{k: v for k, v in res.items() if k != "action"})
+                       **_preload_record(data), **{k: v for k, v in res.items() if k != "action"})
             if data.get("reuse_check") is not None:      # prompted although reuse was checked: why
                 rec["reuse_check"] = data["reuse_check"]
             if res.get("auto_reuse"):

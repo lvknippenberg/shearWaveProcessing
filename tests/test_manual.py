@@ -524,3 +524,62 @@ def test_line_on_buffer1_is_still_registered_and_reviewed_first():
     assert ed.result is None and ed.phase == "review" and 4 in ed.map_info
     ed.on_key(SimpleNamespace(key="enter", inaxes=None))
     assert ed.result["action"] == "accept" and ed.result["source_buffer"] == 1
+
+
+# ------------------------------------------------------------------ 2026-10-06: auto tilt + registered pre-loads
+def _b4_file(folder, shifts_mm, seed=0):
+    """A zea-layout buffer-4 file whose frames are one smooth speckle image shifted in z."""
+    from scipy.ndimage import gaussian_filter, shift as ndshift
+    x = np.linspace(-0.04, 0.04, 161)
+    z = np.linspace(0.02, 0.10, 161)                             # 0.5 mm pixels
+    base = gaussian_filter(np.random.default_rng(seed).normal(size=(z.size, x.size)), 3) ** 2 + 1e-3
+    vals = np.stack([ndshift(base, (s / 0.5, 0), order=1, mode="nearest") for s in shifts_mm])
+    iq = np.stack([np.sqrt(vals), np.zeros_like(vals)], -1).astype(np.float32)
+    coords = np.zeros((z.size, x.size, 3))
+    coords[..., 0], coords[..., 2] = x[None, :], z[:, None]
+    out = os.path.join(folder, "output")
+    os.makedirs(out, exist_ok=True)
+    with h5py.File(os.path.join(out, "CombinedData_buffer4_iq.hdf5"), "w") as f:
+        g = f.create_group("tracks/track_0/data/beamformed_data")
+        g["values"], g["coordinates"] = iq, coords
+    return os.path.join(out, "CombinedData_buffer4_iq.hdf5")
+
+
+def test_previous_acquisition_is_the_nearest_earlier_one_with_a_general_line(tmp_path):
+    from swp.manual import session as SE
+    names = ["X_SW_data_10-July-2026_10-11-11", "X_SW_data_10-July-2026_10-12-47",
+             "X_SW_data_10-July-2026_10-13-38", "X_SW_data_10-July-2026_10-14-12"]
+    fs = [str(tmp_path / "C9" / n) for n in names]
+    for f in fs:
+        os.makedirs(f)
+    pts = np.array([[0.0, 0.05], [0.02, 0.06]])
+    for f in fs[:2]:
+        S.write_json(S.Paths(f).general_json, dict(hash="h", points4_mm=(pts * 1e3).tolist()))
+    S.write_json(S.Paths(fs[2]).general_json, dict(skipped=True, hash=None))
+    assert SE.previous_acquisition(fs[3]) == fs[1]               # 10-13-38 skipped, 10-12-47 nearest
+    assert SE.previous_acquisition(fs[0]) == fs[1]               # nothing earlier: the nearest later one
+
+
+def test_registered_preloads_follow_the_anatomy(tmp_path):
+    from swp.manual import frames as F
+    from swp.manual import session as SE
+    f = str(tmp_path / "C9" / "X_SW_data_10-July-2026_10-12-47")
+    _b4_file(f, [0.0] * 12 + [2.4] * 12)                         # event frames: anatomy 2.4 mm deeper
+    p = S.Paths(f)
+    g4 = np.array([[-15.0, 55.0], [15.0, 65.0]])
+    _general(p, g4 * 1e-3)
+    gen = S.read_json(p.general_json)
+    S.write_json(p.general_json, dict(gen, frames={"4": dict(frame=5)}, points4_mm=g4.tolist()))
+    ev = F.load_panel(f, p.bmode(4), 4, 18, "event", n_avg=1)
+    cfg = dict(registered=True, rotate_labels=["AVC"], max_angle_deg=4, angle_step_deg=2)
+    pre = SE.registered_general(f, p, "MVC", ev, g4, cfg)
+    assert np.allclose(pre["points_mm"] - g4, [[0.0, 2.4], [0.0, 2.4]], atol=0.5)
+    assert "registered onto this event" in pre["what"]
+    # the next acquisition: the previous one's line registered onto its R-peak frame
+    f2 = str(tmp_path / "C9" / "X_SW_data_10-July-2026_10-13-38")
+    _b4_file(f2, [-1.6])
+    p2 = S.Paths(f2)
+    d4 = F.load_panel(f2, p2.bmode(4), 4, 0, "general", n_avg=1)
+    pre2 = SE.previous_general(f2, d4, dict(margins_mm=[12.0, 20.0], max_shift_mm=25.0))
+    assert np.allclose(pre2["points_mm"] - g4, [[0.0, -1.6], [0.0, -1.6]], atol=0.5)
+    assert pre2["registration"]["folder"] == os.path.basename(f)

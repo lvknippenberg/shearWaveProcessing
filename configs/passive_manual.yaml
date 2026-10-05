@@ -88,6 +88,26 @@ events:
     max_phase_ms: 50
     max_perp_mm: 1.0
     max_shift_mm: 3.0
+  # Pre-load of a PROMPTED event line (since 2026-10-06; the editor still opens and ENTER accepts):
+  # the general line registered from its own buffer-4 frame onto the event frame, instead of the
+  # general line unchanged. Labels in rotate_labels also search a rotation (+-max_angle_deg): the AVC
+  # line turns ~7 deg against the general line. Evaluation: drawn line 2.3 -> 1.5 mm from the
+  # proposal (AVC 3.7 -> 1.8 mm, MVC / AK 0.8-1.0 mm). registered: false = the old pre-load.
+  preload:
+    registered: true
+    rotate_labels: [AVC]
+    max_angle_deg: 20
+    angle_step_deg: 2
+
+# Pre-load of a GENERAL line (since 2026-10-06) when there is no September line: the line of the
+# subject's nearest (preferably earlier) acquisition with a general line, registered from its
+# buffer-4 R-peak frame onto this one. Lands 1.09 mm from the drawn line, as close as the reader's
+# own redraw (1.06 mm). previous_acquisition: false = no pre-load (draw from scratch, as before).
+general:
+  preload:
+    previous_acquisition: true
+    margins_mm: [12.0, 20.0, 30.0]
+    max_shift_mm: 25.0
 
 run:
   measurement: 0
