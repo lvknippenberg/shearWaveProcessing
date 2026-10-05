@@ -48,6 +48,15 @@ folders are not listed (no passive buffer).
 **Preliminary results of the re-reading, the "two slopes" pattern and the 2D wave maps:**
 [passive_manual_prelim_2026-10-01.md](passive_manual_prelim_2026-10-01.md).
 
+**2026-10-05: session crash fixed; reversed-looking waves.**
+- **Crash.** A session reading quickly (general lines every ~8 s) died with
+  `RuntimeError: main thread is not in main loop`. The Tk window then hung. Nothing was lost:
+  every answer up to the crash was on disk. The cause and fix are under Implementation notes
+  ("Tk and the prefetch thread"). The same `session` command resumes.
+- **State after the crash:** done 65, need-review 9, need-general 227, not-plax 421; 182 slopes.
+- **Reversed-looking waves.** Some windows show a dominant band that reaches the apical end
+  first. See "Waves that seem to run backwards" under "Drawing the slope". Open decision: how to record them.
+
 **2026-10-02: view filter, MVC line reuse and one exclusion.**
 - **View filter.** Only folders the manual view review labels PLAX (or Unclear) are read. That
   leaves 303 of 724 folders; the other 421 have the stage `not-plax`.
@@ -283,6 +292,49 @@ The score is part of the measurement: automatic bias was +14 % on *clear* panels
 | `3` `2` `1` `0` | accept with confidence |
 | `x` / `b` / `q` | skip / back / quit |
 
+#### Waves that seem to run backwards (noted 2026-10-05)
+
+**Direction is consistent.** r = 0 is the right-hand (basal) end of the line in all 79 general
+lines checked on 2026-10-05. So a positive speed is base → apex in every folder, and a reversal
+is not a line drawn the other way round.
+
+**Example.** C000000008 10-37-16, "AK" at 712 ms. RR is 760 ms, so the event is ~63 ms before
+the next R-peak. The reader's line (+2.98 m/s, base → apex) follows a faint early front. The
+dominant displacement band reaches r = 20-45 mm at ~690-700 ms but r = 0-15 mm only at
+~705-715 ms, so it looks apex → base. The velocity bands are almost vertical.
+
+**Likely causes, most likely first.** These are hypotheses; none has been tested.
+1. **The beam angle changes along the line.** Only the axial (along-beam) component is measured.
+   On the example line the beam direction turns by ~42° (−16° at the apical end, +26° at the
+   basal end). The beam picks up:
+   - motion along the septum: ~0.13 of it at the apical end, ~0.76 at the basal end;
+   - wall-normal motion (thinning / thickening): ~0.99 at the apical end, ~0.65 at the basal end.
+
+   When these motions have different time courses (atrial contraction pulls the base toward the
+   atrium while the wall stretches), the timing of the measured signal drifts along the line.
+   Nothing propagates, yet an apparent slope of either sign appears. The in-phase basal block
+   (rigid base motion) belongs to the same family.
+2. **Hydraulic loading.** Atrial kick and valve closure raise LV pressure through the blood
+   almost instantly (~1500 m/s). The whole septum is loaded together: vertical bands, with small
+   timing differences from local thickness or stiffness.
+3. **Ventricular activation.** Mechanical activation runs roughly apex → base. It matters little
+   for late-diastolic AK windows, more for MVC windows (~R−17 to R+103 ms).
+4. **Reflections or guided waves in the thin septum.** At 3 m/s a wave crosses a 49 mm line in
+   ~16 ms. Forward and reflected waves overlap and give bands whose tilt is ambiguous.
+5. **Near-vertical bands have no meaningful sign.** ±2 ms over 49 mm is already ±25 m/s. The
+   ≥ 6 m/s lower-bound caveat applies to the sign as well.
+6. **A wave arriving at an angle or from outside the image plane.** A front that reaches the
+   apical end first gives a genuine negative slope. Probably rarer than the causes above.
+
+**Reading so far (2026-10-05).** Of 190 accepted slopes, 2 are negative (both MVC, confidence
+1). When the dominant band tilts apex → base, the reader has fitted a weaker base → apex front.
+That is a selection bias, to be decided on purpose. Options:
+- record reversed patterns as drawn (`f`) with a low score;
+- add a separate "reversed / vertical" flag so these events can be counted.
+
+A check of cause 1 is still open: does the reversed tilt follow the change in beam angle along
+each line?
+
 ### Marking ROIs by eye (added 2026-10-01)
 
 The detector's window choice is a major source of error: the energy pick and the semblance
@@ -426,10 +478,18 @@ with `screened=True` and no slope.
 - **Fast start.** The editors avoid importing zea/torch, which costs up to 60 s here; the trigger
   log and line transfer are loaded straight from their files (`swp.manual._light`). A session
   starts in a few seconds, and the next prompt is loaded in the background while one is open.
+- **Tk and the prefetch thread (2026-10-05).** A closed editor leaves Tk `Variable` / `Image`
+  objects in reference cycles. If Python's automatic garbage collection runs in the prefetch
+  thread, it frees them there. Tk then raises `main thread is not in main loop` and may hang.
+  A small script on this machine reproduced it: 14 errors and a hang in 15 open / close cycles.
+  `Session.run` now switches automatic collection off for the session and calls `gc.collect()` on
+  the main thread after every prompt. The same script then finishes cleanly. Keep Tk work on the
+  main thread when changing the session.
 - **Screen cost.** Detection also runs the default view along the general line over the whole
   recording and scores a 100 ms window every 5 ms. That adds ~30 s per folder in the background
   worker (31 s measured on C000000001, on a loaded server).
 - **Tests.**
+  - Run with `KERAS_BACKEND=torch` set: without it the 2 tests that import zea fail.
   - `tests/test_manual.py`: the state machine, staleness, locking, archiving, the cropped loader,
     the five views and the display constants.
   - `tests/test_passive_screen.py`: the picker (phase-window peak, dropped out-of-record window,

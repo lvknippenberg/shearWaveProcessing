@@ -16,6 +16,7 @@ configs/passive_manual.yaml, :func:`reuse_general`; docs/passive_mvc_line_reuse.
 """
 from __future__ import annotations
 
+import gc
 import os
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -356,6 +357,19 @@ class Session:
     # ------------------------------------------------ main loop
     def run(self, wait=True):
         plt = setup_matplotlib()
+        # A closed editor leaves Tk objects in reference cycles; an automatic collection in the
+        # prefetch thread would finalise them there -> "main thread is not in main loop" (Tcl may
+        # then hang or abort). Collect only here, on the Tk thread, after every prompt.
+        gc.disable()
+        try:
+            self._loop(plt, wait)
+        finally:
+            self.pool.shutdown(wait=False, cancel_futures=True)
+            plt.close("all")
+            gc.collect()
+            gc.enable()
+
+    def _loop(self, plt, wait):
         last_refresh = time.time()
         while True:
             task = self.forced or (self.queue.pop(0) if self.queue else self.next_task())
@@ -385,6 +399,7 @@ class Session:
                 continue
             self._prefetch(exclude={task})
             action = self.prompt(task, data)
+            gc.collect()
             if action == "quit":
                 print("stopped - everything accepted so far is saved; run again to continue.")
                 break
@@ -400,8 +415,6 @@ class Session:
             if time.time() - last_refresh > 120:
                 self.refresh_waiting()
                 last_refresh = time.time()
-        self.pool.shutdown(wait=False, cancel_futures=True)
-        plt.close("all")
 
     def _title(self, task, what):
         k = self.folders.index(task[1]) + 1
