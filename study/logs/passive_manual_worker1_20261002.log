@@ -68,3 +68,127 @@ worker on 724 folder(s) (watching)
   process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-12-32  windows [1]
     win1: disp +3.1, velo +3.8, velo +3.8, Keij +4.8, acce +3.8
     10 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-13-45  windows [0]
+    win0: disp -1.3, velo +4.8, velo +5.3, Keij +5.6, acce +4.8
+    10 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-13-45  windows [1]
+    win1: disp +3.5, velo +3.6, velo +4.1, Keij +4.5, acce +3.6
+    15 s
+  process Z:\raw_data\C000000002\SWE02_SW_data_28-April-2026_10-14-30  windows [0]
+    win0: disp -1.2, velo +5.6, velo +5.6, Keij +7.4, acce +4.0
+    10 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-10-39  windows [0]
+    win0: disp +3.4, velo +4.5, velo +4.5, Keij +4.3, acce +4.1
+    15 s
+  detect  Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-12-10
+    2 window(s), 16 s
+  detect  Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-13-59
+    2 window(s), 15 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-12-10  windows [0]
+    win0: disp +2.3, velo -10.8, velo -20.0, Keij -7.4, acce +10.8
+    16 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-13-59  windows [0]
+    win0: disp +2.3, velo +2.3, velo +2.3, Keij +2.6, acce +2.6
+    13 s
+  detect  Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-14-33
+    2 window(s), 22 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-14-33  windows [0]
+    win0: disp +1.4, velo +1.4, velo +1.4, Keij +14.0, acce +20.0
+    17 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-14-33  windows [1, 2]
+    win1: disp +6.0, velo +1.8, velo +1.8, Keij +2.2, acce +1.8
+    win2: disp -1.0, velo +3.1, velo +3.1, Keij +2.1, acce -10.8
+    18 s
+  detect  Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-00-06
+    3 window(s), 13 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-15-05  windows [0]
+    win0: disp +3.1, velo +4.5, velo +4.8, Keij +6.0, acce +2.7
+    12 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-15-05  windows [1]
+    win1: disp +4.5, velo +6.0, velo +6.0, Keij +6.0, acce +8.8
+    15 s
+  process Z:\raw_data\C000000003\VIS_03_SW_data_16-June-2026_10-15-05  windows [2]
+    win2: disp -1.0, velo +4.5, velo +6.0, Keij +3.6, acce +2.2
+    11 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-00-06  windows [0]
+    win0: disp -20.0, velo +6.0, velo +6.0, Keij +6.0, acce +6.8
+    14 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-00-06  windows [1]
+    win1: disp +4.1, velo +3.3, velo +4.1, Keij +4.1, acce +3.3
+    13 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-00-06  windows [2, 3]
+    win2: disp +1.0, velo +1.0, velo +1.0, Keij +1.0, acce +1.0
+    win3: disp -3.6, velo +6.0, velo +6.0, Keij +6.0, acce +6.0
+    21 s
+  detect  Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-20
+    3 window(s), 24 s
+  detect  Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-02-20
+    3 window(s), 18 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-20  windows [0, 1]
+    win0: disp -5.0, velo +2.7, velo +2.7, Keij +2.3, acce +2.9
+    win1: disp +4.8, velo +4.8, velo +5.6, Keij +4.8, acce +4.8
+    25 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-20  windows [2, 3]
+    win2: disp +1.1, velo +1.1, velo +1.1, Keij +1.0, acce +1.0
+    win3: disp -2.6, velo -2.6, velo -2.6, Keij -2.4, acce +3.3
+    28 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-48  windows [1]
+    win1: disp +6.0, velo +6.0, velo +6.0, Keij +7.4, acce +5.6
+    16 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-48  windows [2]
+    win2: disp -2.6, velo -4.0, velo -3.8, Keij +1.0, acce -4.0
+    19 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-01-48  windows [3]
+    win3: disp -2.8, velo +2.8, velo +2.8, Keij -2.9, acce +3.6
+    16 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-02-20  windows [0]
+    win0: disp -6.4, velo +2.6, velo +2.6, Keij -7.4, acce +2.6
+    12 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-02-20  windows [1]
+    win1: disp +4.5, velo +4.5, velo +5.3, Keij +5.0, acce +5.6
+    8 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-02-20  windows [2]
+    win2: disp +1.0, velo +1.1, velo +1.1, Keij +1.1, acce +1.1
+    10 s
+  process Z:\raw_data\C000000004\VIS_4_SW_data_16-June-2026_11-02-20  windows [3]
+    win3: disp -3.3, velo +2.8, velo +2.9, Keij +2.6, acce +3.0
+    18 s
+  detect  Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-14-24
+    0 window(s), 18 s
+  detect  Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-16-29
+    3 window(s), 16 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-54  windows [0]
+    win0: disp +20.0, velo +6.0, velo +8.8, Keij +7.4, acce +6.0
+    13 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-12-54  windows [1]
+    win1: disp -14.0, velo -10.8, velo -12.2, Keij -16.5, acce -4.8
+    9 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-14-24  windows [0]
+    win0: disp +5.3, velo +3.0, velo +3.5, Keij +4.1, acce +2.1
+    15 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-15-51  windows [0, 1]
+    win0: disp +2.5, velo +3.5, velo +3.5, Keij +3.2, acce +4.1
+    win1: disp +9.7, velo +10.8, velo +12.2, Keij +12.2, acce +5.6
+    21 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-15-51  windows [2]
+    win2: disp +1.1, velo +1.7, velo +1.7, Keij +1.9, acce +5.6
+    13 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-16-29  windows [1]
+    win1: disp +2.8, velo +3.8, velo +3.8, Keij +3.8, acce +3.8
+    9 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-16-29  windows [2, 3]
+    win2: disp -5.3, velo -5.3, velo -5.3, Keij +1.0, acce +9.7
+    win3: disp +1.0, velo +1.8, velo +4.3, Keij +12.2, acce -6.8
+    18 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-17-03  windows [0]
+    win0: disp +4.8, velo +4.8, velo +4.8, Keij +5.3, acce +3.8
+    11 s
+  process Z:\raw_data\C000000005\VIS-005_SW_data_19-June-2026_09-17-03  windows [1]
+    win1: disp +3.3, velo +7.4, velo +9.7, Keij +4.0, acce +6.8
+    6 s
+  process Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-47-50  windows [0, 1]
+    win0: disp +16.5, velo -20.0, velo -20.0, Keij +20.0, acce -9.7
+    win1: disp -20.0, velo -20.0, velo -20.0, Keij -20.0, acce -20.0
+    19 s
+  detect  Z:\raw_data\C000000007\VIS-007_SW_data_30-June-2026_11-50-12
+    1 window(s), 15 s
