@@ -48,6 +48,45 @@ folders are not listed (no passive buffer).
 **Preliminary results of the re-reading, the "two slopes" pattern and the 2D wave maps:**
 [passive_manual_prelim_2026-10-01.md](passive_manual_prelim_2026-10-01.md).
 
+**2026-10-06: evaluation, reader decisions, and changes to the session.**
+
+[study/analysis/passive_manual_eval/REPORT_2026-10-05.md](../study/analysis/passive_manual_eval/REPORT_2026-10-05.md)
+evaluates the reading so far (126 folders, 363 slopes). It covers reproducibility, M-lines, septal
+thickness, event placement, slope fitting and the quality metric. `run_all.py` there repeats it on a
+new snapshot when the reading is done.
+
+Decisions taken on it:
+- **AK is not part of the main reading.** It was not in the study plan.
+  - AK windows need not be added in the window review.
+  - The 32 already added stay as they are.
+  - At the end of the study a separate AK pass will measure in how many subjects an AK wave is
+    visible / quantifiable, and correlate it with the MVC/AVC speeds, BMI and condition.
+  - Timing for that pass: the AK energy peak sits at 0.94 RR (~47 ms before the next R-peak), and
+    the wave ~25 ms before that peak.
+- **Scoring rule**, written down because the score drifted between days: on 10-01, comparable
+  windows got ~0.25 point less than later. See "Scoring" under "Drawing the slope". In short:
+  - high = clear propagation in all panels, ideally clean enough for an (automatic) slope fit on
+    the acceleration panel;
+  - strong but near-vertical bands show no propagation and score low;
+  - slow waves (e.g. AK) are scored by the same rule.
+- **Line pre-loads** (only proposals: every line is still shown and accepted with ENTER):
+  - event lines start from the general line *registered* onto the event frame (AVC with rotation);
+  - general lines of a subject's later acquisitions start from the previous acquisition's line,
+    registered onto the new R-peak frame.
+
+  Steps 1 and 4 below give the details.
+- **Slope prompt:**
+  - the slider starts at the velocity-median automatic speed (before: velocity gauss);
+  - the first click sets the tilt automatically through the clicked point (`t` repeats it);
+  - the status line gives the number of frames the line needs to cross the M-line.
+
+Each change has a switch in `configs/passive_manual.yaml`, and the old behaviour is one line away:
+- `events.preload.registered: false`;
+- `general.preload.previous_acquisition: false`;
+- `slope.init_view: "velocity gauss"`, `slope.auto_tilt: false`.
+
+Each was also committed separately, so it can be reverted.
+
 **2026-10-05: session crash fixed; reversed-looking waves.**
 - **Crash.** A session reading quickly (general lines every ~8 s) died with
   `RuntimeError: main thread is not in main loop`. The Tk window then hung. Nothing was lost:
@@ -93,6 +132,17 @@ same machine is released immediately (another host's lock after 3 h).
      read, and the title shows the label (`view: PLAX (manual review)`). For a folder not in the
      review, the title shows the EchoPrime call from `all_sw_views.csv` as a hint. To read the
      filtered folders anyway: `session --all-views` (also passed to the workers it starts).
+   - **Pre-load (since 2026-10-06).** Used when the folder has no September line. The proposal is
+     the general line of the same subject's nearest acquisition that has one (earlier preferred).
+     It is registered from that acquisition's buffer-4 R-peak frame onto this one
+     (`swp.mline.transfer`; box margins 12/20/30 mm, shifts up to 25 mm, because the probe moved).
+     - The title says which acquisition it came from, how far it moved, and "CHECK it" when the
+       registration is not trusted. The registered line is proposed either way.
+     - Evaluation: it lands 1.09 mm from the line drawn by hand, as close as the reader's own
+       redraw (1.06 mm).
+     - The first acquisition of a subject is drawn from scratch: an automatic septum finder was
+       not reliable.
+     - Off: `general.preload.previous_acquisition: false`.
    - **Not a PLAX view after all (e.g. Unclear)? Press `v`** to exclude the whole measurement.
    - `general.json` then records `skipped: true, excluded: "not PLAX"` and the view call. The
      folder's stage is `excluded`, not `skipped`, so `--retry-skipped` leaves it alone. If the
@@ -151,7 +201,14 @@ same machine is released immediately (another host's lock after 3 h).
    buffers 1 and 3 at the frame with the same time since the preceding R-peak. The panel titles
    give the phase and the offset from the event. Pre-loaded, in order of preference:
    - the September line of that event, when an old window lies within 40 ms;
-   - otherwise the general line as drawn.
+   - otherwise (since 2026-10-06) the general line **registered** onto the event: the buffer-4
+     frame at the general line is registered onto the frame at the event, and the line moved with it.
+     - AVC windows also search a rotation of ±20°: in systole the septum turns ~7° and the
+       line's basal end moves ~8 mm along it.
+     - The title says how far it moved, and "CHECK it" when the registration is not trusted.
+     - Evaluation: the proposals land 0.8-1.0 mm (MVC / AK) and ~1.8 mm (AVC) from the line drawn
+       by hand. The unchanged general line was 1.0-1.3 / 3.7 mm away.
+     - Off (`events.preload.registered: false`): the general line as drawn, as before.
 
    The general line is also shown as a dashed magenta reference on buffer 4.
 
@@ -269,8 +326,22 @@ How to draw:
   keys. The line is the same on all five panels.
 - Axes: x = time, y = distance along the line. Speed = dr/dt in m/s; positive means travelling
   away from r = 0.
-- The slider starts at the automatic slant-stack speed of the default view (3 m/s if that fit
-  rails). The number itself is not shown, so it does not anchor the reading.
+- The slider starts at the automatic slant-stack speed of the **velocity median** view
+  (`slope.init_view`; until 2026-10-06 velocity gauss, whose fit is ~18 % too fast on the slopes
+  the reader corrected, against ~10 % for velocity median). It is 3 m/s if that fit rails. The
+  number itself is not shown, so it does not anchor the reading.
+- **Automatic tilt (since 2026-10-06, `slope.auto_tilt`).** The first click also sets the tilt:
+  the straight line through the clicked point that stays inside one band of the clicked panel best
+  (largest |mean signal| along the line, ±0.5 to ±12 m/s).
+  - Click on the band you want to follow; on the acceleration panel that is the ridge, which is
+    also the zero crossing of the velocity bands.
+  - Further clicks only move the anchor and keep your tilt. `t` sets the automatic tilt again
+    through the current anchor.
+  - The status line says "(auto tilt)" while the tilt is untouched.
+  - Evaluation: through the reader's own anchors, this tilt was the automatic fit closest to the
+    hand slopes on clear windows (median 13 % from the hand speed vs 21 % for the old start).
+- The status line also gives the **number of frames the line takes to cross the M-line**. Below 5 it
+  adds "near-vertical, no resolved propagation": see "Scoring".
 - `u` unlinks the displacement panel so it can get its own tilt. Displacement and velocity weight
   different frequencies of a dispersive wave; by hand, velocity came out faster in 87 % of windows.
   Linked, both are stored as the same speed.
@@ -281,11 +352,34 @@ How to draw:
 The score is part of the measurement: automatic bias was +14 % on *clear* panels against +355 % on
 *none* (`docs/passive_speed_estimation.md`).
 
+#### Scoring (rule written down 2026-10-06)
+
+The score is about **visible propagation**, not about how strong the band is:
+
+| score | when |
+|---|---|
+| `3` clear | a propagating wavefront is clearly visible in all panels; ideally clean enough that a slope could be fitted automatically on the acceleration panel |
+| `2` plausible | propagation visible, but not in every panel or not cleanly (noisy, two slopes, partly in-phase) |
+| `1` guess | a slope can be guessed, but propagation is doubtful. Also: a strong band that is near-vertical (crosses the M-line in < 5 frames): no resolved propagation |
+| `0` none | no wavefront; also a purely vertical (in-phase) band |
+
+- **Strong but vertical bands show no shear-wave propagation and are scored low** (1 or 0),
+  however strong they look. The crossing-frame count in the status line helps.
+- **Slow waves** (e.g. AK at 1-1.5 m/s) are scored by the same rule: high when the propagation
+  is clear.
+- **Why written down:** the evaluation of 2026-10-05 found that the score drifted between reading
+  days. On 10-01, comparable windows got ~0.25 point less than on 10-02 / 10-05, also within the
+  same subjects. Some strong vertical bands were scored 2, others 1. Windows worth re-checking
+  against this rule:
+  `study/analysis/passive_manual_eval/results/20261005_1530/07_quality/outliers.csv` (contact sheets
+  in `outlier_sheets/`). Re-score one with `--folder <f> --redo slope --window i`.
+
 | key | |
 |---|---|
 | click | anchor the line (on the displacement panel: its own anchor when unlinked) |
 | slider, ← → | ± 0.05 m/s |
 | ↑ ↓ | ± 0.5 m/s |
+| `t` | automatic tilt through the current anchor (the first click does this by itself) |
 | `f` | flip the direction |
 | `u` | unlink / re-link displacement |
 | `r` | clear the anchor |
@@ -328,7 +422,9 @@ dominant displacement band reaches r = 20-45 mm at ~690-700 ms but r = 0-15 mm o
 
 **Reading so far (2026-10-05).** Of 190 accepted slopes, 2 are negative (both MVC, confidence
 1). When the dominant band tilts apex → base, the reader has fitted a weaker base → apex front.
-That is a selection bias, to be decided on purpose. Options:
+That is a selection bias, to be decided on purpose. **Decided 2026-10-06 for the vertical case:**
+a strong band without resolved propagation is scored low (see "Scoring"). For a genuinely
+reversed slope, these options remain:
 - record reversed patterns as drawn (`f`) with a low score;
 - add a separate "reversed / vertical" flag so these events can be counted.
 
@@ -434,13 +530,13 @@ can run together:
 
 | file | writer | content |
 |---|---|---|
-| `general.json`, `general_mline.npz`, `general.png` | session | line in buffer-4 coordinates; the buffer and points drawn, frames, registration, nudge, what was pre-loaded |
+| `general.json`, `general_mline.npz`, `general.png` | session | line in buffer-4 coordinates; the buffer and points drawn, frames, registration, nudge, what was pre-loaded (since 2026-10-06 also the proposed points `preload_points4_mm` and their registration `preload_registration`) |
 | `windows.json`, `passive_bursts.png`, `passive_full_spacetime.png` | worker | windows + labels + phases, ECG R-peak check, detection key (general-line hash), provenance; `needs_review` for the valves detector (no PNGs then) |
 | `general_st.npz` | worker | the whole-recording "velocity gauss" space-time along the general line + R-peaks (valves detector) |
 | `review.json`, `review.png` | session | the reviewed event windows + phases, what was proposed, keyed to the detected windows' hash |
-| `events.json`, `event<i>_mline.npz`, `event<i>.png` | session | per-event line records, keyed to the (reviewed) windows' hash |
+| `events.json`, `event<i>_mline.npz`, `event<i>.png` | session | per-event line records, keyed to the (reviewed) windows' hash; since 2026-10-06 with `preload_points4_mm` / `preload_registration` (the proposal, so corrections can be measured) |
 | `processed.json`, `st_win<i>.npz` | worker | the five space-times + automatic speeds, keyed to the line's hash |
-| `slopes.json`, `slope<i>.png` | session | the slope(s), confidence, anchor view, automatic speeds for comparison, keyed to the space-times' hash |
+| `slopes.json`, `slope<i>.png` | session | the slope(s), confidence, anchor view, automatic speeds for comparison, keyed to the space-times' hash; since 2026-10-06 `slider_init` (view, speed), and per line `auto_tilt` (speed, view of the last automatic tilt) and `crossing_frames` |
 | `rois.json`, `rois.png` | `passive_roi.py` | time windows marked by eye on the whole-recording general-line space-time, keyed to the general line's hash |
 | `log.jsonl` | session | every accept / skip, append-only |
 | `worker_errors.json` | worker | a failed detection / processing (reported by `status`, not retried until the input changes) |
