@@ -1,0 +1,74 @@
+=== swp batch: 1 measurement folder(s) found, 1 to process, 0 already done ===
+  queued       /mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47
+
+==========================================================================================
+[1/1] /mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47
+==========================================================================================
+[1m[38;5;36mzea[0m[0m: Using backend 'jax'
+I1005 08:29:43.405041  276796 pjrt_api.cc:119] GetPjrtApi was found for cuda at /usr/local/lib/python3.12/site-packages/jax_plugins/xla_cuda12/xla_cuda_plugin.so
+I1005 08:29:43.420360  276796 pjrt_client.cc:579] PjRt-IFRT device count: total=1, addressable=1
+I1005 08:29:43.421201  276796 pjrt_client.cc:583] Addressable PjRt-IFRT device: CpuDevice(id=0)
+I1005 08:29:43.425681  276796 pjrt_api.cc:168] The PJRT plugin has PJRT API version 0.112. The framework PJRT API version is 0.112.
+I1005 08:29:47.625335  276796 service.cc:178] XLA service 0x5f4ec0ac13f0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+I1005 08:29:47.626493  276796 service.cc:194]   StreamExecutor [0]: NVIDIA GeForce RTX 2080 Ti, Compute Capability 7.5 (Driver: 13.0.0[580.173.2]; Runtime: 12.9.0; Toolkit: 12.9.0; DNN: 9.20.0)
+I1005 08:29:47.631454  276796 se_gpu_pjrt_client.cc:1358] Using BFC allocator.
+I1005 08:29:47.632558  276796 gpu_helpers.cc:161] XLA backend will use up to 7.93GiB (8510242816 bytes) on device 0 for BFCAllocator.
+I1005 08:29:47.633086  276796 gpu_helpers.cc:201] XLA backend will use up to 2837446656 bytes on device 0 for CollectiveBFCAllocator.
+I1005 08:29:47.645023  276796 cuda_dnn.cc:436] Loaded cuDNN version 92000
+I1005 08:29:47.654212  276796 pjrt_c_api_client.cc:201] PjRtCApiClient created.
+I1005 08:29:47.655205  276796 pjrt_client.cc:579] PjRt-IFRT device count: total=1, addressable=1
+I1005 08:29:47.655469  276796 pjrt_client.cc:583] Addressable PjRt-IFRT device: CudaDevice(id=0)
+-------------------GPU settings-------------------
+     memory
+GPU        
+0       10821
+1       10821
+2       10821
+3       10821
+4       10821
+5       10821
+6       10821
+7       10821
+Selecting 1 GPU based on available memory.
+Selected GPU 0 with Free Memory: 10821.00 MiB
+Hiding GPUs [1, 2, 3, 4, 5, 6, 7] from the system.
+--------------------------------------------------
+=== beamforming CombinedData.mat -> /mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output (backend jax, jit pipeline, save_converted=True) ===
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl → 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/converted/CombinedData_buffer3.hdf5[0m
+    patch budget 2.84e+07 elements (GPU 11.34657536 GB)
+[1m[38;5;36mzea[0m[0m: File saved to [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer3_iq.hdf5[0m
+  buffer 3 (bmode_focused): 26 frames n_tx=73 patches=46 REFoCUS adjoint -> IQ (26, 382, 529, 2) @ 25.4 FPS -> CombinedData_buffer3_iq.hdf5
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Some events have a transmit but no receive or vice versa; these are skipped.
+[1m[38;5;36mzea[0m[0m: Data contains both receives in accumulate mode and replace mode.
+Discarding transmits in accumulate mode (mode=1). Keeping transmits in replace mode (mode=0).
+[1m[38;5;36mzea[0m[0m: Dropping time to next acquisition (time_to_next_transmit will be None). In accumulate sequences (e.g. pulse inversion), each stored acquisition is formed from several transmits that each carry their own timeToNextAcq, so the per-transmit timing no longer maps one-to-one onto the stored transmits and cannot be represented correctly. It is left unset rather than filled with a misleading value.
+[1m[38;5;36mzea[0m[0m: Raw data has 128 channels but the probe has 80 elements; selecting element channels via Trans.ConnectorES.
+[1m[38;5;36mzea[0m[0m: No ImgDataP image buffer found in file; skipping.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Probe name 'custom' is not in the list of known probes. Please add it to the _VERASONICS_TO_ZEA_PROBE_NAMES dictionary. Falling back to generic probe.
+[1m[38;5;36mzea[0m[0m: Lens: 0.690 wl → 0.221 mm (c_lens = 1000 m/s)
+[1m[38;5;36mzea[0m[0m: File saved to [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/converted/CombinedData_buffer6.hdf5[0m
+[1m[38;5;36mzea[0m[0m: File saved to [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer6_iq.hdf5[0m
+  buffer 6 (bmode_strain): 268 frames n_tx=21 patches=12 delay-and-sum -> IQ (268, 382, 509, 2) @ 88.2 FPS -> CombinedData_buffer6_iq.hdf5
+  buffer 3: ambiguous - first slot -1, shift -1 (none; continuity_first 2, continuity_margin 0.006)
+=== GIFs from 2 IQ file(s) in /mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output (real time; adaptive levels, curve gamma2) ===
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading '/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/values, 40.1 MB)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [38;5;214mWARNING[0m Reading '/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer3_iq.hdf5' [2m(/data/beamformed_data/timestamps, 104 B)[0m compressed with lzf, which zea cannot decode concurrently — falling back to a serial h5py read (slower). Re-save with the `zea data resave` CLI (or zea.File.create) to read it concurrently, with a progress bar.
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer3_iq.gif[0m[0m
+  CombinedData_buffer3_iq.hdf5: B-mode GIF, 25.4 Hz, 26 frames = 1.02 s -> 1.04 s GIF (real time); 26 frames @ 25 fps -> CombinedData_buffer3_iq.gif
+[1m[38;5;36mzea[0m[0m: [32mSuccessfully saved GIF to -> [33m/mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47/output/CombinedData_buffer6_iq.gif[0m[0m
+  CombinedData_buffer6_iq.hdf5: B-mode GIF, 88.2 Hz, 268 frames = 3.04 s -> 3.04 s GIF (real time); 152 frames @ 50 fps -> CombinedData_buffer6_iq.gif
+
+==========================================================================================
+SUMMARY
+==========================================================================================
+  ok        6.4 min  /mnt/z/VISUALIZE/raw_data/C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47
+
+1 ok, 0 failed, 0 skipped

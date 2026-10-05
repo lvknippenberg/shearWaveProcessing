@@ -1,0 +1,6 @@
+=== CombinedData.mat: 1257 folder(s), 738 already built, 519 to build, 4 job(s) ===
+[1m[38;5;36mzea[0m[0m: Using backend 'torch'
+  [518/519] ok      3.9 min  Z:\raw_data\C000000048\VIS-047_Strain_data_28-August-2026_10-39-24
+        (688 min elapsed, 1.33 min/folder, ~1 min left)
+  [CombinedData] done -> Z:\raw_data\C000000048\VIS-047_Strain_data_28-August-2026_10-40-04\CombinedData.mat (RcvBuffer layout verified)
+EXIT=0  

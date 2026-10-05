@@ -175,7 +175,7 @@ docker exec -it -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c \
 - Fully detached alternative to tmux: `docker exec -d ... bash -c "... > log 2>&1"`, follow with
   `tail -f` on the log (it is on the NAS).
 
-### Strain data (2026-10-02)
+### Strain data (2026-10-02, beamforming started 2026-10-05)
 
 `Z:\raw_data` holds 533 `*Strain_data*` folders next to the 724 SW folders. They carry buffers 3
 and 6 only (`RF_data_3.bin` + `RF_data_6.bin`, ~5 GB per folder; buffer 6 = `Bmode_strain`, the long
@@ -193,24 +193,70 @@ The mirror matches DataHub by size, so this happened at acquisition, not in the 
 folder could only be rescued by reconstructing its runtime parameters from a sibling acquisition.
 `process_raw_data.py` reports these four as failed; that is expected.
 
-Beamform them on the server with one command from any terminal. `docker exec -d` runs the job inside
-the container, so it does not depend on the SSH session or tmux; the call returns right away:
+#### Beamforming on the server
+
+`docker exec -d` runs the job inside the container, so it does not depend on the SSH session or
+tmux: the call returns right away and the job survives logging out. Output goes to a log on the NAS.
 
 ```bash
-ssh luuk@bmdserver3 'docker top zea-swp | grep -q process_raw_data && { echo "a batch is still running in zea-swp - not pulling"; exit 1; }; git -C ~/mounts/VISUALIZE/shearWaveProcessing pull --ff-only && docker exec -d -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c "export KERAS_BACKEND=jax XLA_PYTHON_CLIENT_PREALLOCATE=false; args=(); for d in /mnt/z/VISUALIZE/raw_data/C*/*Strain_data*; do args+=(--folder \"\$d\"); done; python scripts/process_raw_data.py \"\${args[@]}\" > study/logs/batch_strain_server_\$(date +%Y%m%d).log 2>&1" && echo started'
+ssh luuk@bmdserver3
+docker ps --filter name=zea-swp --format '{{.Names}}  {{.Status}}'   # "Up ..."; else: docker start zea-swp
+docker top zea-swp | grep process_raw_data                           # must print nothing before pulling
+git -C ~/mounts/VISUALIZE/shearWaveProcessing pull --ff-only
 ```
 
-- The guard refuses to pull while another batch runs from this clone (its code must not change
-  underneath it). Only Strain folders are passed (`--folder` per folder).
-- Resumable: rerun the same command after an interruption or failures; folders with IQ + GIFs are
-  skipped. A buffer failure aborts its folder before any GIF is written, so failed folders are
-  retried.
-- Follow it in `Z:\shearWaveProcessing\study\logs\batch_strain_server_<date>.log`.
-- **First run on strain data.** Before 2026-10-02 no strain folder had been beamformed; check the
-  first folders in the log before leaving it for days. The SW batch took ~6.6 min/folder, so expect
-  2-3 days for all 533 on one worker.
+1. **Pilot** (one folder, ~6.5 min). Check the log and the GIFs before starting the rest:
+
+   ```bash
+   docker exec -d -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c '
+     export KERAS_BACKEND=jax XLA_PYTHON_CLIENT_PREALLOCATE=false
+     F=$(ls -d /mnt/z/VISUALIZE/raw_data/C*/*Strain_data* | head -1)
+     python scripts/process_raw_data.py --folder "$F" > study/logs/strain_pilot.log 2>&1'
+   ```
+
+2. **All strain folders** (the pilot folder is skipped as done):
+
+   ```bash
+   docker exec -d -w /mnt/z/VISUALIZE/shearWaveProcessing zea-swp bash -c '
+     export KERAS_BACKEND=jax XLA_PYTHON_CLIENT_PREALLOCATE=false
+     args=(); for d in /mnt/z/VISUALIZE/raw_data/C*/*Strain_data*; do args+=(--folder "$d"); done
+     python scripts/process_raw_data.py "${args[@]}" > study/logs/batch_strain_server_$(date +%Y%m%d).log 2>&1'
+   exit
+   ```
+
+- Never pull while a batch runs from this clone (its code must not change underneath it).
+  Only Strain folders are passed (`--folder` per folder).
+- Resumable: rerun step 2 after an interruption or failures; folders with IQ + GIFs are skipped.
+  A buffer failure aborts its folder before any GIF is written, so failed folders are retried.
+  The container has no restart policy: after a server reboot, `docker start zea-swp` first.
+- Running? `docker top zea-swp | grep process_raw_data`. Stop: `docker exec zea-swp pkill -f process_raw_data`.
+- Follow it in `Z:\shearWaveProcessing\study\logs\batch_strain_server_<date>.log` (mtime stays at the
+  start time on Windows, contents are current).
 - Buffer-3 unwrap runs automatically during beamforming but was validated on SW acquisitions only.
   When it cannot resolve the head, the folder keeps buffer 3 in stored order (not an error).
+
+#### Status (2026-10-05)
+
+- **Pilot** `C000000001/SWE_01B_Strain_data_21-April-2026_12-42-47`: ok in 6.4 min (JAX).
+  Checked from Windows:
+
+  | | buffer 3 (`bmode_focused`) | buffer 6 (`Bmode_strain`) |
+  |---|---|---|
+  | IQ | 26 x 382 x 529, REFoCUS adjoint | 268 x 382 x 509, delay-and-sum |
+  | frame rate | 25.4 Hz | 88.2 Hz |
+  | frame-mean envelope CV | 1.1 % | 1.6 % |
+  | adjacent-frame complex corr. (median) | 0.72 | 0.92 |
+  | GIF | 26 frames, real time | 152 frames @ 50 fps = 3.04 s, real time |
+
+  Frame counts match the P1-6 base config; all values finite, no repeated or dropped frames. The
+  buffer-3 grid is identical to the validated SW buffer 3 of the same subject (buffer 6 is slightly
+  wider, like buffer 4); ~53 % zeros is the region outside the sector. Images match the anatomy of
+  the scanner's `Strain_replay.avi`, and the 268-frame mean shows no fixed artefact. Buffer-3 unwrap
+  was `ambiguous` (no trigger count, continuity margin 0.006) so it stays in stored order; the likely
+  loop seam is between frames 2 and 3 (adjacent correlation 0.14).
+- **Full batch** started 2026-10-05 10:37 (log `batch_strain_server_20261005.log`): 533 found, 532
+  queued. At ~6.4 min/folder expect ~57 h, finishing around 2026-10-07 evening with 529 ok and the
+  four `C000000012` folders above failed.
 
 ### Buffer-3 unwrap (2026-09-25)
 
